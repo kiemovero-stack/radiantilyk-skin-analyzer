@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `skinAnalyses` (\n  `id` int AUTO_INCREMENT PRIMARY KEY,\n  `userId` int NOT NULL,\n  `imageUrl` text NOT NULL,\n  `report` json NOT NULL,\n  `skinHealthScore` int,\n  `skinType` varchar(64),\n  `createdAt` timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 47VG6EBCbSxGkEr.682af1d5b54c --database YXDmLVYUnds4E9JxEbde2D --execute CREATE TABLE IF NOT EXISTS `skinAnalyses` (\n  `id` int AUTO_INCREMENT PRIMARY KEY,\n  `userId` int NOT NULL,\n  `imageUrl` text NOT NULL,\n  `report` json NOT NULL,\n  `skinHealthScore` int,\n  `skinType` varchar(64),\n  `createdAt` timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 766
+}

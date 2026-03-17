@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1773645903606,
+      "tag": "0000_numerous_blindfold",
+      "breakpoints": true
+    }
+  ]
 }
