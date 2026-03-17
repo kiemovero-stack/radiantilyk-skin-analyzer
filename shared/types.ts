@@ -20,6 +20,7 @@ export interface SkinCondition {
 
 export interface FacialTreatment {
   name: string;
+  price: string;
   reason: string;
   targetConditions: string[];
   benefits: string[];
@@ -28,6 +29,7 @@ export interface FacialTreatment {
 
 export interface SkinProcedure {
   name: string;
+  price: string;
   reason: string;
   targetConditions: string[];
   benefits: string[];

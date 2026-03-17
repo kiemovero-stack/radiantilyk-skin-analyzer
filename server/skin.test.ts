@@ -1,28 +1,88 @@
 import { describe, expect, it } from "vitest";
-import { SKIN_ANALYSIS_SYSTEM_PROMPT, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
+import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import { appRouter } from "./routers";
+import { SERVICE_CATALOG, getServiceCatalogText } from "../shared/serviceCatalog";
+
+const systemPrompt = buildSystemPrompt();
 
 describe("Skin Analysis Prompt", () => {
   it("system prompt includes critical diagnostic rules", () => {
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("world-class AI dermatology");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("EXACTLY 2 facial treatments");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("EXACTLY 4 high-impact skin procedures");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("3 to 5 skincare products");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("Fitzpatrick");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("IPL treatments are contraindicated for Fitzpatrick types V and VI");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("acne scarring");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("NEVER give generic scores");
+    expect(systemPrompt).toContain("world-class AI dermatology");
+    expect(systemPrompt).toContain("EXACTLY 2 facial treatments");
+    expect(systemPrompt).toContain("EXACTLY 4 high-impact skin procedures");
+    expect(systemPrompt).toContain("3 to 5 skincare product");
+    expect(systemPrompt).toContain("Fitzpatrick");
+    expect(systemPrompt).toContain("IPL treatments are contraindicated for Fitzpatrick types V and VI");
+    expect(systemPrompt).toContain("acne scarring");
+    expect(systemPrompt).toContain("NEVER give generic scores");
   });
 
   it("system prompt avoids generic spa language", () => {
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("Never use generic spa language");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("not a spa receptionist");
+    expect(systemPrompt).toContain("Never use generic spa language");
+    expect(systemPrompt).toContain("not a spa receptionist");
   });
 
   it("system prompt includes predictive/futuristic insights requirement", () => {
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("predictive aging analysis");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("skin trajectory modeling");
-    expect(SKIN_ANALYSIS_SYSTEM_PROMPT).toContain("cellular-level explanations");
+    expect(systemPrompt).toContain("predictive aging analysis");
+    expect(systemPrompt).toContain("skin trajectory modeling");
+    expect(systemPrompt).toContain("cellular-level explanations");
+  });
+
+  it("system prompt includes the clinic service catalog", () => {
+    expect(systemPrompt).toContain("CLINIC SERVICE CATALOG WITH PRICING");
+    expect(systemPrompt).toContain("ONLY recommend services and treatments from this catalog");
+    expect(systemPrompt).toContain("Include the exact price");
+  });
+
+  it("system prompt contains key services from the catalog", () => {
+    expect(systemPrompt).toContain("RF Microneedling");
+    expect(systemPrompt).toContain("$450");
+    expect(systemPrompt).toContain("24K Gold Recovery Facial");
+    expect(systemPrompt).toContain("$145");
+    expect(systemPrompt).toContain("HIFU");
+    expect(systemPrompt).toContain("Chemical Peels");
+    expect(systemPrompt).toContain("IPL");
+  });
+
+  it("system prompt mentions multi-angle analysis", () => {
+    expect(systemPrompt).toContain("multiple angles");
+    expect(systemPrompt).toContain("front, left, right");
+  });
+});
+
+describe("Service Catalog", () => {
+  it("has all expected service categories", () => {
+    const categories = SERVICE_CATALOG.map((c) => c.category);
+    expect(categories).toContain("Neurotoxins");
+    expect(categories).toContain("Dermal Filler");
+    expect(categories).toContain("Chemical Peels");
+    expect(categories).toContain("Microneedling");
+    expect(categories).toContain("HIFU");
+    expect(categories).toContain("Facials");
+    expect(categories).toContain("Facial Add-Ons");
+  });
+
+  it("facials category has 7 facial options", () => {
+    const facials = SERVICE_CATALOG.find((c) => c.category === "Facials");
+    expect(facials).toBeDefined();
+    expect(facials!.services).toHaveLength(7);
+  });
+
+  it("getServiceCatalogText returns formatted text", () => {
+    const text = getServiceCatalogText();
+    expect(text).toContain("CLINIC SERVICE CATALOG");
+    expect(text).toContain("END OF CATALOG");
+    expect(text.length).toBeGreaterThan(500);
+  });
+
+  it("all services have name and price", () => {
+    for (const cat of SERVICE_CATALOG) {
+      for (const svc of cat.services) {
+        expect(svc.name).toBeTruthy();
+        expect(svc.price).toBeTruthy();
+        expect(svc.price).toMatch(/\$/);
+      }
+    }
   });
 });
 
@@ -69,6 +129,20 @@ describe("Skin Analysis Output Schema", () => {
     expect(props).toHaveProperty("disclaimer");
   });
 
+  it("facial treatments schema requires price field", () => {
+    const props = SKIN_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const facialItems = props.facialTreatments.items;
+    expect(facialItems.required).toContain("price");
+    expect(facialItems.properties).toHaveProperty("price");
+  });
+
+  it("skin procedures schema requires price field", () => {
+    const props = SKIN_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const procItems = props.skinProcedures.items;
+    expect(procItems.required).toContain("price");
+    expect(procItems.properties).toHaveProperty("price");
+  });
+
   it("conditions schema includes severity enum", () => {
     const props = SKIN_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const conditionItems = props.conditions.items;
@@ -96,17 +170,14 @@ describe("Skin Analysis Output Schema", () => {
 
 describe("Skin Router Registration", () => {
   it("skin router is registered on appRouter", () => {
-    // Verify the router has the skin namespace
     const routerDef = appRouter._def;
     expect(routerDef).toBeDefined();
-    // The router should have procedures accessible
     const procedures = (routerDef as any).procedures;
     if (procedures) {
       expect(procedures).toHaveProperty("skin.analyze");
       expect(procedures).toHaveProperty("skin.getReport");
       expect(procedures).toHaveProperty("skin.listAnalyses");
     } else {
-      // Alternative check - router record
       const record = (routerDef as any).record;
       expect(record).toHaveProperty("skin");
     }

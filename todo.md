@@ -54,5 +54,21 @@
 - [x] Protected routes for analysis and history
 
 ## Testing
-- [x] Vitest tests for skin analysis prompt and schema (9 tests)
+- [x] Vitest tests for skin analysis prompt and schema (18 tests)
 - [x] Vitest tests for auth logout (1 test)
+
+## Multi-Angle Photo Upload
+- [x] Multi-angle upload UI (front, left, right face views)
+- [x] Visual face silhouette guides for each angle
+- [x] Allow analyzing with 1-3 images (front required, sides optional)
+- [x] Pass all images to AI for comprehensive multi-angle analysis
+
+## Service & Product Catalog Integration
+- [x] Extract full service menu with pricing from uploaded image
+- [x] Create shared service catalog data file
+- [x] Update AI prompt to recommend ONLY from the user's service catalog
+- [x] Display service names and prices in report recommendations
+- [x] Include membership options in recommendations where relevant
+
+## Updated Tests
+- [x] Update vitest tests for new prompt and catalog (19 tests passing)

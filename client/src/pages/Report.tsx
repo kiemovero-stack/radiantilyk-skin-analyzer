@@ -366,7 +366,14 @@ export default function Report() {
                       <Star className="w-4 h-4 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold">{treatment.name}</h3>
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold">{treatment.name}</h3>
+                        {treatment.price && (
+                          <span className="shrink-0 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                            {treatment.price}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {treatment.reason}
                       </p>
@@ -423,7 +430,14 @@ export default function Report() {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold">{proc.name}</h3>
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold">{proc.name}</h3>
+                        {proc.price && (
+                          <span className="shrink-0 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                            {proc.price}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {proc.reason}
                       </p>

@@ -4,9 +4,17 @@
  * This module contains the system prompt and output schema for the AI skin
  * analysis engine. The prompt is designed to produce clinical-grade,
  * premium-quality skin diagnostics that rival systems like Aura Skin Analyzer.
+ * 
+ * Updated: Now includes the clinic's full service catalog so the AI
+ * recommends ONLY from available services with exact pricing.
  */
 
-export const SKIN_ANALYSIS_SYSTEM_PROMPT = `You are a world-class AI dermatology diagnostic system and skin imaging scientist. Your capabilities match or exceed advanced systems like the Aura Skin Analyzer. You specialize in highly accurate skin diagnostics, computer vision-based analysis, and personalized treatment planning.
+import { getServiceCatalogText } from "../shared/serviceCatalog";
+
+export function buildSystemPrompt(): string {
+  const catalogText = getServiceCatalogText();
+
+  return `You are a world-class AI dermatology diagnostic system and skin imaging scientist. Your capabilities match or exceed advanced systems like the Aura Skin Analyzer. You specialize in highly accurate skin diagnostics, computer vision-based analysis, and personalized treatment planning.
 
 Your goal is to deliver precise, insightful, and innovative skin reports that feel premium, futuristic, and medically credible.
 
@@ -16,6 +24,7 @@ CRITICAL RULES:
    - NEVER give generic scores. The skin health score MUST be dynamically calculated based on the actual visible conditions, their severity, and their impact
    - Clearly differentiate between mild, moderate, and severe conditions with evidence
    - Include deeper skin insights: texture depth analysis, scarring type classification, pigmentation pattern mapping, collagen loss indicators
+   - When multiple angles are provided (front, left, right), analyze ALL images together for a comprehensive assessment. Note conditions visible from specific angles.
 
 2. SKIN TYPE & TONE DETECTION
    - Detect Fitzpatrick skin type (I-VI) from the image
@@ -23,12 +32,15 @@ CRITICAL RULES:
    - Note: IPL treatments are contraindicated for Fitzpatrick types V and VI - never recommend IPL for these types
    - For darker skin tones, recommend gentler laser settings and always note patch test requirements
 
-3. TREATMENT RECOMMENDATIONS
-   - EXACTLY 2 facial treatments (no more, no less)
-   - EXACTLY 4 high-impact skin procedures (no more, no less)
-   - 3 to 5 skincare products only
+3. TREATMENT RECOMMENDATIONS — USE ONLY FROM THE CLINIC CATALOG BELOW
+   - EXACTLY 2 facial treatments from the clinic's Facials menu (no more, no less)
+   - EXACTLY 4 high-impact skin procedures from the clinic's service menu (no more, no less)
+   - 3 to 5 skincare product recommendations (these can be general product types with key ingredients since the clinic does not sell retail products)
    - Prioritize treatments based on the MOST CRITICAL issues first
    - Every single recommendation MUST be directly tied to a detected condition
+   - Include the EXACT price from the catalog for each facial and procedure
+   - You may also suggest relevant add-ons from the "Facial Add-Ons" section
+   - If a membership would save the client money, mention the relevant membership option
    - Never use generic spa language. Be specific and clinical.
 
 4. NEXT-LEVEL INSIGHTS
@@ -39,8 +51,9 @@ CRITICAL RULES:
 
 5. OPTIMIZATION ROADMAP
    - Create a phased improvement plan (typically 3-4 phases)
-   - Each phase should have clear duration, goals, treatments, and expected outcomes
+   - Each phase should have clear duration, goals, treatments (from the catalog), and expected outcomes
    - The roadmap should be realistic and progressive
+   - Reference specific clinic services and their prices in the roadmap
 
 6. TONE & STYLE
    - Premium, intelligent, and non-generic
@@ -49,7 +62,10 @@ CRITICAL RULES:
    - Avoid phrases like "We noticed..." or "can help with this" - be direct and authoritative
    - Sound like a world-class dermatologist, not a spa receptionist
 
-IMPORTANT: Analyze the actual image provided. Base your entire analysis on what you can actually see in the photo. Do not make up conditions that aren't visible. Be honest about image quality limitations.`;
+IMPORTANT: Analyze the actual image(s) provided. Base your entire analysis on what you can actually see in the photos. Do not make up conditions that aren't visible. Be honest about image quality limitations.
+
+${catalogText}`;
+}
 
 export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
   name: "skin_analysis_report",
@@ -136,13 +152,14 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       facialTreatments: {
         type: "array",
-        description: "EXACTLY 2 facial treatments, prioritized by impact",
+        description: "EXACTLY 2 facial treatments FROM THE CLINIC CATALOG, prioritized by impact. Must include exact price.",
         items: {
           type: "object",
-          required: ["name", "reason", "targetConditions", "benefits", "priority"],
+          required: ["name", "price", "reason", "targetConditions", "benefits", "priority"],
           additionalProperties: false,
           properties: {
-            name: { type: "string" },
+            name: { type: "string", description: "Exact name from the clinic catalog" },
+            price: { type: "string", description: "Exact price from the catalog (e.g., '$145')" },
             reason: { type: "string", description: "Why this facial is recommended, tied to specific detected conditions" },
             targetConditions: { type: "array", items: { type: "string" } },
             benefits: { type: "array", items: { type: "string" } },
@@ -152,13 +169,14 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       skinProcedures: {
         type: "array",
-        description: "EXACTLY 4 high-impact skin procedures, prioritized",
+        description: "EXACTLY 4 high-impact skin procedures FROM THE CLINIC CATALOG, prioritized. Must include exact price.",
         items: {
           type: "object",
-          required: ["name", "reason", "targetConditions", "benefits", "expectedResults", "priority"],
+          required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "priority"],
           additionalProperties: false,
           properties: {
-            name: { type: "string" },
+            name: { type: "string", description: "Exact name from the clinic catalog" },
+            price: { type: "string", description: "Exact price from the catalog (e.g., '$350')" },
             reason: { type: "string", description: "Clinical reasoning for this procedure" },
             targetConditions: { type: "array", items: { type: "string" } },
             benefits: { type: "array", items: { type: "string" } },
@@ -207,7 +225,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       roadmap: {
         type: "array",
-        description: "Phased skin optimization plan (3-4 phases)",
+        description: "Phased skin optimization plan (3-4 phases) using clinic services with prices",
         items: {
           type: "object",
           required: ["phase", "title", "duration", "goals", "treatments", "expectedOutcome"],
@@ -217,7 +235,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
             title: { type: "string" },
             duration: { type: "string", description: "e.g., 'Weeks 1-4', 'Months 2-3'" },
             goals: { type: "array", items: { type: "string" } },
-            treatments: { type: "array", items: { type: "string" } },
+            treatments: { type: "array", items: { type: "string" }, description: "Specific clinic services with prices (e.g., 'RF Microneedling — $450')" },
             expectedOutcome: { type: "string" }
           }
         }
@@ -228,7 +246,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       disclaimer: {
         type: "string",
-        description: "Medical disclaimer that this is for informational purposes only"
+        description: "Medical disclaimer that this is for informational purposes only and not a substitute for professional dermatological consultation"
       }
     }
   }

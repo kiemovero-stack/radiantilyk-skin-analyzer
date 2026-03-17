@@ -5,53 +5,85 @@ import { storagePut } from "./storage";
 import { getDb } from "./db";
 import { skinAnalyses } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
-import { SKIN_ANALYSIS_SYSTEM_PROMPT, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
+import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import type { SkinAnalysisReport } from "../shared/types";
 
 export const skinRouter = router({
   /**
-   * Analyze a skin photo using AI vision.
-   * Accepts base64 image, uploads to S3, sends to AI, saves report.
+   * Analyze skin photos using AI vision.
+   * Accepts 1-3 images (front required, left/right optional).
+   * Uploads all to S3, sends to AI together, saves report.
    */
   analyze: publicProcedure
     .input(
       z.object({
-        imageBase64: z.string().min(1),
-        imageMimeType: z.string().default("image/jpeg"),
+        images: z.array(
+          z.object({
+            base64: z.string().min(1),
+            mimeType: z.string().default("image/jpeg"),
+            angle: z.enum(["front", "left", "right"]),
+          })
+        ).min(1).max(3),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { imageBase64, imageMimeType } = input;
+      const { images } = input;
 
-      // 1. Upload image to S3
-      const buffer = Buffer.from(imageBase64, "base64");
-      const ext = imageMimeType.includes("png") ? "png" : "jpg";
-      const key = `skin-photos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      // 1. Upload all images to S3 and build image content for AI
+      const imageUrls: string[] = [];
+      const imageContents: Array<{
+        type: "image_url";
+        image_url: { url: string; detail: "high" | "low" | "auto" };
+      }> = [];
 
-      const { url: imageUrl } = await storagePut(key, buffer, imageMimeType);
+      for (const img of images) {
+        const buffer = Buffer.from(img.base64, "base64");
+        const ext = img.mimeType.includes("png") ? "png" : "jpg";
+        const key = `skin-photos/${Date.now()}-${img.angle}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-      // 2. Call AI with the image for analysis
+        const { url } = await storagePut(key, buffer, img.mimeType);
+        imageUrls.push(url);
+
+        imageContents.push({
+          type: "image_url",
+          image_url: {
+            url: `data:${img.mimeType};base64,${img.base64}`,
+            detail: "high",
+          },
+        });
+      }
+
+      // 2. Build the user message with angle labels and all images
+      const angleLabels = images.map((img) => img.angle).join(", ");
+      const userContent: Array<
+        | { type: "text"; text: string }
+        | { type: "image_url"; image_url: { url: string; detail: "high" | "low" | "auto" } }
+      > = [
+        {
+          type: "text",
+          text: `Analyze these ${images.length} skin photo(s) (angles: ${angleLabels}) comprehensively. Provide a complete skin analysis report following the exact output structure. Be thorough, specific, and avoid generic language. Every treatment recommendation must come from the clinic's service catalog with exact pricing. Remember: exactly 2 facials, exactly 4 procedures, and 3-5 skincare products.`,
+        },
+      ];
+
+      // Add each image with an angle label
+      for (let i = 0; i < images.length; i++) {
+        userContent.push({
+          type: "text",
+          text: `[${images[i].angle.toUpperCase()} VIEW]`,
+        });
+        userContent.push(imageContents[i]);
+      }
+
+      // 3. Call AI with all images for analysis
       const result = await invokeLLM({
         messages: [
           {
             role: "system",
-            content: SKIN_ANALYSIS_SYSTEM_PROMPT,
+            content: buildSystemPrompt(),
           },
           {
             role: "user",
-            content: [
-              {
-                type: "text",
-                text: "Analyze this skin photo comprehensively. Provide a complete skin analysis report following the exact output structure. Be thorough, specific, and avoid generic language. Every recommendation must be tied to a visible condition. Remember: exactly 2 facials, exactly 4 procedures, and 3-5 skincare products.",
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${imageMimeType};base64,${imageBase64}`,
-                  detail: "high",
-                },
-              },
-            ],
+            content: userContent,
           },
         ],
         responseFormat: {
@@ -60,7 +92,7 @@ export const skinRouter = router({
         },
       });
 
-      // 3. Parse the AI response
+      // 4. Parse the AI response
       const content = result.choices[0]?.message?.content;
       if (!content) {
         throw new Error("AI analysis returned empty response");
@@ -68,23 +100,26 @@ export const skinRouter = router({
 
       let report: SkinAnalysisReport;
       try {
-        const text = typeof content === "string" ? content : (content[0] as { type: "text"; text: string }).text;
+        const text = typeof content === "string"
+          ? content
+          : (content[0] as { type: "text"; text: string }).text;
         report = JSON.parse(text) as SkinAnalysisReport;
       } catch (e) {
         throw new Error("Failed to parse AI analysis response");
       }
 
-      // 4. Save to database
+      // 5. Save to database (store the front image URL as primary)
       const db = await getDb();
       if (!db) {
         throw new Error("Database not available");
       }
 
       const userId = ctx.user?.id ?? 0;
+      const primaryImageUrl = imageUrls[0];
 
       const insertResult = await db.insert(skinAnalyses).values({
         userId,
-        imageUrl,
+        imageUrl: primaryImageUrl,
         report: report,
         skinHealthScore: report.skinHealthScore,
         skinType: report.skinType,
