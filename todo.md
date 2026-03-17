@@ -72,3 +72,19 @@
 
 ## Updated Tests
 - [x] Update vitest tests for new prompt and catalog (19 tests passing)
+
+## Staff-Only Access
+- [x] Restrict all routes (Analyze, History, Report) to authenticated users only
+- [x] Redirect unauthenticated users to login
+- [x] Landing page shows login prompt for non-authenticated visitors
+
+## Patient Intake Form
+- [x] Add patient info form before analysis (first name, last name, email, DOB)
+- [x] Add patient fields to database schema (skinAnalyses table)
+- [x] Pass patient info to backend with analysis request
+- [x] Display patient info on report page
+- [x] Display patient info in history list
+- [x] Update tests for patient intake and auth restrictions
+
+## Additional Requests
+- [x] Store when the analysis was done (timestamp displayed on report/history)

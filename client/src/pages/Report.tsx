@@ -18,6 +18,10 @@ import {
   Star,
   Loader2,
   CheckCircle2,
+  User,
+  Mail,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { motion } from "framer-motion";
@@ -170,28 +174,74 @@ export default function Report() {
             </span>
           </Link>
 
-          {/* Report Header */}
+          {/* Patient Info & Report Header */}
           <motion.div
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            className="text-center mb-10"
+            className="mb-10"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
-              <Sparkles className="w-3 h-3" />
-              AI Skin Analysis Report
+            {/* Patient card */}
+            {data.patientFirstName && (
+              <div className="p-5 rounded-2xl border border-border/60 bg-card mb-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-lg">{data.patientFirstName} {data.patientLastName}</h2>
+                    <p className="text-xs text-muted-foreground">Patient Report</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>{data.patientEmail}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>DOB: {data.patientDob ? new Date(data.patientDob + "T00:00:00").toLocaleDateString() : "N/A"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>
+                      {new Date(data.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}{" "}
+                      {new Date(data.createdAt).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
+                <Sparkles className="w-3 h-3" />
+                AI Skin Analysis Report
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                {data.patientFirstName ? `${data.patientFirstName}'s Skin Report` : "Your Skin Report"}
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                Generated on{" "}
+                {new Date(data.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}{" "}
+                at{" "}
+                {new Date(data.createdAt).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Your Skin Report
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Generated on{" "}
-              {new Date(data.createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
           </motion.div>
 
           {/* Section 1: Score */}

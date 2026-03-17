@@ -97,9 +97,20 @@ export interface SkinAnalysisReport {
   disclaimer: string;
 }
 
+export interface PatientInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  dateOfBirth: string; // YYYY-MM-DD
+}
+
 export interface AnalysisRecord {
   id: number;
   userId: number;
+  patientFirstName: string;
+  patientLastName: string;
+  patientEmail: string;
+  patientDob: string;
   imageUrl: string;
   report: SkinAnalysisReport;
   createdAt: string;

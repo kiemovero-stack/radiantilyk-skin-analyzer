@@ -11,6 +11,7 @@ import {
   Loader2,
   FileText,
   LogIn,
+  User,
 } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -48,8 +49,7 @@ export default function History() {
             <LogIn className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Sign In Required</h2>
             <p className="text-muted-foreground mb-6">
-              Sign in to view your analysis history and track your skin health
-              over time.
+              This tool is restricted to authorized staff members. Please log in to access analysis history.
             </p>
             <Button asChild>
               <a href={getLoginUrl()}>Sign In</a>
@@ -131,26 +131,38 @@ export default function History() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="font-semibold text-sm truncate">
-                                {analysis.skinType || "Skin Analysis"}
+                                {analysis.patientFirstName && analysis.patientLastName
+                                  ? `${analysis.patientFirstName} ${analysis.patientLastName}`
+                                  : analysis.skinType || "Skin Analysis"}
                               </h3>
                               {report?.conditions && (
                                 <span className="text-xs text-muted-foreground">
-                                  {report.conditions.length} conditions found
+                                  {report.conditions.length} conditions
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              {new Date(analysis.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
+                            <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                              {analysis.patientEmail && (
+                                <span className="truncate max-w-[180px]">{analysis.patientEmail}</span>
                               )}
+                              {analysis.skinType && (
+                                <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground text-[10px] font-medium">
+                                  {analysis.skinType}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(analysis.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </span>
                             </div>
                           </div>
 

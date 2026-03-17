@@ -14,9 +14,13 @@ export const skinRouter = router({
    * Accepts 1-3 images (front required, left/right optional).
    * Uploads all to S3, sends to AI together, saves report.
    */
-  analyze: publicProcedure
+  analyze: protectedProcedure
     .input(
       z.object({
+        patientFirstName: z.string().min(1, "First name is required"),
+        patientLastName: z.string().min(1, "Last name is required"),
+        patientEmail: z.string().email("Valid email is required"),
+        patientDob: z.string().min(1, "Date of birth is required"),
         images: z.array(
           z.object({
             base64: z.string().min(1),
@@ -27,7 +31,7 @@ export const skinRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { images } = input;
+      const { images, patientFirstName, patientLastName, patientEmail, patientDob } = input;
 
       // 1. Upload all images to S3 and build image content for AI
       const imageUrls: string[] = [];
@@ -114,11 +118,15 @@ export const skinRouter = router({
         throw new Error("Database not available");
       }
 
-      const userId = ctx.user?.id ?? 0;
+      const userId = ctx.user.id;
       const primaryImageUrl = imageUrls[0];
 
       const insertResult = await db.insert(skinAnalyses).values({
         userId,
+        patientFirstName,
+        patientLastName,
+        patientEmail,
+        patientDob,
         imageUrl: primaryImageUrl,
         report: report,
         skinHealthScore: report.skinHealthScore,
@@ -136,7 +144,7 @@ export const skinRouter = router({
   /**
    * Get a single report by ID.
    */
-  getReport: publicProcedure
+  getReport: protectedProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const db = await getDb();

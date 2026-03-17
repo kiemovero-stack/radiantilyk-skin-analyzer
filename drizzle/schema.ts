@@ -25,6 +25,11 @@ export type InsertUser = typeof users.$inferInsert;
 export const skinAnalyses = mysqlTable("skinAnalyses", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
+  // Patient info collected before analysis
+  patientFirstName: varchar("patientFirstName", { length: 128 }).notNull().default(""),
+  patientLastName: varchar("patientLastName", { length: 128 }).notNull().default(""),
+  patientEmail: varchar("patientEmail", { length: 320 }).notNull().default(""),
+  patientDob: varchar("patientDob", { length: 16 }).notNull().default(""),
   imageUrl: text("imageUrl").notNull(),
   report: json("report").notNull(),
   skinHealthScore: int("skinHealthScore"),
