@@ -22,7 +22,12 @@ import {
   Mail,
   Calendar,
   Clock,
+  Download,
+  Send,
+  Check,
 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 import { motion } from "framer-motion";
 
@@ -159,6 +164,59 @@ export default function Report() {
   }
 
   const report = data.report as SkinAnalysisReport;
+
+  const [downloading, setDownloading] = useState(false);
+  const [emailing, setEmailing] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
+  const downloadPdf = trpc.skin.downloadPdf.useMutation({
+    onSuccess: (result) => {
+      // Convert base64 to blob and trigger download
+      const byteChars = atob(result.base64);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("PDF downloaded successfully");
+      setDownloading(false);
+    },
+    onError: (err) => {
+      toast.error(`Failed to generate PDF: ${err.message}`);
+      setDownloading(false);
+    },
+  });
+
+  const emailReport = trpc.skin.emailReport.useMutation({
+    onSuccess: () => {
+      toast.success(`Report emailed to ${data.patientEmail}`);
+      setEmailing(false);
+      setEmailSent(true);
+    },
+    onError: (err) => {
+      toast.error(`Failed to send email: ${err.message}`);
+      setEmailing(false);
+    },
+  });
+
+  const handleDownload = () => {
+    setDownloading(true);
+    downloadPdf.mutate({ id: reportId });
+  };
+
+  const handleEmail = () => {
+    setEmailing(true);
+    emailReport.mutate({ id: reportId });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -704,7 +762,38 @@ export default function Report() {
           </motion.div>
 
           {/* Actions */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
+            <Button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {downloading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {downloading ? "Generating PDF..." : "Download PDF"}
+            </Button>
+            <Button
+              onClick={handleEmail}
+              disabled={emailing || emailSent}
+              variant={emailSent ? "outline" : "default"}
+              className={emailSent ? "border-emerald-300 text-emerald-700" : "bg-primary text-primary-foreground hover:bg-primary/90"}
+            >
+              {emailing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : emailSent ? (
+                <Check className="w-4 h-4 mr-2" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
+              {emailing
+                ? "Sending..."
+                : emailSent
+                  ? `Sent to ${data.patientEmail}`
+                  : `Email to ${data.patientEmail}`}
+            </Button>
             <Button variant="outline" asChild>
               <Link href="/analyze">
                 <Sparkles className="w-4 h-4 mr-2" />

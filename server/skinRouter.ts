@@ -7,6 +7,8 @@ import { skinAnalyses } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import type { SkinAnalysisReport } from "../shared/types";
+import { generateReportPdf } from "./pdfReport";
+import { sendReportEmail } from "./emailService";
 
 export const skinRouter = router({
   /**
@@ -161,6 +163,93 @@ export const skinRouter = router({
       }
 
       return results[0];
+    }),
+
+  /**
+   * Generate PDF report and return as base64.
+   */
+  downloadPdf: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const results = await db
+        .select()
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, input.id))
+        .limit(1);
+
+      if (results.length === 0) throw new Error("Report not found");
+
+      const analysis = results[0];
+      const report = analysis.report as SkinAnalysisReport;
+
+      const pdfBuffer = await generateReportPdf(report, {
+        firstName: analysis.patientFirstName,
+        lastName: analysis.patientLastName,
+        email: analysis.patientEmail,
+        dob: analysis.patientDob,
+        analysisDate: new Date(analysis.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      });
+
+      return {
+        base64: pdfBuffer.toString("base64"),
+        filename: `SkinAnalysis_${analysis.patientFirstName}_${analysis.patientLastName}_${new Date(analysis.createdAt).toISOString().slice(0, 10)}.pdf`,
+      };
+    }),
+
+  /**
+   * Email the PDF report to the patient.
+   */
+  emailReport: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const results = await db
+        .select()
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, input.id))
+        .limit(1);
+
+      if (results.length === 0) throw new Error("Report not found");
+
+      const analysis = results[0];
+      const report = analysis.report as SkinAnalysisReport;
+
+      const analysisDate = new Date(analysis.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      const pdfBuffer = await generateReportPdf(report, {
+        firstName: analysis.patientFirstName,
+        lastName: analysis.patientLastName,
+        email: analysis.patientEmail,
+        dob: analysis.patientDob,
+        analysisDate,
+      });
+
+      const result = await sendReportEmail({
+        toEmail: analysis.patientEmail,
+        patientName: `${analysis.patientFirstName} ${analysis.patientLastName}`,
+        skinHealthScore: report.skinHealthScore,
+        pdfBuffer,
+        analysisDate,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to send email");
+      }
+
+      return { success: true, messageId: result.messageId };
     }),
 
   /**

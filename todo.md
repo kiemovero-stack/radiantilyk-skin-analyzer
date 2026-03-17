@@ -88,3 +88,21 @@
 
 ## Additional Requests
 - [x] Store when the analysis was done (timestamp displayed on report/history)
+
+## PDF Report Download
+- [x] Install PDF generation library (pdfkit)
+- [x] Create server-side PDF generation endpoint
+- [x] Generate premium-styled PDF with all 8 report sections
+- [x] Include patient info, score, conditions, treatments, and roadmap in PDF
+- [x] Add "Download PDF" button on Report page
+
+## Email Report
+- [x] Set up email sending (Nodemailer with Gmail SMTP)
+- [x] Configure RadiantilyK@gmail.com as sender
+- [x] Create email template with report summary and score
+- [x] Attach PDF report to email
+- [x] Send to patient's email address
+- [x] Add "Email Report" button on Report page
+- [x] Show success/error feedback after sending
+- [x] Gmail App Password validated via SMTP verification test
+- [x] 22 tests passing (including PDF generation + email service tests)

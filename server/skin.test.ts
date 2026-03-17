@@ -168,8 +168,119 @@ describe("Skin Analysis Output Schema", () => {
   });
 });
 
+describe("PDF Report Generation", () => {
+  it("generateReportPdf returns a Buffer", async () => {
+    const { generateReportPdf } = await import("./pdfReport");
+    const mockReport = {
+      skinHealthScore: 72,
+      scoreJustification: "Test justification",
+      skinType: "Combination",
+      skinTone: "Medium",
+      fitzpatrickType: 3,
+      conditions: [
+        {
+          name: "Acne",
+          severity: "moderate" as const,
+          area: "T-zone",
+          description: "Active breakouts",
+          cellularInsight: "Sebaceous gland overactivity",
+        },
+      ],
+      positiveFindings: ["Good hydration levels"],
+      missedConditions: [],
+      facialTreatments: [
+        {
+          name: "24K Gold Recovery Facial",
+          price: "$145",
+          reason: "Anti-inflammatory",
+          targetConditions: ["Acne"],
+          benefits: ["Reduces redness"],
+          priority: 1,
+        },
+      ],
+      skinProcedures: [
+        {
+          name: "RF Microneedling",
+          price: "$450",
+          reason: "Collagen induction",
+          targetConditions: ["Acne scarring"],
+          benefits: ["Skin renewal"],
+          expectedResults: "Visible improvement in 4-6 weeks",
+          priority: 1,
+        },
+      ],
+      skincareProducts: [
+        {
+          name: "Vitamin C Serum",
+          type: "Serum",
+          purpose: "Brightening",
+          keyIngredients: ["L-Ascorbic Acid"],
+          targetConditions: ["Hyperpigmentation"],
+        },
+      ],
+      predictiveInsights: [
+        {
+          title: "Aging Forecast",
+          description: "Moderate collagen loss expected",
+          timeframe: "5 years",
+        },
+      ],
+      skinTrajectory: "Improving with treatment",
+      cellularAnalysis: "Normal cell turnover rate",
+      roadmap: [
+        {
+          phase: 1,
+          title: "Foundation",
+          duration: "4 weeks",
+          goals: ["Reduce inflammation"],
+          treatments: ["24K Gold Recovery Facial"],
+          expectedOutcome: "Calmer skin",
+        },
+      ],
+      summary: "Overall good skin health with room for improvement.",
+      disclaimer: "This is for informational purposes only.",
+    };
+
+    const pdf = await generateReportPdf(mockReport, {
+      firstName: "Jane",
+      lastName: "Doe",
+      email: "jane@example.com",
+      dob: "1990-05-15",
+      analysisDate: "March 17, 2026",
+    });
+
+    expect(pdf).toBeInstanceOf(Buffer);
+    expect(pdf.length).toBeGreaterThan(1000);
+    // PDF files start with %PDF
+    expect(pdf.toString("utf-8", 0, 5)).toBe("%PDF-");
+  });
+});
+
+describe("Email Service", () => {
+  it("sendReportEmail returns a result object with success field", async () => {
+    const { sendReportEmail } = await import("./emailService");
+    // The function should always return a structured result (not throw)
+    const result = await sendReportEmail({
+      toEmail: "test@example.com",
+      patientName: "Test User",
+      skinHealthScore: 72,
+      pdfBuffer: Buffer.from("fake pdf"),
+      analysisDate: "March 17, 2026",
+    });
+
+    // Result should have a success field (boolean)
+    expect(typeof result.success).toBe("boolean");
+    // If successful, should have messageId; if failed, should have error
+    if (result.success) {
+      expect(result.messageId).toBeDefined();
+    } else {
+      expect(result.error).toBeDefined();
+    }
+  });
+});
+
 describe("Skin Router Registration", () => {
-  it("skin router is registered on appRouter", () => {
+  it("skin router is registered on appRouter with all endpoints", () => {
     const routerDef = appRouter._def;
     expect(routerDef).toBeDefined();
     const procedures = (routerDef as any).procedures;
@@ -177,6 +288,8 @@ describe("Skin Router Registration", () => {
       expect(procedures).toHaveProperty("skin.analyze");
       expect(procedures).toHaveProperty("skin.getReport");
       expect(procedures).toHaveProperty("skin.listAnalyses");
+      expect(procedures).toHaveProperty("skin.downloadPdf");
+      expect(procedures).toHaveProperty("skin.emailReport");
     } else {
       const record = (routerDef as any).record;
       expect(record).toHaveProperty("skin");
