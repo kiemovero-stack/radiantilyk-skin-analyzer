@@ -403,7 +403,7 @@ export default function Analyze() {
                       ref={(el) => { fileInputRefs.current[key] = el; }}
                       type="file"
                       accept="image/*"
-                      className="hidden"
+                      style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleFile(key, file);
@@ -414,7 +414,7 @@ export default function Analyze() {
                       type="file"
                       accept="image/*"
                       capture="environment"
-                      className="hidden"
+                      style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleFile(key, file);
@@ -442,8 +442,17 @@ export default function Analyze() {
                       </div>
                     ) : (
                       <div
-                        className="aspect-[3/4] rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-accent/30 hover:bg-accent/50 transition-all flex flex-col items-center justify-center gap-3 cursor-pointer"
-                        onClick={() => fileInputRefs.current[key]?.click()}
+                        className="aspect-[3/4] rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-accent/30 hover:bg-accent/50 transition-all flex flex-col items-center justify-center gap-3 cursor-pointer relative"
+                        onClick={(e) => {
+                          // Only trigger if clicking the zone itself, not the buttons
+                          if (e.target === e.currentTarget || !(e.target as HTMLElement).closest('button')) {
+                            const input = fileInputRefs.current[key];
+                            if (input) {
+                              input.value = '';
+                              input.click();
+                            }
+                          }
+                        }}
                       >
                         <FaceSilhouette angle={key} className="text-muted-foreground/40" />
                         <p className="text-xs text-muted-foreground text-center px-4">
@@ -451,9 +460,15 @@ export default function Analyze() {
                         </p>
                         <div className="flex gap-2">
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              fileInputRefs.current[key]?.click();
+                              e.preventDefault();
+                              const input = fileInputRefs.current[key];
+                              if (input) {
+                                input.value = '';
+                                input.click();
+                              }
                             }}
                             className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors flex items-center gap-1"
                           >
@@ -461,9 +476,15 @@ export default function Analyze() {
                             Upload
                           </button>
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              cameraInputRefs.current[key]?.click();
+                              e.preventDefault();
+                              const input = cameraInputRefs.current[key];
+                              if (input) {
+                                input.value = '';
+                                input.click();
+                              }
                             }}
                             className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors flex items-center gap-1"
                           >

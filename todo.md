@@ -106,3 +106,6 @@
 - [x] Show success/error feedback after sending
 - [x] Gmail App Password validated via SMTP verification test
 - [x] 22 tests passing (including PDF generation + email service tests)
+
+## Bug Fixes
+- [x] Fix photo upload failing - changed hidden file inputs from display:none to sr-only positioning for cross-browser compatibility
