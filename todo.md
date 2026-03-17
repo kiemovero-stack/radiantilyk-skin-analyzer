@@ -121,3 +121,8 @@
 - [x] Update AI prompt to recommend ONLY from the user's actual product catalog
 - [x] Update report UI to display product recommendations with prices and links
 - [x] Update tests for new product catalog integration (36 tests passing)
+
+## PDF Report Fix
+- [x] Fix distorted PDF report that is emailed to clients
+- [x] Rebuild PDF layout with proper formatting, spacing, and readability
+- [x] Test PDF output quality
