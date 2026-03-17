@@ -50,11 +50,13 @@ export const skinRouter = router({
         const { url } = await storagePut(key, buffer, img.mimeType);
         imageUrls.push(url);
 
+        // Use S3 URL instead of base64 data URI to reduce payload size and latency
+        // Front view gets "high" detail, side views get "low" to speed up analysis
         imageContents.push({
           type: "image_url",
           image_url: {
-            url: `data:${img.mimeType};base64,${img.base64}`,
-            detail: "high",
+            url,
+            detail: img.angle === "front" ? "high" : "low",
           },
         });
       }
@@ -81,27 +83,42 @@ export const skinRouter = router({
       }
 
       // 3. Call AI with all images for analysis
-      const result = await invokeLLM({
-        messages: [
-          {
-            role: "system",
-            content: buildSystemPrompt(),
+      console.log(`[SkinAnalysis] Starting AI analysis with ${images.length} image(s) for patient ${patientFirstName} ${patientLastName}`);
+      const startTime = Date.now();
+
+      let result;
+      try {
+        result = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: buildSystemPrompt(),
+            },
+            {
+              role: "user",
+              content: userContent,
+            },
+          ],
+          maxTokens: 8192,
+          responseFormat: {
+            type: "json_schema",
+            json_schema: SKIN_ANALYSIS_OUTPUT_SCHEMA,
           },
-          {
-            role: "user",
-            content: userContent,
-          },
-        ],
-        responseFormat: {
-          type: "json_schema",
-          json_schema: SKIN_ANALYSIS_OUTPUT_SCHEMA,
-        },
-      });
+        });
+      } catch (llmError: any) {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.error(`[SkinAnalysis] LLM call failed after ${elapsed}s:`, llmError?.message || llmError);
+        throw new Error(`AI analysis failed after ${elapsed}s. Please try again.`);
+      }
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`[SkinAnalysis] AI analysis completed in ${elapsed}s`);
 
       // 4. Parse the AI response
       const content = result.choices[0]?.message?.content;
       if (!content) {
-        throw new Error("AI analysis returned empty response");
+        console.error("[SkinAnalysis] Empty response from AI. Full result:", JSON.stringify(result).slice(0, 500));
+        throw new Error("AI analysis returned empty response. Please try again.");
       }
 
       let report: SkinAnalysisReport;
@@ -111,7 +128,8 @@ export const skinRouter = router({
           : (content[0] as { type: "text"; text: string }).text;
         report = JSON.parse(text) as SkinAnalysisReport;
       } catch (e) {
-        throw new Error("Failed to parse AI analysis response");
+        console.error("[SkinAnalysis] Failed to parse AI response:", typeof content === "string" ? content.slice(0, 500) : JSON.stringify(content).slice(0, 500));
+        throw new Error("Failed to parse AI analysis response. Please try again.");
       }
 
       // 5. Save to database (store the front image URL as primary)
