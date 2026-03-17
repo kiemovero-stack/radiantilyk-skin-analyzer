@@ -39,6 +39,8 @@ export interface SkinProcedure {
 
 export interface SkincareProduct {
   name: string;
+  sku: string;
+  price: string;
   type: string;
   purpose: string;
   keyIngredients: string[];

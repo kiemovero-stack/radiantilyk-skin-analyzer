@@ -10,9 +10,11 @@
  */
 
 import { getServiceCatalogText } from "../shared/serviceCatalog";
+import { getProductCatalogText } from "../shared/productCatalog";
 
 export function buildSystemPrompt(): string {
   const catalogText = getServiceCatalogText();
+  const productCatalogText = getProductCatalogText();
 
   return `You are a world-class AI dermatology diagnostic system and skin imaging scientist. Your capabilities match or exceed advanced systems like the Aura Skin Analyzer. You specialize in highly accurate skin diagnostics, computer vision-based analysis, and personalized treatment planning.
 
@@ -35,7 +37,11 @@ CRITICAL RULES:
 3. TREATMENT RECOMMENDATIONS — USE ONLY FROM THE CLINIC CATALOG BELOW
    - EXACTLY 2 facial treatments from the clinic's Facials menu (no more, no less)
    - EXACTLY 4 high-impact skin procedures from the clinic's service menu (no more, no less)
-   - 3 to 5 skincare product recommendations (these can be general product types with key ingredients since the clinic does not sell retail products)
+   - 3 to 5 skincare product recommendations — MUST be selected ONLY from the RadiantilyK Aesthetic Product Catalog below
+   - Each product recommendation MUST include the exact product name, SKU code, and price from the catalog
+   - Match products to the patient's specific detected conditions (e.g., recommend brightening serums for hyperpigmentation, peptide creams for aging)
+   - Always recommend the EELHOE Sun Cream SPF90 ($22.00) as one of the products — sun protection is essential for every patient
+   - If the patient is getting procedures, recommend a post-procedure kit (Cosmedix or FactorFive) as part of their product regimen
    - Prioritize treatments based on the MOST CRITICAL issues first
    - Every single recommendation MUST be directly tied to a detected condition
    - Include the EXACT price from the catalog for each facial and procedure
@@ -64,7 +70,9 @@ CRITICAL RULES:
 
 IMPORTANT: Analyze the actual image(s) provided. Base your entire analysis on what you can actually see in the photos. Do not make up conditions that aren't visible. Be honest about image quality limitations.
 
-${catalogText}`;
+${catalogText}
+
+${productCatalogText}`;
 }
 
 export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
@@ -187,14 +195,16 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       skincareProducts: {
         type: "array",
-        description: "3-5 skincare product recommendations with specific ingredients",
+        description: "3-5 skincare product recommendations from the RadiantilyK Aesthetic Product Catalog. Each MUST include exact SKU and price.",
         items: {
           type: "object",
-          required: ["name", "type", "purpose", "keyIngredients", "targetConditions"],
+          required: ["name", "sku", "price", "type", "purpose", "keyIngredients", "targetConditions"],
           additionalProperties: false,
           properties: {
-            name: { type: "string", description: "Product type/name (e.g., 'Medical-Grade Vitamin C Serum', 'Retinoid Night Treatment')" },
-            type: { type: "string", description: "Product category (Serum, Moisturizer, SPF, Treatment, Cleanser)" },
+            name: { type: "string", description: "Exact product name from the catalog (e.g., 'RadiantilyK Aesthetic Vitamin C Facial Serum 30ml')" },
+            sku: { type: "string", description: "Product SKU code from the catalog (e.g., 'RKA-010')" },
+            price: { type: "string", description: "Exact price from the catalog (e.g., '$49.00')" },
+            type: { type: "string", description: "Product category (Serum, Cream, Cleanser, Sunscreen, Post-Procedure, Trial Kit)" },
             purpose: { type: "string" },
             keyIngredients: { type: "array", items: { type: "string" } },
             targetConditions: { type: "array", items: { type: "string" } }

@@ -114,3 +114,10 @@
 - [x] Fix production timeout: Replace base64 tRPC upload with multipart/form-data Express route
 - [x] Add client-side image compression (resize to 1200px max, JPEG 80% quality)
 - [x] Fix React hooks order violation in Report.tsx (hooks called after early returns)
+
+## Skincare Product Catalog Integration (rkaskin.co)
+- [x] Scrape and catalog all products from rkaskin.co (names, prices, descriptions, categories)
+- [x] Create shared product catalog data file with all products
+- [x] Update AI prompt to recommend ONLY from the user's actual product catalog
+- [x] Update report UI to display product recommendations with prices and links
+- [x] Update tests for new product catalog integration (36 tests passing)

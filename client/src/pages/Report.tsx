@@ -585,32 +585,74 @@ export default function Report() {
               number="06"
               title="Recommended Skincare Products"
             />
+            <p className="text-sm text-muted-foreground mb-4">
+              Available at{" "}
+              <a
+                href="https://rkaskin.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                rkaskin.co
+              </a>
+            </p>
             <div className="space-y-4">
               {report.skincareProducts.map((product, i) => (
                 <div
                   key={i}
-                  className="p-4 rounded-xl border border-border/60 bg-accent/30"
+                  className="p-5 rounded-xl border border-border/60 hover:border-primary/20 transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-sm">{product.name}</h3>
-                      <span className="text-xs text-primary font-medium">
-                        {product.type}
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-primary">
+                        #{i + 1}
                       </span>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {product.purpose}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {product.keyIngredients.map((ing, j) => (
-                      <span
-                        key={j}
-                        className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[10px] font-medium"
-                      >
-                        {ing}
-                      </span>
-                    ))}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div>
+                          <h3 className="font-semibold">{product.name}</h3>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {product.sku && (
+                              <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+                                {product.sku}
+                              </span>
+                            )}
+                            <span className="text-xs text-primary font-medium">
+                              {product.type}
+                            </span>
+                          </div>
+                        </div>
+                        {product.price && (
+                          <span className="shrink-0 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                            {product.price}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {product.purpose}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {product.keyIngredients.map((ing, j) => (
+                          <span
+                            key={j}
+                            className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[10px] font-medium"
+                          >
+                            {ing}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {product.targetConditions.map((c, j) => (
+                          <span
+                            key={j}
+                            className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium"
+                          >
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

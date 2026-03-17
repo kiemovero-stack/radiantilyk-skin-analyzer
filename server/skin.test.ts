@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import { appRouter } from "./routers";
 import { SERVICE_CATALOG, getServiceCatalogText } from "../shared/serviceCatalog";
+import { PRODUCT_CATALOG, getProductCatalogText, getProductCount } from "../shared/productCatalog";
 
 const systemPrompt = buildSystemPrompt();
 
@@ -32,6 +33,26 @@ describe("Skin Analysis Prompt", () => {
     expect(systemPrompt).toContain("CLINIC SERVICE CATALOG WITH PRICING");
     expect(systemPrompt).toContain("ONLY recommend services and treatments from this catalog");
     expect(systemPrompt).toContain("Include the exact price");
+  });
+
+  it("system prompt includes the product catalog from rkaskin.co", () => {
+    expect(systemPrompt).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
+    expect(systemPrompt).toContain("ONLY recommend products from this catalog");
+    expect(systemPrompt).toContain("rkaskin.co");
+    expect(systemPrompt).toContain("END OF PRODUCT CATALOG");
+  });
+
+  it("system prompt contains key products from the catalog", () => {
+    expect(systemPrompt).toContain("RadiantilyK Aesthetic Vitamin C Facial Serum 30ml");
+    expect(systemPrompt).toContain("RKA-010");
+    expect(systemPrompt).toContain("$49.00");
+    expect(systemPrompt).toContain("EELHOE Sun Cream SPF90");
+    expect(systemPrompt).toContain("Dermagarden Peptide-7 Cream");
+    expect(systemPrompt).toContain("AIXIN Beauty");
+  });
+
+  it("system prompt instructs AI to always recommend sunscreen", () => {
+    expect(systemPrompt).toContain("Always recommend the EELHOE Sun Cream SPF90");
   });
 
   it("system prompt contains key services from the catalog", () => {
@@ -129,6 +150,16 @@ describe("Skin Analysis Output Schema", () => {
     expect(props).toHaveProperty("disclaimer");
   });
 
+  it("skincareProducts schema requires sku and price fields", () => {
+    const props = SKIN_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const productItems = props.skincareProducts.items;
+    expect(productItems.required).toContain("sku");
+    expect(productItems.required).toContain("price");
+    expect(productItems.required).toContain("name");
+    expect(productItems.properties).toHaveProperty("sku");
+    expect(productItems.properties).toHaveProperty("price");
+  });
+
   it("facial treatments schema requires price field", () => {
     const props = SKIN_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const facialItems = props.facialTreatments.items;
@@ -211,10 +242,12 @@ describe("PDF Report Generation", () => {
       ],
       skincareProducts: [
         {
-          name: "Vitamin C Serum",
+          name: "RadiantilyK Aesthetic Vitamin C Facial Serum 30ml",
+          sku: "RKA-010",
+          price: "$49.00",
           type: "Serum",
-          purpose: "Brightening",
-          keyIngredients: ["L-Ascorbic Acid"],
+          purpose: "Brightening and antioxidant protection",
+          keyIngredients: ["Vitamin C", "L-Ascorbic Acid"],
           targetConditions: ["Hyperpigmentation"],
         },
       ],
@@ -310,5 +343,66 @@ describe("Upload Route Module", () => {
   it("registerUploadRoute is a function that can be imported", async () => {
     const { registerUploadRoute } = await import("./uploadRoute");
     expect(typeof registerUploadRoute).toBe("function");
+  });
+});
+
+describe("Product Catalog", () => {
+  it("has all expected product categories", () => {
+    const categories = PRODUCT_CATALOG.map((c) => c.category);
+    expect(categories).toContain("Cleansers");
+    expect(categories).toContain("Creams");
+    expect(categories).toContain("Serums");
+    expect(categories).toContain("Post-Procedure");
+    expect(categories).toContain("Sunscreen");
+    expect(categories).toContain("Trial Kits");
+  });
+
+  it("has exactly 32 products total", () => {
+    expect(getProductCount()).toBe(32);
+  });
+
+  it("all products have sku, name, price, and description", () => {
+    for (const cat of PRODUCT_CATALOG) {
+      for (const prod of cat.products) {
+        expect(prod.sku).toMatch(/^RKA-\d{3}$/);
+        expect(prod.name).toBeTruthy();
+        expect(prod.price).toMatch(/^\$\d+\.\d{2}$/);
+        expect(prod.description).toBeTruthy();
+        expect(prod.keyBenefits.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("serums category has 13 products", () => {
+    const serums = PRODUCT_CATALOG.find((c) => c.category === "Serums");
+    expect(serums).toBeDefined();
+    expect(serums!.products).toHaveLength(13);
+  });
+
+  it("creams category has 10 products", () => {
+    const creams = PRODUCT_CATALOG.find((c) => c.category === "Creams");
+    expect(creams).toBeDefined();
+    expect(creams!.products).toHaveLength(10);
+  });
+
+  it("getProductCatalogText returns formatted text", () => {
+    const text = getProductCatalogText();
+    expect(text).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
+    expect(text).toContain("END OF PRODUCT CATALOG");
+    expect(text).toContain("rkaskin.co");
+    expect(text.length).toBeGreaterThan(2000);
+  });
+
+  it("includes RadiantilyK branded products", () => {
+    const allProducts = PRODUCT_CATALOG.flatMap((c) => c.products);
+    const rkaProducts = allProducts.filter((p) => p.name.includes("RadiantilyK"));
+    expect(rkaProducts.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("includes sunscreen product", () => {
+    const sunscreen = PRODUCT_CATALOG.find((c) => c.category === "Sunscreen");
+    expect(sunscreen).toBeDefined();
+    expect(sunscreen!.products).toHaveLength(1);
+    expect(sunscreen!.products[0].name).toContain("SPF90");
   });
 });
