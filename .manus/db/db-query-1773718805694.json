@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE skinAnalyses ADD COLUMN `status` VARCHAR(32) NOT NULL DEFAULT 'completed', ADD COLUMN `errorMessage` TEXT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 47VG6EBCbSxGkEr.682af1d5b54c --database YXDmLVYUnds4E9JxEbde2D --execute ALTER TABLE skinAnalyses ADD COLUMN `status` VARCHAR(32) NOT NULL DEFAULT 'completed', ADD COLUMN `errorMessage` TEXT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1924
+}

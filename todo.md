@@ -110,3 +110,7 @@
 ## Bug Fixes
 - [x] Fix photo upload failing - changed hidden file inputs from display:none to sr-only positioning for cross-browser compatibility
 - [x] Fix AI analysis timing out - use S3 URLs instead of base64, reduce max_tokens, remove thinking mode, add logging
+- [x] Fix full app crash "An unexpected error occurred" on published domain after analysis
+- [x] Fix production timeout: Replace base64 tRPC upload with multipart/form-data Express route
+- [x] Add client-side image compression (resize to 1200px max, JPEG 80% quality)
+- [x] Fix React hooks order violation in Report.tsx (hooks called after early returns)

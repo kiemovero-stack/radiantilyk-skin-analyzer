@@ -295,4 +295,20 @@ describe("Skin Router Registration", () => {
       expect(record).toHaveProperty("skin");
     }
   });
+
+  it("uploadImages tRPC mutation has been removed (now uses Express multipart route)", () => {
+    const routerDef = appRouter._def;
+    const procedures = (routerDef as any).procedures;
+    if (procedures) {
+      expect(procedures).not.toHaveProperty("skin.uploadImages");
+    }
+    // The upload is now handled by /api/upload-images Express route
+  });
+});
+
+describe("Upload Route Module", () => {
+  it("registerUploadRoute is a function that can be imported", async () => {
+    const { registerUploadRoute } = await import("./uploadRoute");
+    expect(typeof registerUploadRoute).toBe("function");
+  });
 });

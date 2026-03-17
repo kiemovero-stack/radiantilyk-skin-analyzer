@@ -105,6 +105,76 @@ export default function History() {
             <div className="space-y-4">
               {analyses.map((analysis, i) => {
                 const report = analysis.report as SkinAnalysisReport;
+                const status = (analysis as any).status || "completed";
+                const isCompleted = status === "completed";
+                const isProcessing = status === "processing";
+                const isFailed = status === "failed";
+
+                const cardContent = (
+                  <div className={`group p-5 rounded-2xl border bg-card transition-all ${isCompleted ? "border-border/60 hover:border-primary/30 hover:shadow-md cursor-pointer" : isProcessing ? "border-amber-500/30 bg-amber-500/5" : "border-red-500/30 bg-red-500/5"}`}>
+                    <div className="flex items-center gap-4">
+                      {/* Score circle */}
+                      <div className={`w-14 h-14 rounded-full border-4 flex items-center justify-center shrink-0 ${isProcessing ? "border-amber-500/20" : isFailed ? "border-red-500/20" : "border-primary/20"}`}>
+                        {isProcessing ? (
+                          <Loader2 className="w-5 h-5 animate-spin text-amber-500" />
+                        ) : (
+                          <span className={`text-lg font-bold ${isFailed ? "text-red-500" : "text-primary"}`}>
+                            {isFailed ? "!" : analysis.skinHealthScore || "—"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm truncate">
+                            {analysis.patientFirstName && analysis.patientLastName
+                              ? `${analysis.patientFirstName} ${analysis.patientLastName}`
+                              : analysis.skinType || "Skin Analysis"}
+                          </h3>
+                          {isProcessing && (
+                            <span className="text-xs text-amber-600 font-medium">Processing...</span>
+                          )}
+                          {isFailed && (
+                            <span className="text-xs text-red-600 font-medium">Failed</span>
+                          )}
+                          {isCompleted && report?.conditions && (
+                            <span className="text-xs text-muted-foreground">
+                              {report.conditions.length} conditions
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                          {analysis.patientEmail && (
+                            <span className="truncate max-w-[180px]">{analysis.patientEmail}</span>
+                          )}
+                          {isCompleted && analysis.skinType && (
+                            <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground text-[10px] font-medium">
+                              {analysis.skinType}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(analysis.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      {isCompleted && (
+                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      )}
+                    </div>
+                  </div>
+                );
+
                 return (
                   <motion.div
                     key={analysis.id}
@@ -118,58 +188,13 @@ export default function History() {
                       },
                     }}
                   >
-                    <Link href={`/report/${analysis.id}`}>
-                      <div className="group p-5 rounded-2xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all cursor-pointer">
-                        <div className="flex items-center gap-4">
-                          {/* Score circle */}
-                          <div className="w-14 h-14 rounded-full border-4 border-primary/20 flex items-center justify-center shrink-0">
-                            <span className="text-lg font-bold text-primary">
-                              {analysis.skinHealthScore || "—"}
-                            </span>
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-sm truncate">
-                                {analysis.patientFirstName && analysis.patientLastName
-                                  ? `${analysis.patientFirstName} ${analysis.patientLastName}`
-                                  : analysis.skinType || "Skin Analysis"}
-                              </h3>
-                              {report?.conditions && (
-                                <span className="text-xs text-muted-foreground">
-                                  {report.conditions.length} conditions
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
-                              {analysis.patientEmail && (
-                                <span className="truncate max-w-[180px]">{analysis.patientEmail}</span>
-                              )}
-                              {analysis.skinType && (
-                                <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground text-[10px] font-medium">
-                                  {analysis.skinType}
-                                </span>
-                              )}
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {new Date(analysis.createdAt).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}
-                              </span>
-                            </div>
-                          </div>
-
-                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                        </div>
-                      </div>
-                    </Link>
+                    {isCompleted ? (
+                      <Link href={`/report/${analysis.id}`}>
+                        {cardContent}
+                      </Link>
+                    ) : (
+                      cardContent
+                    )}
                   </motion.div>
                 );
               })}

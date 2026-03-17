@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
+import { uploadImages } from "@/lib/uploadService";
 import {
   Camera,
   Upload,
@@ -19,7 +20,7 @@ import {
   Calendar,
   LogIn,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -29,8 +30,6 @@ type AngleKey = "front" | "left" | "right";
 interface AnglePhoto {
   file: File | null;
   preview: string | null;
-  base64: string | null;
-  mimeType: string;
 }
 
 const ANGLE_CONFIG: { key: AngleKey; label: string; required: boolean; description: string }[] = [
@@ -87,14 +86,16 @@ export default function Analyze() {
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
 
-  // Photo state
+  // Photo state — now stores File objects instead of base64
   const [photos, setPhotos] = useState<Record<AngleKey, AnglePhoto>>({
-    front: { file: null, preview: null, base64: null, mimeType: "image/jpeg" },
-    left: { file: null, preview: null, base64: null, mimeType: "image/jpeg" },
-    right: { file: null, preview: null, base64: null, mimeType: "image/jpeg" },
+    front: { file: null, preview: null },
+    left: { file: null, preview: null },
+    right: { file: null, preview: null },
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState("");
+  const [pollingId, setPollingId] = useState<number | null>(null);
+
   const fileInputRefs = useRef<Record<AngleKey, HTMLInputElement | null>>({
     front: null,
     left: null,
@@ -106,18 +107,44 @@ export default function Analyze() {
     right: null,
   });
 
-  const analyzeMutation = trpc.skin.analyze.useMutation({
-    onSuccess: (data: { id: number }) => {
-      if (data?.id) {
-        navigate(`/report/${data.id}`);
-      }
-    },
-    onError: (error: { message: string }) => {
-      toast.error("Analysis failed: " + error.message);
+  // Start analysis mutation (returns immediately with ID)
+  const analyzeMutation = trpc.skin.analyze.useMutation();
+
+  // Poll for analysis status
+  const statusQuery = trpc.skin.getStatus.useQuery(
+    { id: pollingId! },
+    {
+      enabled: pollingId !== null,
+      refetchInterval: (query) => {
+        const data = query.state.data;
+        if (data?.status === "completed" || data?.status === "failed") {
+          return false; // Stop polling
+        }
+        return 3000; // Poll every 3 seconds
+      },
+    }
+  );
+
+  // Handle polling results
+  useEffect(() => {
+    if (!statusQuery.data || pollingId === null) return;
+
+    const { status, id } = statusQuery.data;
+
+    if (status === "completed") {
       setIsAnalyzing(false);
       setAnalysisProgress("");
-    },
-  });
+      setPollingId(null);
+      navigate(`/report/${id}`);
+    } else if (status === "failed") {
+      setIsAnalyzing(false);
+      setAnalysisProgress("");
+      setPollingId(null);
+      toast.error("Analysis failed: " + (statusQuery.data.errorMessage || "Unknown error. Please try again."));
+    } else if (status === "processing") {
+      setAnalysisProgress("AI is analyzing your photos... This may take 30-60 seconds.");
+    }
+  }, [statusQuery.data, pollingId, navigate]);
 
   const handleFile = useCallback((angle: AngleKey, file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -128,31 +155,33 @@ export default function Analyze() {
       toast.error("Image must be under 20MB");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      const base64 = dataUrl.split(",")[1];
-      setPhotos((prev) => ({
-        ...prev,
-        [angle]: { file, preview: dataUrl, base64, mimeType: file.type },
-      }));
-    };
-    reader.readAsDataURL(file);
+    // Create a preview URL and store the File object
+    const preview = URL.createObjectURL(file);
+    setPhotos((prev) => ({
+      ...prev,
+      [angle]: { file, preview },
+    }));
   }, []);
 
   const clearPhoto = (angle: AngleKey) => {
-    setPhotos((prev) => ({
-      ...prev,
-      [angle]: { file: null, preview: null, base64: null, mimeType: "image/jpeg" },
-    }));
+    setPhotos((prev) => {
+      // Revoke old preview URL to free memory
+      if (prev[angle].preview) {
+        URL.revokeObjectURL(prev[angle].preview!);
+      }
+      return {
+        ...prev,
+        [angle]: { file: null, preview: null },
+      };
+    });
     const ref = fileInputRefs.current[angle];
     if (ref) ref.value = "";
     const camRef = cameraInputRefs.current[angle];
     if (camRef) camRef.value = "";
   };
 
-  const hasFrontPhoto = !!photos.front.preview;
-  const photoCount = [photos.front, photos.left, photos.right].filter((p) => p.preview).length;
+  const hasFrontPhoto = !!photos.front.file;
+  const photoCount = [photos.front, photos.left, photos.right].filter((p) => p.file).length;
 
   const isPatientFormValid = firstName.trim() && lastName.trim() && email.trim() && dob;
 
@@ -167,38 +196,54 @@ export default function Analyze() {
   };
 
   const handleAnalyze = async () => {
-    if (!photos.front.base64) {
+    if (!photos.front.file) {
       toast.error("Front view photo is required");
       return;
     }
 
     setIsAnalyzing(true);
-    setAnalysisProgress("Uploading images...");
+    setAnalysisProgress("Compressing images...");
 
     try {
-      const images: { base64: string; mimeType: string; angle: "front" | "left" | "right" }[] = [];
+      // Step 1: Compress and upload images via multipart/form-data (bypasses tRPC)
+      const imagesToUpload: { file: File; angle: "front" | "left" | "right" }[] = [];
 
-      if (photos.front.base64) {
-        images.push({ base64: photos.front.base64, mimeType: photos.front.mimeType, angle: "front" });
+      if (photos.front.file) {
+        imagesToUpload.push({ file: photos.front.file, angle: "front" });
       }
-      if (photos.left.base64) {
-        images.push({ base64: photos.left.base64, mimeType: photos.left.mimeType, angle: "left" });
+      if (photos.left.file) {
+        imagesToUpload.push({ file: photos.left.file, angle: "left" });
       }
-      if (photos.right.base64) {
-        images.push({ base64: photos.right.base64, mimeType: photos.right.mimeType, angle: "right" });
+      if (photos.right.file) {
+        imagesToUpload.push({ file: photos.right.file, angle: "right" });
       }
 
-      setAnalysisProgress(`AI is analyzing ${images.length} photo${images.length > 1 ? "s" : ""}...`);
+      const uploadResult = await uploadImages(imagesToUpload, (msg) => {
+        setAnalysisProgress(msg);
+      });
 
-      await analyzeMutation.mutateAsync({
+      setAnalysisProgress("Starting AI analysis...");
+
+      // Step 2: Start analysis with S3 URLs (returns immediately)
+      const analyzeResult = await analyzeMutation.mutateAsync({
         patientFirstName: firstName.trim(),
         patientLastName: lastName.trim(),
         patientEmail: email.trim(),
         patientDob: dob,
-        images,
+        imageUrls: uploadResult.uploadedImages.map((img) => ({
+          url: img.url,
+          angle: img.angle as "front" | "left" | "right",
+        })),
       });
-    } catch {
-      // Error handled by onError
+
+      setAnalysisProgress("AI is analyzing your photos... This may take 30-60 seconds.");
+
+      // Step 3: Start polling for results
+      setPollingId(analyzeResult.id);
+    } catch (error: any) {
+      setIsAnalyzing(false);
+      setAnalysisProgress("");
+      toast.error("Failed to start analysis: " + (error?.message || "Please try again."));
     }
   };
 
@@ -280,71 +325,66 @@ export default function Analyze() {
               <div className="p-6 md:p-8 rounded-2xl border border-border/60 bg-card space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm font-medium flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-muted-foreground" />
-                      First Name <span className="text-destructive">*</span>
+                    <Label htmlFor="firstName" className="flex items-center gap-1.5 text-sm font-medium">
+                      <User className="w-3.5 h-3.5" />
+                      First Name *
                     </Label>
                     <Input
                       id="firstName"
                       placeholder="John"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="h-11"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-sm font-medium flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-muted-foreground" />
-                      Last Name <span className="text-destructive">*</span>
+                    <Label htmlFor="lastName" className="flex items-center gap-1.5 text-sm font-medium">
+                      <User className="w-3.5 h-3.5" />
+                      Last Name *
                     </Label>
                     <Input
                       id="lastName"
                       placeholder="Doe"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="h-11"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                    Email Address <span className="text-destructive">*</span>
+                  <Label htmlFor="email" className="flex items-center gap-1.5 text-sm font-medium">
+                    <Mail className="w-3.5 h-3.5" />
+                    Email Address *
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="patient@example.com"
+                    placeholder="patient@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dob" className="text-sm font-medium flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                    Date of Birth <span className="text-destructive">*</span>
+                  <Label htmlFor="dob" className="flex items-center gap-1.5 text-sm font-medium">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Date of Birth *
                   </Label>
                   <Input
                     id="dob"
                     type="date"
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="h-11"
-                    max={new Date().toISOString().split("T")[0]}
                   />
                 </div>
 
                 <Button
-                  className="w-full h-12 font-semibold text-base mt-2"
                   size="lg"
-                  onClick={handleNextStep}
+                  className="w-full font-semibold mt-4"
                   disabled={!isPatientFormValid}
+                  onClick={handleNextStep}
                 >
                   Continue to Photo Upload
-                  <ChevronRight className="w-5 h-5 ml-2" />
+                  <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             </div>
@@ -353,199 +393,188 @@ export default function Analyze() {
           {/* Step 2: Photo Upload */}
           {step === 2 && (
             <>
-              {/* Patient summary bar */}
-              <div className="mb-6 p-4 rounded-xl border border-border/60 bg-card flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{firstName} {lastName}</p>
-                    <p className="text-xs text-muted-foreground">{email} &middot; DOB: {new Date(dob + "T00:00:00").toLocaleDateString()}</p>
-                  </div>
-                </div>
-                {!isAnalyzing && (
-                  <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
-                )}
-              </div>
-
               <div className="text-center mb-8">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                   Upload Skin Photos
                 </h1>
-                <p className="mt-3 text-muted-foreground text-lg">
-                  Upload photos from multiple angles for the most comprehensive analysis.
-                  Front view is required; side views are optional but recommended.
+                <p className="mt-3 text-muted-foreground">
+                  Capture or upload photos from up to 3 angles for a comprehensive analysis.
                 </p>
               </div>
 
-              {/* Multi-Angle Upload Grid */}
+              {/* Back to patient info */}
+              {!isAnalyzing && (
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Back to patient info
+                </button>
+              )}
+
+              {/* Photo Upload Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 {ANGLE_CONFIG.map(({ key, label, required, description }) => (
-                  <div key={key} className="flex flex-col">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-sm">{label}</h3>
-                      {required ? (
-                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                          Required
+                  <div
+                    key={key}
+                    className={cn(
+                      "relative rounded-2xl border-2 border-dashed transition-all overflow-hidden",
+                      photos[key].preview
+                        ? "border-primary/40 bg-primary/5"
+                        : "border-border/60 bg-card hover:border-primary/30 hover:bg-primary/5"
+                    )}
+                  >
+                    {photos[key].preview ? (
+                      <div className="relative aspect-[3/4]">
+                        <img
+                          src={photos[key].preview!}
+                          alt={label}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                          <span className="text-white text-sm font-medium">{label}</span>
+                        </div>
+                        {!isAnalyzing && (
+                          <button
+                            type="button"
+                            onClick={() => clearPhoto(key)}
+                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        className="aspect-[3/4] flex flex-col items-center justify-center p-4 cursor-pointer"
+                        onClick={() => !isAnalyzing && fileInputRefs.current[key]?.click()}
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const file = e.dataTransfer.files[0];
+                          if (file) handleFile(key, file);
+                        }}
+                      >
+                        <FaceSilhouette angle={key} className="text-muted-foreground/40 mb-3" />
+                        <span className="text-sm font-medium text-foreground">{label}</span>
+                        <span className="text-xs text-muted-foreground mt-1">
+                          {required ? "Required" : "Optional"}
                         </span>
-                      ) : (
-                        <span className="text-[10px] font-medium uppercase px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                          Optional
-                        </span>
-                      )}
-                    </div>
+                        <p className="text-xs text-muted-foreground/70 mt-2 text-center">{description}</p>
 
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isAnalyzing}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fileInputRefs.current[key]?.click();
+                            }}
+                          >
+                            <Upload className="w-3.5 h-3.5 mr-1" />
+                            Upload
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isAnalyzing}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              cameraInputRefs.current[key]?.click();
+                            }}
+                          >
+                            <Camera className="w-3.5 h-3.5 mr-1" />
+                            Camera
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Hidden file inputs */}
                     <input
                       ref={(el) => { fileInputRefs.current[key] = el; }}
                       type="file"
                       accept="image/*"
-                      style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleFile(key, file);
                       }}
+                      style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}
                     />
                     <input
                       ref={(el) => { cameraInputRefs.current[key] = el; }}
                       type="file"
                       accept="image/*"
                       capture="environment"
-                      style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleFile(key, file);
                       }}
+                      style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}
                     />
-
-                    {photos[key].preview ? (
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-border/60 bg-card group">
-                        <img
-                          src={photos[key].preview!}
-                          alt={`${label} photo`}
-                          className="w-full h-full object-cover"
-                        />
-                        {!isAnalyzing && (
-                          <button
-                            onClick={() => clearPhoto(key)}
-                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-3">
-                          <span className="text-white text-xs font-medium">{label}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        className="aspect-[3/4] rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-accent/30 hover:bg-accent/50 transition-all flex flex-col items-center justify-center gap-3 cursor-pointer relative"
-                        onClick={(e) => {
-                          // Only trigger if clicking the zone itself, not the buttons
-                          if (e.target === e.currentTarget || !(e.target as HTMLElement).closest('button')) {
-                            const input = fileInputRefs.current[key];
-                            if (input) {
-                              input.value = '';
-                              input.click();
-                            }
-                          }
-                        }}
-                      >
-                        <FaceSilhouette angle={key} className="text-muted-foreground/40" />
-                        <p className="text-xs text-muted-foreground text-center px-4">
-                          {description}
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              const input = fileInputRefs.current[key];
-                              if (input) {
-                                input.value = '';
-                                input.click();
-                              }
-                            }}
-                            className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors flex items-center gap-1"
-                          >
-                            <Upload className="w-3 h-3" />
-                            Upload
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              const input = cameraInputRefs.current[key];
-                              if (input) {
-                                input.value = '';
-                                input.click();
-                              }
-                            }}
-                            className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors flex items-center gap-1"
-                          >
-                            <Camera className="w-3 h-3" />
-                            Camera
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
 
               {/* Analyze Button */}
-              {isAnalyzing ? (
-                <div className="text-center py-8">
-                  <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-primary/5 border border-primary/20">
-                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                    <div className="text-left">
-                      <p className="font-semibold text-sm">{analysisProgress}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        This may take 20-40 seconds for a thorough multi-angle analysis
-                      </p>
+              <div className="flex flex-col items-center gap-4">
+                <Button
+                  size="lg"
+                  className="w-full max-w-md font-semibold text-base py-6"
+                  disabled={!hasFrontPhoto || isAnalyzing}
+                  onClick={handleAnalyze}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Analyze {photoCount} Photo{photoCount !== 1 ? "s" : ""}
+                    </>
+                  )}
+                </Button>
+
+                {/* Progress indicator */}
+                {isAnalyzing && analysisProgress && (
+                  <div className="w-full max-w-md p-4 rounded-xl bg-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-3">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium">{analysisProgress}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Please wait — do not close this page.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-4">
-                  <Button
-                    className="font-semibold px-10 h-12 text-base"
-                    size="lg"
-                    onClick={handleAnalyze}
-                    disabled={!hasFrontPhoto}
-                  >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    {hasFrontPhoto
-                      ? `Analyze ${photoCount} Photo${photoCount > 1 ? "s" : ""}`
-                      : "Upload Front View to Begin"}
-                  </Button>
-                  {!hasFrontPhoto && (
-                    <p className="text-xs text-muted-foreground">
-                      Front view is required. Side views enhance accuracy.
-                    </p>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Tips */}
-              <div className="mt-10 p-5 rounded-xl bg-accent/50 border border-border/60">
-                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  Tips for Best Results
-                </h3>
-                <ul className="text-sm text-muted-foreground space-y-1.5">
-                  <li>Use natural lighting — avoid harsh shadows or flash</li>
-                  <li>Remove makeup for the most accurate analysis</li>
-                  <li>For the front view, look directly at the camera</li>
-                  <li>For side views, turn your head 90 degrees to show your profile</li>
-                  <li>Ensure images are in focus and well-lit</li>
-                  <li>Adding all 3 angles gives the most comprehensive analysis</li>
-                </ul>
+              <div className="mt-8 p-5 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-sm mb-2">Tips for Best Results</h3>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>Use natural lighting — avoid harsh shadows or flash</li>
+                      <li>Remove makeup for the most accurate analysis</li>
+                      <li>For the front view, look directly at the camera</li>
+                      <li>For side views, turn your head 90 degrees to show your profile</li>
+                      <li>Ensure images are in focus and well-lit</li>
+                      <li>Adding all 3 angles gives the most comprehensive analysis</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </>
           )}
