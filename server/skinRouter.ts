@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
 import { skinAnalyses } from "../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
@@ -332,4 +332,33 @@ export const skinRouter = router({
 
     return results;
   }),
+
+  /**
+   * Get multiple analyses by IDs for comparison.
+   * Only returns completed analyses belonging to the current user.
+   */
+  getComparisonData: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.number()).min(2).max(5),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const results = await db
+        .select()
+        .from(skinAnalyses)
+        .where(
+          and(
+            eq(skinAnalyses.userId, ctx.user.id),
+            inArray(skinAnalyses.id, input.ids)
+          )
+        )
+        .orderBy(skinAnalyses.createdAt);
+
+      // Only return completed analyses
+      return results.filter((r) => r.status === "completed");
+    }),
 });

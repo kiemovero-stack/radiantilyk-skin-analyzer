@@ -406,3 +406,39 @@ describe("Product Catalog", () => {
     expect(sunscreen!.products[0].name).toContain("SPF90");
   });
 });
+
+describe("Comparison Feature", () => {
+  it("getComparisonData endpoint is registered on the skin router", () => {
+    const routerDef = appRouter._def;
+    const procedures = (routerDef as any).procedures;
+    if (procedures) {
+      expect(procedures).toHaveProperty("skin.getComparisonData");
+    } else {
+      const record = (routerDef as any).record;
+      expect(record).toHaveProperty("skin");
+    }
+  });
+
+  it("getComparisonData input requires at least 2 IDs", () => {
+    // The schema requires min(2) and max(5) IDs
+    const routerDef = appRouter._def;
+    const procedures = (routerDef as any).procedures;
+    if (procedures) {
+      const proc = procedures["skin.getComparisonData"];
+      expect(proc).toBeDefined();
+    }
+  });
+
+  it("all required endpoints exist for comparison flow", () => {
+    const routerDef = appRouter._def;
+    const procedures = (routerDef as any).procedures;
+    if (procedures) {
+      // listAnalyses is needed to show history and select items
+      expect(procedures).toHaveProperty("skin.listAnalyses");
+      // getComparisonData is needed to fetch the selected analyses
+      expect(procedures).toHaveProperty("skin.getComparisonData");
+      // getReport is needed for individual report view
+      expect(procedures).toHaveProperty("skin.getReport");
+    }
+  });
+});

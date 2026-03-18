@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Analyze from "./pages/Analyze";
 import Report from "./pages/Report";
 import History from "./pages/History";
+import Compare from "./pages/Compare";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/analyze" component={Analyze} />
       <Route path="/report/:id" component={Report} />
       <Route path="/history" component={History} />
+      <Route path="/compare" component={Compare} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

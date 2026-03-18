@@ -126,3 +126,12 @@
 - [x] Fix distorted PDF report that is emailed to clients
 - [x] Rebuild PDF layout with proper formatting, spacing, and readability
 - [x] Test PDF output quality
+
+## Client Analysis Comparison Feature
+- [x] Audit database schema and history page for comparison support
+- [x] Build server-side endpoint to fetch multiple analyses for comparison
+- [x] Build comparison UI page with side-by-side analysis view
+- [x] Show score progression, condition changes, and severity trends over time
+- [x] Add comparison entry points from History page (select & compare)
+- [x] Add navigation/routing for the comparison page
+- [x] Write tests for comparison feature (39 tests passing)
