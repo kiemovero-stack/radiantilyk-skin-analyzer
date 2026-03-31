@@ -9,7 +9,7 @@ describe("Gmail App Password Validation", () => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "RadiantilyK@gmail.com",
+        user: "kV@rkaglow.com",
         pass: appPassword,
       },
     });

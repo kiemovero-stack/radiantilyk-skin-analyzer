@@ -135,3 +135,7 @@
 - [x] Add comparison entry points from History page (select & compare)
 - [x] Add navigation/routing for the comparison page
 - [x] Write tests for comparison feature (39 tests passing)
+
+## Email Sender Change
+- [x] Update sender email from RadiantilyK@gmail.com to kV@rkaglow.com
+- [x] Update GMAIL_APP_PASSWORD secret for new account

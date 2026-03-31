@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const SENDER_EMAIL = "RadiantilyK@gmail.com";
+const SENDER_EMAIL = "kV@rkaglow.com";
 
 /**
  * Create a nodemailer transporter using Gmail SMTP.
