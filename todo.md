@@ -206,29 +206,20 @@
 - [x] Empty state when no results match search criteria
 - [x] Write tests for new features (76 tests passing)
 
+## Bug Fix: Simulation Images Issues
+- [x] Fix only one simulation image generated instead of one per recommended procedure
+- [x] Fix simulation still showing as loading / never completing on client report page
+
 ## Change: Single Combined Simulation Image
 - [x] Generate ONE simulation image combining ALL recommended procedures (not separate per procedure)
 - [x] Update simulation prompt to describe combined results of all treatments
-- [x] Update client report to show single before/after slider
+- [x] Update client report to show single before/after slider with "Your Treatment Preview" section
 - [x] Faster and cheaper (1 API call instead of 4)
+- [x] Backward compatible with old per-procedure simulation images
+- [x] 76 tests passing
 
-## Share Results Button
-- [x] Add "Share Results" button to ClientReport page
-- [x] Support sharing via native share API (mobile), copy link, email, and text/SMS
-- [x] Show share modal with options on desktop
-
-## Staff Notification on Client Analysis Completion
-- [x] Send email to staff (kV@rkaglow.com) when a new client analysis completes
-- [x] Include client name, score, top concerns, and link to report in notification email
-
-## Product Images from rkaskin.co
-- [x] Scrape product images from rkaskin.co for all catalog products
-- [x] Update product catalog with image URLs
-- [x] Display product images alongside recommendations in client report
-
-## Test Follow-Up Emails (old)
-- [x] Verify 24hr and 48hr follow-up email scheduling works
-- [x] Confirm emails include booking link updated to rkaemr.click/portal
+## Bug: AI Simulation Not Showing
+- [x] Fix AI simulation image not displaying on client report page (combined __combined__ key + treatmentName prop fix)
 
 ## Update Booking URL
 - [x] Change booking URL from radiantapp.click to rkaemr.click/portal throughout the app
@@ -239,30 +230,70 @@
 ## Staff Notification Email
 - [x] Send staff email notification when new client analysis completes
 
-## Product Images from rkaskin.co
-- [x] Add generic product category icons alongside recommendations in client report (per brand guidelines)
-
-## Test Follow-Up Emails
-- [x] Verify 24hr/48hr follow-up emails have correct booking link (rkaemr.click/portal)
-- [x] Note: Follow-up emails use in-memory setTimeout (lost on server restart)
+## Product Category Icons
+- [x] Add generic product category icons alongside recommendations in client report
 
 ## Persistent Follow-Up Email Scheduler
-- [x] Create scheduledEmails database table (id, analysisId, emailType, scheduledAt, sentAt, status, config)
-- [x] Migrate followUpService from in-memory setTimeout to DB-backed scheduler
-- [x] Add server startup job that checks for pending emails and sends overdue ones
-- [x] Add periodic polling (every 5 min) to check and send due emails
-- [x] Ensure emails survive server restarts and deployments
+- [x] Create scheduledEmails database table
+- [x] Rewrite followUpService to use database instead of setTimeout
+- [x] Add startup job to process pending emails on server restart
+- [x] Email scheduler runs every 60 seconds checking for due emails
 
-## Client Consent Form with E-Signature
-- [x] Create consent form page in client flow (before photo upload)
-- [x] Include consent text for AI skin analysis and data usage
-- [x] Add electronic signature pad (draw or type signature)
-- [x] Capture date/time stamp with signature
-- [x] Store consent in database (signature data, timestamp, IP, consent text version)
-- [x] Block analysis if consent not signed
-- [x] Make consent downloadable as PDF
+## Client Consent Form
+- [x] Add consent step (step 4) to client analysis flow
+- [x] Electronic signature pad with date/time stamp
+- [x] Save consent to clientConsents database table
+- [x] Consent must be signed before analysis can proceed
 
-## Staff Push Notifications
-- [x] Integrate built-in notification API for staff alerts
-- [x] Send push notification when new client analysis completes
-- [x] Include patient name, score, and link to report in notification
+## Push Notifications for Staff
+- [x] Add push notifications when new client analysis completes
+
+## Bug: Staff Can't See Client Reports
+- [x] Fix staff History page to show client portal analyses (shows Client Portal / Staff badge)
+
+## Add Ultherapy Prime Service
+- [x] Research Ultherapy Prime details
+- [x] Add Ultherapy Prime to procedure/service catalog with pricing
+- [x] Add to AI analysis prompt so it can recommend Ultherapy Prime when appropriate
+- [x] Add to simulation service treatment effects mapping
+
+## CRITICAL Bug: Score Always 68
+- [x] Fix AI prompt — added mandatory scoreCalculation field forcing step-by-step math
+- [x] Added explicit instruction: NEVER return 68, must calculate from actual photo analysis
+- [x] Added scoring rubric with deduction categories and variance enforcement
+
+## Bug Fix: Simulation Image Altering Facial Features
+- [x] Rewrite simulation prompt to strictly preserve facial features (nose, lips, eyes, skin color)
+- [x] Only show subtle skin texture/tone improvements, not identity changes
+- [x] Add explicit constraints: same person, same skin color, same facial structure
+
+## Bug Fix: Fitzpatrick Type Misidentification
+- [x] Improve Fitzpatrick typing accuracy, especially for darker skin tones (Type IV-VI)
+- [x] Add stronger guidance in AI prompt for accurate skin tone classification
+- [x] Ensure Type V/VI clients are never misclassified as lighter types
+
+## Bug Fix: AI Analysis Too Generic / Fabricating Conditions
+- [x] Rewrite AI analysis prompt to be hyper-specific and location-based
+- [x] AI must only report conditions it can actually see in the photo
+- [x] AI must specify exact location (e.g., "perioral area on left side" not just "wrinkles")
+- [x] AI must NOT fabricate conditions (e.g., forehead wrinkles when there are none)
+- [x] Add "NEVER guess or assume" instruction to prevent hallucinated findings
+- [x] Make analysis more detailed with specific anatomical references
+
+## Add Ultherapy Prime Service (Full Implementation)
+- [x] Add Ultherapy Prime to serviceCatalog.ts with pricing tiers (Full Face $1,800, Neck $900, Face+Neck $2,800)
+- [x] Add spring promo pricing for Ultherapy Prime
+- [x] Add Ultherapy Prime to AI analysis prompt so it can recommend when appropriate
+- [x] Add Ultherapy Prime to simulation service treatment effects mapping
+
+## Bug Fix: Admin History Not Showing Client Portal Analyses
+- [x] Investigate why client portal analyses don't appear in admin/staff History page
+- [x] Fix the History page query/filter to include client portal analyses
+- [x] Ensure client portal analyses show with appropriate badge/label
+
+## Bug Fix: Sculptra and Radiesse Not Being Recommended
+- [x] Increase procedure count from EXACTLY 4 to 5-6 to give AI room for diverse recommendations
+- [x] Add explicit collagen induction guidance (Sculptra/Radiesse) to client prompt with stacking examples
+- [x] Add Sculptra/Radiesse guidance to staff prompt
+- [x] Update skinProcedures schema description to require Sculptra/Radiesse for volume loss/laxity/aging
+- [x] Update tests to match new procedure count

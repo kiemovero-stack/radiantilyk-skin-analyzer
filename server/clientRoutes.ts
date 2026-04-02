@@ -14,18 +14,17 @@
 import type { Express, Request, Response } from "express";
 import multer from "multer";
 import { getDb } from "./db";
-import { skinAnalyses } from "../drizzle/schema";
+import { skinAnalyses, clientConsents } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
-import { notifyOwner } from "./_core/notification";
 import { buildClientSystemPrompt, CLIENT_ANALYSIS_OUTPUT_SCHEMA } from "./clientPrompt";
 import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
 import { sendClientReportEmail } from "./clientEmailService";
 import { scheduleFollowUpEmails } from "./followUpService";
-import { generateTreatmentSimulations } from "./simulationService";
 import { sendStaffNotificationEmail } from "./staffNotificationService";
+import { generateTreatmentSimulations } from "./simulationService";
 
 // Multer for public uploads
 const upload = multer({
@@ -239,36 +238,6 @@ async function runClientAnalysisInBackground(
         });
 
         console.log(`[ClientAnalysis] Follow-up emails scheduled for ${analysis.patientEmail}`);
-
-        // 📢 Send staff notification email
-        try {
-          await sendStaffNotificationEmail({
-            patientName: `${analysis.patientFirstName} ${analysis.patientLastName}`,
-            patientEmail: analysis.patientEmail,
-            skinHealthScore: report.skinHealthScore,
-            topConcerns: report.conditions.slice(0, 3).map((c) => c.name),
-            topTreatments: report.skinProcedures.slice(0, 3).map((p) => p.name),
-            reportUrl: `/client/report/${analysisId}`,
-            analysisId,
-          });
-          console.log(`[ClientAnalysis] Staff notification sent for record ${analysisId}`);
-        } catch (staffErr: any) {
-          console.error(`[ClientAnalysis] Staff notification error:`, staffErr?.message);
-        }
-
-        // 🔔 Send push notification to project owner
-        try {
-          const score = report.skinHealthScore;
-          const concerns = report.conditions.slice(0, 3).map((c: any) => c.name).join(", ");
-          const topTx = report.skinProcedures[0]?.name || "a personalized treatment";
-          await notifyOwner({
-            title: `New Skin Analysis: ${analysis.patientFirstName} ${analysis.patientLastName}`,
-            content: `Score: ${score}/100 | Concerns: ${concerns} | Top Recommendation: ${topTx}\n\nView report: /client/report/${analysisId}`,
-          });
-          console.log(`[ClientAnalysis] Push notification sent for record ${analysisId}`);
-        } catch (pushErr: any) {
-          console.error(`[ClientAnalysis] Push notification error:`, pushErr?.message);
-        }
       }
     } catch (emailErr: any) {
       console.error(`[ClientAnalysis] Email/follow-up error for record ${analysisId}:`, emailErr?.message);
@@ -512,6 +481,51 @@ export function registerClientRoutes(app: Express) {
       });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to check simulations" });
+    }
+  });
+
+  // ── POST /api/client/consent ─────────────────────────────────────────
+  // Save client consent with electronic signature before analysis
+  app.post("/api/client/consent", async (req: Request, res: Response) => {
+    try {
+      const {
+        patientFirstName,
+        patientLastName,
+        patientEmail,
+        patientDob,
+        signatureData,
+        consentVersion,
+      } = req.body;
+
+      if (!patientFirstName || !patientLastName || !patientEmail || !signatureData) {
+        res.status(400).json({ error: "Missing required consent fields" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const result = await db.insert(clientConsents).values({
+        patientFirstName,
+        patientLastName,
+        patientEmail,
+        patientDob: patientDob || "",
+        signatureData,
+        consentVersion: consentVersion || "1.0",
+        ipAddress: (req.headers["x-forwarded-for"] as string) || req.ip || "unknown",
+        userAgent: req.headers["user-agent"] || "unknown",
+      });
+
+      const consentId = (result as any)[0]?.insertId;
+      console.log(`[Consent] Saved consent #${consentId} for ${patientFirstName} ${patientLastName}`);
+
+      res.json({ success: true, consentId });
+    } catch (error: any) {
+      console.error("[Consent] Error saving consent:", error?.message);
+      res.status(500).json({ error: "Failed to save consent" });
     }
   });
 }

@@ -93,6 +93,47 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
     ],
   },
   {
+    category: "Ultherapy Prime",
+    services: [
+      {
+        name: "Ultherapy Prime - Full Face",
+        price: "$1,800",
+        category: "Ultherapy Prime",
+        description: "Non-invasive micro-focused ultrasound treatment that lifts and tightens sagging facial skin by stimulating deep collagen production. Targets the SMAS layer (same layer addressed in surgical facelifts) without incisions or downtime. Results develop gradually over 2-3 months.",
+      },
+      {
+        name: "Ultherapy Prime - Neck",
+        price: "$900",
+        category: "Ultherapy Prime",
+        description: "Micro-focused ultrasound treatment targeting neck laxity to smooth, firm, and tighten loose neck skin. Stimulates long-term collagen and elastin production for a more defined neckline.",
+      },
+      {
+        name: "Ultherapy Prime - Face + Neck",
+        price: "$2,800",
+        category: "Ultherapy Prime",
+        description: "Comprehensive micro-focused ultrasound treatment for full face and neck lifting and tightening. The most complete non-surgical option for overall facial rejuvenation and jawline definition.",
+      },
+      {
+        name: "Ultherapy Prime - Full Face (Spring Promo)",
+        price: "$1,199",
+        category: "Ultherapy Prime",
+        description: "Limited-time introductory pricing for full face Ultherapy Prime treatment. Available April & May only for a limited number of clients.",
+      },
+      {
+        name: "Ultherapy Prime - Neck (Spring Promo)",
+        price: "$599",
+        category: "Ultherapy Prime",
+        description: "Limited-time introductory pricing for neck Ultherapy Prime treatment. Available April & May only for a limited number of clients.",
+      },
+      {
+        name: "Ultherapy Prime - Face + Neck (Spring Promo)",
+        price: "$1,699",
+        category: "Ultherapy Prime",
+        description: "Limited-time introductory pricing for face + neck Ultherapy Prime treatment. Available April & May only for a limited number of clients.",
+      },
+    ],
+  },
+  {
     category: "Collagen Induction",
     services: [
       { name: "Sculptra", price: "$800", category: "Collagen Induction" },
