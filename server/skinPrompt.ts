@@ -180,7 +180,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
         description: "EXACTLY 4 high-impact skin procedures FROM THE CLINIC CATALOG, prioritized. Must include exact price.",
         items: {
           type: "object",
-          required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "priority"],
+          required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "simulation", "priority"],
           additionalProperties: false,
           properties: {
             name: { type: "string", description: "Exact name from the clinic catalog" },
@@ -189,6 +189,33 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
             targetConditions: { type: "array", items: { type: "string" } },
             benefits: { type: "array", items: { type: "string" } },
             expectedResults: { type: "string" },
+            simulation: {
+              type: "object",
+              required: ["beforeDescription", "afterDescription", "improvementPercent", "timelineWeeks", "sessionsNeeded", "milestones"],
+              additionalProperties: false,
+              description: "Treatment simulation details",
+              properties: {
+                beforeDescription: { type: "string", description: "Current state of the treatment area" },
+                afterDescription: { type: "string", description: "Expected state after treatment" },
+                improvementPercent: { type: "number", description: "Estimated improvement 0-100" },
+                timelineWeeks: { type: "number", description: "Weeks to full results" },
+                sessionsNeeded: { type: "string", description: "Number of sessions needed" },
+                milestones: {
+                  type: "array",
+                  description: "Progressive improvement milestones",
+                  items: {
+                    type: "object",
+                    required: ["timepoint", "description", "improvementPercent"],
+                    additionalProperties: false,
+                    properties: {
+                      timepoint: { type: "string" },
+                      description: { type: "string" },
+                      improvementPercent: { type: "number" }
+                    }
+                  }
+                }
+              }
+            },
             priority: { type: "number" }
           }
         }

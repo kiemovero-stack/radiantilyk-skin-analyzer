@@ -26,6 +26,10 @@ import {
   ExternalLink,
   CalendarCheck,
   Eye,
+  TrendingUp,
+  Clock,
+  ArrowRight,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "wouter";
@@ -504,54 +508,150 @@ export default function ClientReport() {
               title="Recommended Treatments"
               subtitle="These treatments are safe and effective for your skin type"
             />
-            <div className="space-y-4">
+            <div className="space-y-6">
               {report.skinProcedures.map((proc: any, i: number) => (
                 <div
                   key={i}
-                  className="p-5 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors"
+                  className="rounded-2xl border border-gray-100 hover:border-purple-200 transition-colors overflow-hidden"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-purple-600">
-                        #{i + 1}
-                      </span>
+                  {/* Treatment Header */}
+                  <div className="p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-xs font-bold text-white">
+                          #{i + 1}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <h3 className="font-bold text-lg">{proc.name}</h3>
+                          {proc.price && (
+                            <span className="shrink-0 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-bold">
+                              {proc.price}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                          {proc.reason}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {proc.targetConditions.map((c: string, j: number) => (
+                            <span
+                              key={j}
+                              className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-medium"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <h3 className="font-semibold">{proc.name}</h3>
-                        {proc.price && (
-                          <span className="shrink-0 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-bold">
-                            {proc.price}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-2">
-                        {proc.reason}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {proc.targetConditions.map((c: string, j: number) => (
-                          <span
-                            key={j}
-                            className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-medium"
-                          >
-                            {c}
-                          </span>
-                        ))}
-                      </div>
-                      {/* Treatment Simulation */}
-                      {proc.expectedResults && (
-                        <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100">
-                          <p className="text-xs font-semibold text-purple-700 mb-1 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" />
-                            What to Expect
+                  </div>
+
+                  {/* Treatment Simulation Section */}
+                  {proc.simulation && (
+                    <div className="border-t border-gray-100">
+                      {/* Before / After Comparison */}
+                      <div className="grid grid-cols-1 md:grid-cols-2">
+                        <div className="p-4 bg-gray-50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center">
+                              <span className="text-[8px] font-bold text-white">NOW</span>
+                            </div>
+                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Before</span>
+                          </div>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            {proc.simulation.beforeDescription}
                           </p>
-                          <p className="text-sm text-gray-600 italic">
-                            {proc.expectedResults}
+                        </div>
+                        <div className="p-4 bg-gradient-to-br from-pink-50 to-purple-50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center">
+                              <Sparkles className="w-2.5 h-2.5 text-white" />
+                            </div>
+                            <span className="text-xs font-semibold text-purple-600 uppercase tracking-wider">After Treatment</span>
+                          </div>
+                          <p className="text-sm text-purple-800 leading-relaxed">
+                            {proc.simulation.afterDescription}
                           </p>
+                        </div>
+                      </div>
+
+                      {/* Improvement Gauge */}
+                      <div className="px-5 py-4 bg-white border-t border-gray-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-gray-500 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            Expected Improvement
+                          </span>
+                          <span className="text-sm font-bold text-purple-600">
+                            {proc.simulation.improvementPercent}%
+                          </span>
+                        </div>
+                        <div className="w-full h-3 rounded-full bg-gray-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-pink-400 to-purple-500 transition-all duration-1000"
+                            style={{ width: `${proc.simulation.improvementPercent}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mt-2 text-[10px] text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            {proc.simulation.sessionsNeeded}
+                          </span>
+                          <span>Full results in ~{proc.simulation.timelineWeeks} weeks</span>
+                        </div>
+                      </div>
+
+                      {/* Progress Timeline */}
+                      {proc.simulation.milestones && proc.simulation.milestones.length > 0 && (
+                        <div className="px-5 py-4 bg-gray-50/50 border-t border-gray-100">
+                          <p className="text-xs font-semibold text-gray-500 mb-3 flex items-center gap-1">
+                            <Zap className="w-3 h-3" />
+                            Your Progress Timeline
+                          </p>
+                          <div className="relative">
+                            <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-pink-300 to-purple-400" />
+                            <div className="space-y-3">
+                              {proc.simulation.milestones.map((m: any, mi: number) => (
+                                <div key={mi} className="relative pl-7">
+                                  <div className="absolute left-0 top-1 w-4 h-4 rounded-full bg-white border-2 border-purple-400 flex items-center justify-center">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-bold text-purple-600">
+                                        {m.timepoint}
+                                      </span>
+                                      <span className="text-[10px] text-gray-400">
+                                        ~{m.improvementPercent}% improvement
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
+                                      {m.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
+                  )}
+
+                  {/* Fallback: expectedResults only (for older reports without simulation) */}
+                  {!proc.simulation && proc.expectedResults && (
+                    <div className="border-t border-gray-100 p-4 bg-gradient-to-r from-pink-50 to-purple-50">
+                      <p className="text-xs font-semibold text-purple-700 mb-1 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        What to Expect
+                      </p>
+                      <p className="text-sm text-gray-600 italic">
+                        {proc.expectedResults}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

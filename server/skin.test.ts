@@ -579,3 +579,79 @@ describe("Client Portal - Email Services", () => {
     expect(true).toBe(true);
   });
 });
+
+describe("Treatment Simulation Schema", () => {
+  it("client schema skinProcedures include simulation object", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const procItems = props.skinProcedures.items;
+    expect(procItems.properties).toHaveProperty("simulation");
+    const sim = procItems.properties.simulation;
+    expect(sim.properties).toHaveProperty("beforeDescription");
+    expect(sim.properties).toHaveProperty("afterDescription");
+    expect(sim.properties).toHaveProperty("improvementPercent");
+    expect(sim.properties).toHaveProperty("timelineWeeks");
+    expect(sim.properties).toHaveProperty("sessionsNeeded");
+    expect(sim.properties).toHaveProperty("milestones");
+  });
+
+  it("simulation milestones have timepoint, description, and improvementPercent", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const procItems = props.skinProcedures.items;
+    const milestones = procItems.properties.simulation.properties.milestones;
+    expect(milestones.type).toBe("array");
+    const milestoneItem = milestones.items;
+    expect(milestoneItem.properties).toHaveProperty("timepoint");
+    expect(milestoneItem.properties).toHaveProperty("description");
+    expect(milestoneItem.properties).toHaveProperty("improvementPercent");
+  });
+
+  it("staff schema skinProcedures also include simulation object", async () => {
+    const { SKIN_ANALYSIS_OUTPUT_SCHEMA } = await import("./skinPrompt");
+    const props = SKIN_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const procItems = props.skinProcedures.items;
+    expect(procItems.properties).toHaveProperty("simulation");
+  });
+
+  it("simulation improvementPercent is a number type", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const sim = props.skinProcedures.items.properties.simulation;
+    expect(sim.properties.improvementPercent.type).toBe("number");
+    expect(sim.properties.timelineWeeks.type).toBe("number");
+  });
+});
+
+describe("Client Landing Page Route", () => {
+  it("App routes include /client, /client/start, and /client/report/:id", async () => {
+    // Verify the route structure exists by checking the App.tsx imports
+    // This is a structural test to ensure routing is configured
+    const fs = await import("fs");
+    const appContent = fs.readFileSync("/home/ubuntu/skin-analyzer/client/src/App.tsx", "utf-8");
+    expect(appContent).toContain('path="/client"');
+    expect(appContent).toContain('path="/client/start"');
+    expect(appContent).toContain('path="/client/report/:id"');
+    expect(appContent).toContain("ClientLanding");
+    expect(appContent).toContain("ClientAnalyze");
+    expect(appContent).toContain("ClientReport");
+  });
+
+  it("ClientLanding page file exists and exports default component", async () => {
+    const fs = await import("fs");
+    const exists = fs.existsSync("/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx");
+    expect(exists).toBe(true);
+    const content = fs.readFileSync("/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx", "utf-8");
+    expect(content).toContain("export default function ClientLanding");
+    expect(content).toContain("radiantapp.click");
+    expect(content).toContain("How It Works");
+    expect(content).toContain("What Our Clients Say");
+    expect(content).toContain("Analyze My Skin");
+  });
+
+  it("ClientLanding links to /client/start for the analysis flow", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync("/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx", "utf-8");
+    expect(content).toContain("/client/start");
+  });
+});

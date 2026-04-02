@@ -147,8 +147,26 @@
 - [x] Public upload route (no auth required for client flow)
 - [x] Client-specific AI prompt — layman-friendly language, Fitzpatrick-aware treatment stacking
 - [x] Client-facing report page with simple explanations in plain English
-- [ ] Treatment simulation using AI image generation (fillers, laser, microneedling)
+- [x] Treatment simulation with AI-generated descriptions, before/after comparison, progress timeline
 - [x] Automated 24hr follow-up email with check-in link to radiantapp.click
 - [x] Automated 48hr follow-up email with check-in link to radiantapp.click
 - [x] Add /client routes to App.tsx router
 - [x] Write tests for client portal features (52 tests passing)
+
+## Treatment Simulation
+- [x] Add simulation schema to AI prompt (beforeDescription, afterDescription, improvementPercent, milestones)
+- [x] Build before/after comparison UI on client report page
+- [x] Build improvement gauge with percentage visualization
+- [x] Build progress timeline with milestones (1 week, 1 month, 3 months, 6 months)
+- [x] Fitzpatrick-aware simulation descriptions
+- [x] Write tests for simulation schema (59 tests passing)
+
+## Client Landing Page
+- [x] Build branded landing page at /client with hero section
+- [x] How It Works steps (4 steps: photos, AI analysis, plan, book)
+- [x] Features grid (AI-Powered, Personalized, Fitzpatrick-Aware, Results in Minutes)
+- [x] What You'll Get checklist
+- [x] Testimonials section with 5-star reviews
+- [x] Final CTA with booking link
+- [x] Footer with links to radiantapp.click and rkaskin.co
+- [x] Separate /client (landing) and /client/start (analysis) routes

@@ -27,6 +27,21 @@ export interface FacialTreatment {
   priority: number;
 }
 
+export interface TreatmentSimulation {
+  beforeDescription: string;       // What the area looks like now
+  afterDescription: string;        // What it would look like after treatment
+  improvementPercent: number;      // Estimated improvement 0-100
+  timelineWeeks: number;           // Weeks to see full results
+  sessionsNeeded: string;          // e.g. "3-4 sessions" or "1 session"
+  milestones: SimulationMilestone[];
+}
+
+export interface SimulationMilestone {
+  timepoint: string;               // e.g. "1 week", "1 month", "3 months"
+  description: string;             // What to expect at this point
+  improvementPercent: number;      // Cumulative improvement at this point
+}
+
 export interface SkinProcedure {
   name: string;
   price: string;
@@ -34,6 +49,7 @@ export interface SkinProcedure {
   targetConditions: string[];
   benefits: string[];
   expectedResults: string;
+  simulation: TreatmentSimulation;
   priority: number;
 }
 

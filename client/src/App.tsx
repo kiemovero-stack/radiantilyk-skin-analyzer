@@ -9,6 +9,7 @@ import Analyze from "./pages/Analyze";
 import Report from "./pages/Report";
 import History from "./pages/History";
 import Compare from "./pages/Compare";
+import ClientLanding from "./pages/ClientLanding";
 import ClientAnalyze from "./pages/ClientAnalyze";
 import ClientReport from "./pages/ClientReport";
 
@@ -21,7 +22,8 @@ function Router() {
       <Route path="/history" component={History} />
       <Route path="/compare" component={Compare} />
       {/* Public client-facing routes (no login required) */}
-      <Route path="/client" component={ClientAnalyze} />
+      <Route path="/client" component={ClientLanding} />
+      <Route path="/client/start" component={ClientAnalyze} />
       <Route path="/client/report/:id" component={ClientReport} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

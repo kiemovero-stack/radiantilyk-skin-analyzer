@@ -193,7 +193,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
         description: "EXACTLY 4 procedures. Include what it does, what to expect, and how it stacks with other treatments. Note Fitzpatrick safety.",
         items: {
           type: "object",
-          required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "priority"],
+          required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "simulation", "priority"],
           additionalProperties: false,
           properties: {
             name: { type: "string" },
@@ -202,6 +202,33 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
             targetConditions: { type: "array", items: { type: "string" } },
             benefits: { type: "array", items: { type: "string" } },
             expectedResults: { type: "string", description: "Realistic description of what improvement would look like — like a treatment simulation in words" },
+            simulation: {
+              type: "object",
+              required: ["beforeDescription", "afterDescription", "improvementPercent", "timelineWeeks", "sessionsNeeded", "milestones"],
+              additionalProperties: false,
+              description: "Detailed treatment simulation — describe what the client's face looks like NOW vs what it would look like AFTER this treatment. Be specific to their actual photos.",
+              properties: {
+                beforeDescription: { type: "string", description: "Describe what this area of their face/body looks like right now based on their photos. Be specific and compassionate." },
+                afterDescription: { type: "string", description: "Describe what this area would realistically look like after completing this treatment. Paint a vivid, hopeful picture." },
+                improvementPercent: { type: "number", description: "Estimated overall improvement percentage (0-100). Be realistic — most treatments give 40-80% improvement." },
+                timelineWeeks: { type: "number", description: "Number of weeks to see full results" },
+                sessionsNeeded: { type: "string", description: "How many sessions needed, e.g. '3-4 sessions spaced 4 weeks apart' or '1 session'" },
+                milestones: {
+                  type: "array",
+                  description: "Timeline milestones showing progressive improvement. Include 3-4 milestones.",
+                  items: {
+                    type: "object",
+                    required: ["timepoint", "description", "improvementPercent"],
+                    additionalProperties: false,
+                    properties: {
+                      timepoint: { type: "string", description: "e.g. '1 week', '1 month', '3 months', '6 months'" },
+                      description: { type: "string", description: "What the client would notice at this point — be specific and encouraging" },
+                      improvementPercent: { type: "number", description: "Cumulative improvement at this timepoint (0-100)" }
+                    }
+                  }
+                }
+              }
+            },
             priority: { type: "number" }
           }
         }
