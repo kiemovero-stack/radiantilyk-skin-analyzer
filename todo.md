@@ -205,3 +205,9 @@
 - [x] Clear filters button when filters are active
 - [x] Empty state when no results match search criteria
 - [x] Write tests for new features (76 tests passing)
+
+## Change: Single Combined Simulation Image
+- [ ] Generate ONE simulation image combining ALL recommended procedures (not separate per procedure)
+- [ ] Update simulation prompt to describe combined results of all treatments
+- [ ] Update client report to show single before/after slider
+- [ ] Faster and cheaper (1 API call instead of 4)

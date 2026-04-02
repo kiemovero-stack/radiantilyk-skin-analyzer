@@ -42,8 +42,9 @@ const upload = multer({
 });
 
 /**
- * Generate simulation images in the background AFTER the analysis is already completed.
+ * Generate ONE combined simulation image in the background AFTER the analysis is completed.
  * This is non-blocking — the client sees their report immediately.
+ * The single image shows the combined results of ALL recommended procedures.
  */
 async function generateSimulationsInBackground(
   analysisId: number,
@@ -52,7 +53,8 @@ async function generateSimulationsInBackground(
   procedures: Array<{ name: string; reason: string; targetConditions: string[] }>
 ) {
   try {
-    console.log(`[Simulation] Starting background generation for record ${analysisId} (${procedures.length} procedures)`);
+    const procedureNames = procedures.map((p) => p.name).join(", ");
+    console.log(`[Simulation] Starting combined simulation for record ${analysisId} (${procedures.length} procedures: ${procedureNames})`);
     
     const simulations = await generateTreatmentSimulations(
       analysisId,
@@ -72,14 +74,14 @@ async function generateSimulationsInBackground(
           .set({ simulationImages: simMap })
           .where(eq(skinAnalyses.id, analysisId));
 
-        console.log(`[Simulation] ${simulations.size} images saved for record ${analysisId}`);
+        console.log(`[Simulation] Combined image saved for record ${analysisId}`);
       }
     } else {
-      console.log(`[Simulation] No simulation images generated for record ${analysisId}`);
+      console.log(`[Simulation] No simulation image generated for record ${analysisId}`);
     }
   } catch (err: any) {
     console.error(`[Simulation] Background generation failed for record ${analysisId}:`, err?.message);
-    // Non-fatal — report is still available without simulations
+    // Non-fatal — report is still available without simulation
   }
 }
 

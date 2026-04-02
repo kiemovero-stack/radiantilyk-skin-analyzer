@@ -704,7 +704,7 @@ describe("Client Report includes simulation images", () => {
     expect(routeContent).toContain("record.simulationImages");
   });
 
-  it("ClientReport.tsx includes BeforeAfterSlider component", async () => {
+  it("ClientReport.tsx includes single combined BeforeAfterSlider", async () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/home/ubuntu/skin-analyzer/client/src/pages/ClientReport.tsx",
@@ -714,7 +714,9 @@ describe("Client Report includes simulation images", () => {
     expect(content).toContain("simulationImages");
     expect(content).toContain("BEFORE");
     expect(content).toContain("AFTER");
-    expect(content).toContain("AI Treatment Simulation");
+    expect(content).toContain("Your Treatment Preview");
+    expect(content).toContain("__combined__");
+    expect(content).toContain("Combined Results");
     expect(content).toContain("Drag the slider to compare");
   });
 
@@ -734,8 +736,8 @@ describe("Client Report includes simulation images", () => {
       "utf-8"
     );
     expect(routeContent).toContain("generateTreatmentSimulations");
-    expect(routeContent).toContain("Starting background generation");
-    expect(routeContent).toContain("images saved");
+    expect(routeContent).toContain("Starting combined simulation");
+    expect(routeContent).toContain("Combined image saved");
     // Verify async flow: analysis is marked completed BEFORE simulations
     expect(routeContent).toContain('status: "completed"');
     expect(routeContent).toContain("generateSimulationsInBackground");
@@ -780,7 +782,7 @@ describe("Simulation Polling Endpoint", () => {
     expect(content).toContain("clearInterval");
     // Verify it shows a loading indicator while generating
     expect(content).toContain("Generating Your Treatment Preview");
-    expect(content).toContain("creating a personalized before/after simulation");
+    expect(content).toContain("creating a personalized before/after simulation showing the combined results");
   });
 });
 
