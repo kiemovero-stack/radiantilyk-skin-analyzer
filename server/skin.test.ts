@@ -6,6 +6,7 @@ import { SERVICE_CATALOG, getServiceCatalogText } from "../shared/serviceCatalog
 import { PRODUCT_CATALOG, getProductCatalogText, getProductCount } from "../shared/productCatalog";
 
 const systemPrompt = buildSystemPrompt();
+const clientPrompt = buildClientSystemPrompt();
 
 describe("Skin Analysis Prompt", () => {
   it("system prompt includes critical diagnostic rules", () => {
