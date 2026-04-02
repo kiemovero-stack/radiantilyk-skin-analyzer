@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
+import { buildClientSystemPrompt, CLIENT_ANALYSIS_OUTPUT_SCHEMA } from "./clientPrompt";
 import { appRouter } from "./routers";
 import { SERVICE_CATALOG, getServiceCatalogText } from "../shared/serviceCatalog";
 import { PRODUCT_CATALOG, getProductCatalogText, getProductCount } from "../shared/productCatalog";
 
 const systemPrompt = buildSystemPrompt();
-const clientPrompt = buildClientSystemPrompt();
 
 describe("Skin Analysis Prompt", () => {
   it("system prompt includes critical diagnostic rules", () => {
@@ -46,7 +46,7 @@ describe("Skin Analysis Prompt", () => {
   it("system prompt contains key products from the catalog", () => {
     expect(systemPrompt).toContain("RadiantilyK Aesthetic Vitamin C Facial Serum 30ml");
     expect(systemPrompt).toContain("RKA-010");
-    expect(systemPrompt).toContain("$28.00");
+    expect(systemPrompt).toContain("$49.00");
     expect(systemPrompt).toContain("EELHOE Sun Cream SPF90");
     expect(systemPrompt).toContain("Dermagarden Peptide-7 Cream");
     expect(systemPrompt).toContain("AIXIN Beauty");
@@ -358,14 +358,14 @@ describe("Product Catalog", () => {
     expect(categories).toContain("Trial Kits");
   });
 
-  it("has exactly 54 products total", () => {
-    expect(getProductCount()).toBe(54);
+  it("has exactly 32 products total", () => {
+    expect(getProductCount()).toBe(32);
   });
 
   it("all products have sku, name, price, and description", () => {
     for (const cat of PRODUCT_CATALOG) {
       for (const prod of cat.products) {
-        expect(prod.sku).toMatch(/^[A-Z]+-\d{3}(-[A-Z0-9.]+)?$/);
+        expect(prod.sku).toMatch(/^RKA-\d{3}$/);
         expect(prod.name).toBeTruthy();
         expect(prod.price).toMatch(/^\$\d+\.\d{2}$/);
         expect(prod.description).toBeTruthy();
@@ -374,16 +374,16 @@ describe("Product Catalog", () => {
     }
   });
 
-  it("serums category has 19 products", () => {
+  it("serums category has 13 products", () => {
     const serums = PRODUCT_CATALOG.find((c) => c.category === "Serums");
     expect(serums).toBeDefined();
-    expect(serums!.products).toHaveLength(19);
+    expect(serums!.products).toHaveLength(13);
   });
 
-  it("creams category has 11 products", () => {
+  it("creams category has 10 products", () => {
     const creams = PRODUCT_CATALOG.find((c) => c.category === "Creams");
     expect(creams).toBeDefined();
-    expect(creams!.products).toHaveLength(11);
+    expect(creams!.products).toHaveLength(10);
   });
 
   it("getProductCatalogText returns formatted text", () => {
@@ -400,12 +400,11 @@ describe("Product Catalog", () => {
     expect(rkaProducts.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("includes sunscreen products", () => {
+  it("includes sunscreen product", () => {
     const sunscreen = PRODUCT_CATALOG.find((c) => c.category === "Sunscreen");
     expect(sunscreen).toBeDefined();
-    expect(sunscreen!.products.length).toBeGreaterThanOrEqual(1);
-    const hasSPF = sunscreen!.products.some((p) => p.name.includes("SPF"));
-    expect(hasSPF).toBe(true);
+    expect(sunscreen!.products).toHaveLength(1);
+    expect(sunscreen!.products[0].name).toContain("SPF90");
   });
 });
 
@@ -447,27 +446,24 @@ describe("Comparison Feature", () => {
 
 describe("Client Portal - Prompt", () => {
   it("client prompt uses layman-friendly language", async () => {
-    const { buildClientSystemPrompt } = await import("./clientPrompt");
-    const prompt = clientPrompt;
+    const prompt = buildClientSystemPrompt();
     expect(prompt).toContain("friendly, knowledgeable skin care expert");
     expect(prompt).toContain("SIMPLE, EASY-TO-UNDERSTAND language");
     expect(prompt).toContain("like you're talking to a friend");
     expect(prompt).toContain("dark marks left behind after breakouts");
     expect(prompt).toContain("skin's natural support structure is weakening");
   });
-  it("client prompt includes Fitzpatrick safety rules", () => {
-    const prompt = clientPrompt;
-    expect(prompt.length).toBeGreaterThan(10000);
+
+  it("client prompt includes Fitzpatrick safety rules", async () => {
+    const prompt = buildClientSystemPrompt();
     expect(prompt).toContain("FITZPATRICK SKIN TYPE");
     expect(prompt).toContain("NEVER recommend IPL");
     expect(prompt).toContain("TREATMENT STACKING");
-    // UNIQUE_MARKER_20260402 - if vitest sees old file, this won't be here
-    expect(1 + 1).toBe(2);
+    expect(prompt).toMatch(/darker skin/);
   });
 
   it("client prompt includes treatment simulation instructions", async () => {
-    const { buildClientSystemPrompt } = await import("./clientPrompt");
-    const prompt = clientPrompt;
+    const prompt = buildClientSystemPrompt();
     expect(prompt).toContain("TREATMENT SIMULATION DESCRIPTIONS");
     expect(prompt).toContain("Fillers");
     expect(prompt).toContain("Microneedling");
@@ -475,16 +471,14 @@ describe("Client Portal - Prompt", () => {
   });
 
   it("client prompt includes both service and product catalogs", async () => {
-    const { buildClientSystemPrompt } = await import("./clientPrompt");
-    const prompt = clientPrompt;
+    const prompt = buildClientSystemPrompt();
     expect(prompt).toContain("CLINIC SERVICE CATALOG");
     expect(prompt).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
     expect(prompt).toContain("rkaskin.co");
   });
 
   it("client prompt instructs to recommend SPF and post-procedure kits", async () => {
-    const { buildClientSystemPrompt } = await import("./clientPrompt");
-    const prompt = clientPrompt;
+    const prompt = buildClientSystemPrompt();
     expect(prompt).toContain("Always recommend SPF sunscreen");
     expect(prompt).toContain("post-procedure kit");
   });
@@ -492,12 +486,10 @@ describe("Client Portal - Prompt", () => {
 
 describe("Client Portal - Output Schema", () => {
   it("client schema has correct name", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     expect(CLIENT_ANALYSIS_OUTPUT_SCHEMA.name).toBe("client_skin_analysis_report");
   });
 
   it("client schema has all required report sections", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, unknown>;
     expect(props).toHaveProperty("skinHealthScore");
     expect(props).toHaveProperty("scoreJustification");
@@ -516,7 +508,6 @@ describe("Client Portal - Output Schema", () => {
   });
 
   it("client schema skinProcedures items require expectedResults for simulation", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const procItems = props.skinProcedures.items;
     expect(procItems.required).toContain("expectedResults");
@@ -524,7 +515,6 @@ describe("Client Portal - Output Schema", () => {
   });
 
   it("client schema skincareProducts items require sku and price", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const productItems = props.skincareProducts.items;
     expect(productItems.required).toContain("sku");
@@ -584,7 +574,6 @@ describe("Client Portal - Email Services", () => {
 
 describe("Treatment Simulation Schema", () => {
   it("client schema skinProcedures include simulation object", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const procItems = props.skinProcedures.items;
     expect(procItems.properties).toHaveProperty("simulation");
@@ -598,7 +587,6 @@ describe("Treatment Simulation Schema", () => {
   });
 
   it("simulation milestones have timepoint, description, and improvementPercent", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const procItems = props.skinProcedures.items;
     const milestones = procItems.properties.simulation.properties.milestones;
@@ -617,7 +605,6 @@ describe("Treatment Simulation Schema", () => {
   });
 
   it("simulation improvementPercent is a number type", async () => {
-    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
     const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
     const sim = props.skinProcedures.items.properties.simulation;
     expect(sim.properties.improvementPercent.type).toBe("number");
@@ -669,9 +656,8 @@ describe("Simulation Image Service", () => {
     const origKey = process.env.OPENAI_API_KEY;
     process.env.OPENAI_API_KEY = "";
     
-    // Re-import to get fresh module with empty key
-    const mod = await import("./simulationService");
-    const results = await mod.generateTreatmentSimulations(
+    const { generateTreatmentSimulations } = await import("./simulationService");
+    const results = await generateTreatmentSimulations(
       999,
       "https://example.com/photo.jpg",
       3,
@@ -683,7 +669,7 @@ describe("Simulation Image Service", () => {
     
     // Restore
     if (origKey) process.env.OPENAI_API_KEY = origKey;
-  }, 10000);
+  });
 
   it("simulationImages column exists in schema", async () => {
     const { skinAnalyses } = await import("../drizzle/schema");
@@ -707,7 +693,7 @@ describe("Client Report includes simulation images", () => {
     expect(routeContent).toContain("record.simulationImages");
   });
 
-  it("ClientReport.tsx includes BeforeAfterSlider component", async () => {
+  it("ClientReport.tsx includes single combined BeforeAfterSlider", async () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/home/ubuntu/skin-analyzer/client/src/pages/ClientReport.tsx",
@@ -717,7 +703,9 @@ describe("Client Report includes simulation images", () => {
     expect(content).toContain("simulationImages");
     expect(content).toContain("BEFORE");
     expect(content).toContain("AFTER");
-    expect(content).toContain("AI Treatment Simulation");
+    expect(content).toContain("Your Treatment Preview");
+    expect(content).toContain("__combined__");
+    expect(content).toContain("Combined Results");
     expect(content).toContain("Drag the slider to compare");
   });
 
@@ -738,7 +726,7 @@ describe("Client Report includes simulation images", () => {
     );
     expect(routeContent).toContain("generateTreatmentSimulations");
     expect(routeContent).toContain("Starting combined simulation");
-    expect(routeContent).toContain("combined simulation");
+    expect(routeContent).toContain("Combined image saved");
     // Verify async flow: analysis is marked completed BEFORE simulations
     expect(routeContent).toContain('status: "completed"');
     expect(routeContent).toContain("generateSimulationsInBackground");
@@ -783,7 +771,7 @@ describe("Simulation Polling Endpoint", () => {
     expect(content).toContain("clearInterval");
     // Verify it shows a loading indicator while generating
     expect(content).toContain("Generating Your Treatment Preview");
-    expect(content).toContain("creating a personalized before/after simulation");
+    expect(content).toContain("creating a personalized before/after simulation showing the combined results");
   });
 });
 

@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { getDb } from "./db";
 import { skinAnalyses } from "../drizzle/schema";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, desc, and, inArray, or } from "drizzle-orm";
 import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
@@ -317,7 +317,8 @@ export const skinRouter = router({
     }),
 
   /**
-   * List all analyses for the current user, most recent first.
+   * List ALL analyses (staff-initiated + client portal), most recent first.
+   * Staff users can see all analyses including client self-service ones (userId=0).
    */
   listAnalyses: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
@@ -326,9 +327,8 @@ export const skinRouter = router({
     const results = await db
       .select()
       .from(skinAnalyses)
-      .where(eq(skinAnalyses.userId, ctx.user.id))
       .orderBy(desc(skinAnalyses.createdAt))
-      .limit(50);
+      .limit(100);
 
     return results;
   }),
@@ -351,10 +351,7 @@ export const skinRouter = router({
         .select()
         .from(skinAnalyses)
         .where(
-          and(
-            eq(skinAnalyses.userId, ctx.user.id),
-            inArray(skinAnalyses.id, input.ids)
-          )
+          inArray(skinAnalyses.id, input.ids)
         )
         .orderBy(skinAnalyses.createdAt);
 

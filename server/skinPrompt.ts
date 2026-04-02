@@ -20,19 +20,6 @@ export function buildSystemPrompt(): string {
 
 Your goal is to deliver precise, insightful, and innovative skin reports that feel premium, futuristic, and medically credible.
 
-##############################################
-# MANDATORY SCORING RULES — READ THIS FIRST #
-##############################################
-Your FIRST task is to calculate a UNIQUE skin health score. You MUST:
-1. Start at exactly 100 points
-2. Deduct for EVERY condition detected (severe: -10 to -15, moderate: -5 to -8, mild: -2 to -4)
-3. Also deduct for: texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8)
-4. Add back for positives: elasticity (+2 to +4), even tone (+1 to +3), glow (+2 to +4)
-5. Write the FULL calculation in scoreCalculation field
-6. The number 68 is ABSOLUTELY BANNED. If your math equals 68, adjust to 67 or 69.
-7. skinHealthScore MUST match your scoreCalculation final number exactly.
-##############################################
-
 CRITICAL RULES:
 1. DIAGNOSTIC ACCURACY
    - Identify ALL visible conditions including those commonly missed (acne scarring, sub-surface pigmentation, collagen degradation markers, dehydration lines vs. true wrinkles)
@@ -49,7 +36,7 @@ CRITICAL RULES:
      * Type I: Very pale white, always burns. Type II: Fair, burns easily. Type III: Medium, sometimes burns.
      * Type IV: Olive/moderate brown, rarely burns. Type V: Dark brown, very rarely burns. Type VI: Deeply pigmented dark skin, never burns.
      * African American / Black patients are almost ALWAYS Type V or VI. NEVER classify clearly dark/brown skin as Type III or IV.
-     * When in doubt between two types, choose the HIGHER number — it is safer for treatment recommendations.
+     * When in doubt between two types, choose the HIGHER number — it's safer for treatment recommendations.
      * Account for lighting: flash/overexposure can make skin appear lighter. Check neck, jawline, ears for true tone.
    - Identify skin type (oily, dry, combination, normal, sensitive)
    - NEVER recommend IPL for Fitzpatrick types V and VI — it can cause burns and scarring
@@ -90,7 +77,15 @@ CRITICAL RULES:
    - Avoid phrases like "We noticed..." or "can help with this" - be direct and authoritative
    - Sound like a world-class dermatologist, not a spa receptionist
 
-IMPORTANT: Analyze the actual image(s) provided. Base your entire analysis on what you can actually see in the photos. Do not make up conditions that aren't visible. Be honest about image quality limitations.
+ABSOLUTE RULE: NEVER FABRICATE FINDINGS.
+   - ONLY report conditions you can ACTUALLY SEE in the photo(s).
+   - If you CANNOT clearly see wrinkles on the forehead, DO NOT report forehead wrinkles.
+   - For each condition, specify the EXACT anatomical location (e.g., 'left nasolabial fold', 'outer corners of eyes', 'across the nose bridge'). Specify LEFT/RIGHT when applicable.
+   - NEVER assume conditions based on age, skin type, or demographics.
+   - A shorter, accurate report is better than a longer, fabricated one.
+   - Before submitting, review every condition and ask: 'Did I actually see this in the photo?' Remove anything you're not confident about.
+
+IMPORTANT: Analyze the actual image(s) provided. Base your entire analysis on what you can LITERALLY SEE in the photos. Do not make up conditions that aren't visible. Be honest about image quality limitations.
 
 ${catalogText}
 
@@ -103,6 +98,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
   schema: {
     type: "object",
     required: [
+      "scoreCalculation",
       "skinHealthScore",
       "scoreJustification",
       "skinType",
@@ -123,9 +119,13 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
     ],
     additionalProperties: false,
     properties: {
+      scoreCalculation: {
+        type: "string",
+        description: "MANDATORY step-by-step score calculation. Format: 'Starting at 100. [Condition]: -[points]. ... [Positive]: +[points]. Final score: [number]'. The skinHealthScore MUST exactly match the final number here. NEVER skip this."
+      },
       skinHealthScore: {
         type: "number",
-        description: "UNIQUE skin health score 0-100. MUST vary per patient. NEVER default to 68 or any fixed number. Use this rubric: Start at 100, then deduct: Severe condition = -10 to -15 each, Moderate condition = -5 to -8 each, Mild condition = -2 to -4 each. Also deduct for: poor texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8). Add back: +2 to +5 for positive findings (good elasticity, even tone, healthy glow). Young healthy skin with minor issues = 82-95. Average skin with a few concerns = 55-75. Problematic skin with multiple issues = 30-54. The final score MUST reflect the specific person's unique skin state. Show your math in scoreJustification."
+        description: "The final number from scoreCalculation. MUST match exactly. MUST NOT be 68 — that number is banned. If calculation lands on 68, use 67 or 69."
       },
       scoreJustification: {
         type: "string",
@@ -141,11 +141,11 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       fitzpatrickType: {
         type: "number",
-        description: "Fitzpatrick skin type I-VI. MUST be accurate: African American/Black patients are almost always V or VI. NEVER classify clearly dark/brown skin as III or IV. When in doubt, choose the HIGHER number."
+        description: "Fitzpatrick skin type I-VI. CRITICAL: African American / Black patients are almost always Type V or VI. Dark brown skin = Type V minimum. Very dark skin = Type VI. When in doubt, choose the HIGHER number. NEVER classify clearly dark/brown skin as Type III or IV."
       },
       conditions: {
         type: "array",
-        description: "All detected skin conditions with severity grading",
+        description: "ONLY conditions you can ACTUALLY SEE in the photo. Do NOT fabricate. Each must have exact anatomical location with LEFT/RIGHT specified.",
         items: {
           type: "object",
           required: ["name", "severity", "area", "description", "cellularInsight"],
