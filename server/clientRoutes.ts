@@ -9,6 +9,7 @@
  *   POST /api/client/analyze        — Start analysis (no auth)
  *   GET  /api/client/status/:id     — Poll analysis status
  *   GET  /api/client/report/:id     — Get completed report
+ *   GET  /api/client/simulations/:id — Poll simulation images
  */
 import type { Express, Request, Response } from "express";
 import multer from "multer";
@@ -41,8 +42,56 @@ const upload = multer({
 });
 
 /**
+ * Generate simulation images in the background AFTER the analysis is already completed.
+ * This is non-blocking — the client sees their report immediately.
+ */
+async function generateSimulationsInBackground(
+  analysisId: number,
+  frontImageUrl: string,
+  fitzpatrickType: number,
+  procedures: Array<{ name: string; reason: string; targetConditions: string[] }>
+) {
+  try {
+    console.log(`[Simulation] Starting background generation for record ${analysisId} (${procedures.length} procedures)`);
+    
+    const simulations = await generateTreatmentSimulations(
+      analysisId,
+      frontImageUrl,
+      fitzpatrickType,
+      procedures
+    );
+
+    if (simulations.size > 0) {
+      const simMap: Record<string, string> = {};
+      simulations.forEach((url, name) => { simMap[name] = url; });
+
+      const db = await getDb();
+      if (db) {
+        await db
+          .update(skinAnalyses)
+          .set({ simulationImages: simMap })
+          .where(eq(skinAnalyses.id, analysisId));
+
+        console.log(`[Simulation] ${simulations.size} images saved for record ${analysisId}`);
+      }
+    } else {
+      console.log(`[Simulation] No simulation images generated for record ${analysisId}`);
+    }
+  } catch (err: any) {
+    console.error(`[Simulation] Background generation failed for record ${analysisId}:`, err?.message);
+    // Non-fatal — report is still available without simulations
+  }
+}
+
+/**
  * Run the client AI analysis in the background.
  * Uses the client-specific prompt with layman-friendly language.
+ * 
+ * FLOW:
+ * 1. Run AI analysis → save report → mark "completed" immediately
+ * 2. Client sees report right away
+ * 3. Simulation images generate in background (non-blocking)
+ * 4. Report page polls for simulation images and shows them when ready
  */
 async function runClientAnalysisInBackground(
   analysisId: number,
@@ -109,58 +158,38 @@ async function runClientAnalysisInBackground(
     const db = await getDb();
     if (!db) throw new Error("Database not available");
 
-    // Save the report but keep status as "processing" — we'll mark completed after simulations
+    // ✅ Mark as COMPLETED immediately so the client sees their report right away
     await db
       .update(skinAnalyses)
       .set({
         report: report,
         skinHealthScore: report.skinHealthScore,
         skinType: report.skinType,
-      })
-      .where(eq(skinAnalyses.id, analysisId));
-
-    console.log(`[ClientAnalysis] Record ${analysisId} report saved, generating simulation images...`);
-
-    // Generate treatment simulation images BEFORE marking as completed
-    // This ensures the report page has simulation images when it loads
-    let simMap: Record<string, string> = {};
-    try {
-      const frontImageUrl = imageUrls[0]; // First image is always front view
-      if (frontImageUrl) {
-        console.log(`[ClientAnalysis] Starting simulation image generation for record ${analysisId}`);
-        const simulations = await generateTreatmentSimulations(
-          analysisId,
-          frontImageUrl,
-          report.fitzpatrickType || 3,
-          report.skinProcedures.map((p) => ({
-            name: p.name,
-            reason: p.reason,
-            targetConditions: p.targetConditions,
-          }))
-        );
-
-        if (simulations.size > 0) {
-          simulations.forEach((url, name) => { simMap[name] = url; });
-          console.log(`[ClientAnalysis] ${simulations.size} simulation images generated for record ${analysisId}`);
-        }
-      }
-    } catch (simErr: any) {
-      console.error(`[ClientAnalysis] Simulation generation error for record ${analysisId}:`, simErr?.message);
-      // Non-fatal: report is still available without simulations
-    }
-
-    // NOW mark as completed with simulation images included
-    await db
-      .update(skinAnalyses)
-      .set({
-        simulationImages: Object.keys(simMap).length > 0 ? simMap : null,
         status: "completed",
       })
       .where(eq(skinAnalyses.id, analysisId));
 
-    console.log(`[ClientAnalysis] Record ${analysisId} marked completed with ${Object.keys(simMap).length} simulation images`);
+    console.log(`[ClientAnalysis] Record ${analysisId} marked COMPLETED (score: ${report.skinHealthScore})`);
 
-    // Send the initial report email to the client
+    // 🔥 Fire-and-forget: Generate simulation images in background
+    // The client report page will poll for these and show them when ready
+    const frontImageUrl = imageUrls[0];
+    if (frontImageUrl) {
+      generateSimulationsInBackground(
+        analysisId,
+        frontImageUrl,
+        report.fitzpatrickType || 3,
+        report.skinProcedures.map((p) => ({
+          name: p.name,
+          reason: p.reason,
+          targetConditions: p.targetConditions,
+        }))
+      ).catch((err) => {
+        console.error(`[Simulation] Unhandled background error:`, err);
+      });
+    }
+
+    // Send the initial report email to the client (also non-blocking)
     try {
       const records = await db
         .select()
@@ -410,6 +439,45 @@ export function registerClientRoutes(app: Express) {
       });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to get report" });
+    }
+  });
+
+  // ── Poll Simulation Images ─────────────────────────────────────────
+  // The report page polls this endpoint to check if simulation images are ready
+  app.get("/api/client/simulations/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid ID" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const results = await db
+        .select({ simulationImages: skinAnalyses.simulationImages })
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, id))
+        .limit(1);
+
+      if (results.length === 0) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+
+      const simImages = results[0].simulationImages;
+      const hasImages = simImages && typeof simImages === "object" && Object.keys(simImages).length > 0;
+
+      res.json({
+        ready: hasImages,
+        simulationImages: simImages || {},
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to check simulations" });
     }
   });
 }

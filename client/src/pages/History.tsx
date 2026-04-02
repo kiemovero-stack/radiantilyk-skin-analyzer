@@ -13,21 +13,33 @@ import {
   FileText,
   LogIn,
   BarChart3,
+  Search,
+  X,
+  Filter,
+  CalendarDays,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+type DateFilter = "all" | "today" | "week" | "month" | "custom";
+
 export default function History() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [, navigate] = useLocation();
   const [compareMode, setCompareMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  // Search & filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { data: analyses, isLoading } = trpc.skin.listAnalyses.useQuery(
     undefined,
@@ -42,6 +54,56 @@ export default function History() {
       ),
     [analyses]
   );
+
+  // Filter analyses based on search query and date filter
+  const filteredAnalyses = useMemo(() => {
+    if (!analyses) return [];
+
+    let filtered = [...analyses];
+
+    // Text search: match name, email, skin type
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((a) => {
+        const fullName = `${a.patientFirstName || ""} ${a.patientLastName || ""}`.toLowerCase();
+        const email = (a.patientEmail || "").toLowerCase();
+        const skinType = (a.skinType || "").toLowerCase();
+        const score = String(a.skinHealthScore || "");
+        return (
+          fullName.includes(q) ||
+          email.includes(q) ||
+          skinType.includes(q) ||
+          score.includes(q)
+        );
+      });
+    }
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      let cutoff: Date;
+
+      switch (dateFilter) {
+        case "today":
+          cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case "week":
+          cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "month":
+          cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          cutoff = new Date(0);
+      }
+
+      filtered = filtered.filter(
+        (a) => new Date(a.createdAt) >= cutoff
+      );
+    }
+
+    return filtered;
+  }, [analyses, searchQuery, dateFilter]);
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) => {
@@ -67,6 +129,19 @@ export default function History() {
   const exitCompareMode = () => {
     setCompareMode(false);
     setSelectedIds(new Set());
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  };
+
+  const dateFilterLabels: Record<DateFilter, string> = {
+    all: "All Time",
+    today: "Today",
+    week: "Past 7 Days",
+    month: "Past 30 Days",
+    custom: "Custom",
   };
 
   if (authLoading) {
@@ -107,7 +182,7 @@ export default function History() {
 
       <main className="flex-1 container py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 Analysis History
@@ -158,6 +233,98 @@ export default function History() {
             </div>
           </div>
 
+          {/* Search & Filter Bar */}
+          {analyses && analyses.length > 0 && (
+            <div className="mb-6 space-y-3">
+              <div className="flex items-center gap-2">
+                {/* Search Input */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search by name, email, or skin type..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-border bg-card text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Date Filter Dropdown */}
+                <div className="relative">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-[42px] gap-2 rounded-xl"
+                    onClick={() => setShowDateDropdown(!showDateDropdown)}
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                    <span className="hidden sm:inline">{dateFilterLabels[dateFilter]}</span>
+                    {dateFilter !== "all" && (
+                      <span className="w-2 h-2 rounded-full bg-primary" />
+                    )}
+                  </Button>
+
+                  {showDateDropdown && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setShowDateDropdown(false)}
+                      />
+                      <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl border border-border bg-card shadow-lg py-1">
+                        {(["all", "today", "week", "month"] as DateFilter[]).map((df) => (
+                          <button
+                            key={df}
+                            onClick={() => {
+                              setDateFilter(df);
+                              setShowDateDropdown(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                              dateFilter === df
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "hover:bg-muted text-foreground"
+                            }`}
+                          >
+                            {dateFilterLabels[df]}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Active filters & result count */}
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  Showing {filteredAnalyses.length} of {analyses.length} analyses
+                  {searchQuery && (
+                    <> matching "<span className="font-medium text-foreground">{searchQuery}</span>"</>
+                  )}
+                </span>
+                {(searchQuery || dateFilter !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setDateFilter("all");
+                    }}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Compare mode instruction banner */}
           {compareMode && (
             <motion.div
@@ -188,9 +355,26 @@ export default function History() {
                 <Link href="/analyze">Start Your First Analysis</Link>
               </Button>
             </div>
+          ) : filteredAnalyses.length === 0 ? (
+            <div className="text-center py-16">
+              <Search className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No results found</h3>
+              <p className="text-muted-foreground mb-6">
+                No analyses match your search criteria. Try adjusting your filters.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setDateFilter("all");
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
-              {analyses.map((analysis, i) => {
+              {filteredAnalyses.map((analysis, i) => {
                 const report = analysis.report as SkinAnalysisReport;
                 const status = (analysis as any).status || "completed";
                 const isCompleted = status === "completed";

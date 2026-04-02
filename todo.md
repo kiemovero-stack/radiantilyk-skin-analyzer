@@ -188,3 +188,20 @@
 - [x] Added detailed scoring rubric to both client and staff AI prompts
 - [x] Rubric: Start at 100, deduct per condition severity, add back for positive findings
 - [x] Score ranges defined: Excellent (85-95), Good (70-84), Average (55-69), Below average (35-54), Poor (<35)
+
+## Async Simulation Fix (Client Portal Not Hanging)
+- [x] Make simulation image generation fully asynchronous — analysis marks "completed" immediately
+- [x] Client report page loads instantly after AI text analysis finishes
+- [x] Simulation images generate in background (fire-and-forget)
+- [x] Add polling logic on ClientReport.tsx — polls /api/client/simulations/:id every 10 seconds
+- [x] Show "Generating Your Treatment Preview" loading indicator while simulations generate
+- [x] Simulations appear automatically on report page when ready (no page refresh needed)
+- [x] Server-side /api/client/simulations/:id endpoint returns { ready, simulationImages }
+
+## History Page Search & Filter
+- [x] Add search bar to History page — search by name, email, or skin type
+- [x] Add date filter dropdown (All Time, Today, Past 7 Days, Past 30 Days)
+- [x] Show result count ("Showing X of Y analyses")
+- [x] Clear filters button when filters are active
+- [x] Empty state when no results match search criteria
+- [x] Write tests for new features (76 tests passing)

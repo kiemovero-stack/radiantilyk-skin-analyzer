@@ -260,6 +260,7 @@ export default function ClientReport() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [simulationsLoading, setSimulationsLoading] = useState(false);
 
   useEffect(() => {
     if (reportId <= 0) {
@@ -282,6 +283,37 @@ export default function ClientReport() {
         setLoading(false);
       });
   }, [reportId]);
+
+  // Poll for simulation images if they're not ready yet
+  useEffect(() => {
+    if (!data || data.status !== "completed") return;
+    const hasSimulations = data.simulationImages && Object.keys(data.simulationImages).length > 0;
+    if (hasSimulations) return; // Already have them
+
+    setSimulationsLoading(true);
+    let attempts = 0;
+    const maxAttempts = 30; // Poll for up to 5 minutes (30 x 10s)
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await fetch(`/api/client/simulations/${reportId}`);
+        if (!res.ok) return;
+        const result = await res.json();
+        if (result.ready && result.simulationImages) {
+          setData((prev) => prev ? { ...prev, simulationImages: result.simulationImages } : prev);
+          setSimulationsLoading(false);
+          clearInterval(interval);
+        }
+      } catch { /* ignore polling errors */ }
+      if (attempts >= maxAttempts) {
+        setSimulationsLoading(false);
+        clearInterval(interval);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [data?.status, reportId]);
 
   if (loading) {
     return (
@@ -638,6 +670,17 @@ export default function ClientReport() {
                   {proc.simulation && (
                     <div className="border-t border-gray-100">
                       {/* AI-Generated Before/After Image Slider */}
+                      {simulationsLoading && !(data.simulationImages && data.simulationImages[proc.name]) && (
+                        <div className="p-5 border-b border-gray-100">
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border border-purple-200">
+                            <Loader2 className="w-5 h-5 animate-spin text-purple-500 shrink-0" />
+                            <div>
+                              <p className="text-sm font-semibold text-purple-700">Generating Your Treatment Preview</p>
+                              <p className="text-xs text-purple-500 mt-0.5">Our AI is creating a personalized before/after simulation for {proc.name}...</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       {data.simulationImages && data.simulationImages[proc.name] && (
                         <div className="p-5 border-b border-gray-100">
                           <BeforeAfterSlider

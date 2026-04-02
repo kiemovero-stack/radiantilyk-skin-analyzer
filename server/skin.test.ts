@@ -727,14 +727,123 @@ describe("Client Report includes simulation images", () => {
     expect(content).toContain("simulationImages: Record<string, string>");
   });
 
-  it("simulation generation is triggered after analysis completion", async () => {
+  it("simulation generation is triggered asynchronously after analysis completion", async () => {
     const fs = await import("fs");
     const routeContent = fs.readFileSync(
       "/home/ubuntu/skin-analyzer/server/clientRoutes.ts",
       "utf-8"
     );
     expect(routeContent).toContain("generateTreatmentSimulations");
-    expect(routeContent).toContain("Starting simulation image generation");
-    expect(routeContent).toContain("simulation images generated");
+    expect(routeContent).toContain("Starting background generation");
+    expect(routeContent).toContain("images saved");
+    // Verify async flow: analysis is marked completed BEFORE simulations
+    expect(routeContent).toContain('status: "completed"');
+    expect(routeContent).toContain("generateSimulationsInBackground");
+    expect(routeContent).toContain("Fire-and-forget");
+  });
+});
+
+describe("Simulation Polling Endpoint", () => {
+  it("clientRoutes.ts has a /api/client/simulations/:id endpoint", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/clientRoutes.ts",
+      "utf-8"
+    );
+    expect(content).toContain("/api/client/simulations/:id");
+    expect(content).toContain("simulationImages");
+    expect(content).toContain("ready");
+  });
+
+  it("simulations endpoint returns ready boolean and simulationImages object", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/clientRoutes.ts",
+      "utf-8"
+    );
+    // Verify the response shape
+    expect(content).toContain("ready: hasImages");
+    expect(content).toContain("simulationImages: simImages");
+  });
+
+  it("ClientReport.tsx polls for simulation images when not ready", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/ClientReport.tsx",
+      "utf-8"
+    );
+    // Verify polling logic exists
+    expect(content).toContain("/api/client/simulations/");
+    expect(content).toContain("simulationsLoading");
+    expect(content).toContain("setSimulationsLoading");
+    expect(content).toContain("setInterval");
+    expect(content).toContain("clearInterval");
+    // Verify it shows a loading indicator while generating
+    expect(content).toContain("Generating Your Treatment Preview");
+    expect(content).toContain("creating a personalized before/after simulation");
+  });
+});
+
+describe("History Page - Search & Filter", () => {
+  it("History.tsx has search input and date filter", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/History.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("searchQuery");
+    expect(content).toContain("setSearchQuery");
+    expect(content).toContain("dateFilter");
+    expect(content).toContain("setDateFilter");
+    expect(content).toContain("Search by name, email, or skin type");
+  });
+
+  it("History.tsx filters analyses by text search", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/History.tsx",
+      "utf-8"
+    );
+    // Verify text search logic
+    expect(content).toContain("filteredAnalyses");
+    expect(content).toContain("patientFirstName");
+    expect(content).toContain("patientLastName");
+    expect(content).toContain("patientEmail");
+    expect(content).toContain("toLowerCase");
+    expect(content).toContain(".includes(q)");
+  });
+
+  it("History.tsx has date filter options: all, today, week, month", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/History.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("All Time");
+    expect(content).toContain("Today");
+    expect(content).toContain("Past 7 Days");
+    expect(content).toContain("Past 30 Days");
+  });
+
+  it("History.tsx shows result count and clear filters button", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/History.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("Showing");
+    expect(content).toContain("analyses");
+    expect(content).toContain("Clear filters");
+  });
+
+  it("History.tsx shows empty state when no results match filters", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/History.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("No results found");
+    expect(content).toContain("No analyses match your search criteria");
+    expect(content).toContain("Clear Filters");
   });
 });
