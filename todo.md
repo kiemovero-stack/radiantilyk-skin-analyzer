@@ -177,3 +177,14 @@
 - [x] Support simulation for: fillers, laser, microneedling, wrinkle reduction, skin rejuvenation
 - [x] Build before/after image slider UI on client report page
 - [x] Write tests for simulation image feature (68 tests passing)
+
+## Bug Fix: Simulation Images Not Working
+- [x] Debug why AI simulation images are not generating/displaying
+- [x] Fix root cause: simulations now complete BEFORE marking status as "completed" so report page has images on load
+- [x] Test end-to-end simulation flow (68 tests passing)
+
+## Bug Fix: Score Always 68
+- [x] Fix AI prompt so every client gets a unique, accurate skin score (not always 68)
+- [x] Added detailed scoring rubric to both client and staff AI prompts
+- [x] Rubric: Start at 100, deduct per condition severity, add back for positive findings
+- [x] Score ranges defined: Excellent (85-95), Good (70-84), Average (55-69), Below average (35-54), Poor (<35)

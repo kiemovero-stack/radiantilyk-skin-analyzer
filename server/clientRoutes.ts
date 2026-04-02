@@ -109,20 +109,21 @@ async function runClientAnalysisInBackground(
     const db = await getDb();
     if (!db) throw new Error("Database not available");
 
+    // Save the report but keep status as "processing" — we'll mark completed after simulations
     await db
       .update(skinAnalyses)
       .set({
         report: report,
         skinHealthScore: report.skinHealthScore,
         skinType: report.skinType,
-        status: "completed",
       })
       .where(eq(skinAnalyses.id, analysisId));
 
-    console.log(`[ClientAnalysis] Record ${analysisId} updated to completed`);
+    console.log(`[ClientAnalysis] Record ${analysisId} report saved, generating simulation images...`);
 
-    // Generate treatment simulation images in the background
-    // Uses the client's front-facing photo to create "after" previews
+    // Generate treatment simulation images BEFORE marking as completed
+    // This ensures the report page has simulation images when it loads
+    let simMap: Record<string, string> = {};
     try {
       const frontImageUrl = imageUrls[0]; // First image is always front view
       if (frontImageUrl) {
@@ -139,21 +140,25 @@ async function runClientAnalysisInBackground(
         );
 
         if (simulations.size > 0) {
-          const simMap: Record<string, string> = {};
           simulations.forEach((url, name) => { simMap[name] = url; });
-
-          await db
-            .update(skinAnalyses)
-            .set({ simulationImages: simMap })
-            .where(eq(skinAnalyses.id, analysisId));
-
-          console.log(`[ClientAnalysis] ${simulations.size} simulation images saved for record ${analysisId}`);
+          console.log(`[ClientAnalysis] ${simulations.size} simulation images generated for record ${analysisId}`);
         }
       }
     } catch (simErr: any) {
       console.error(`[ClientAnalysis] Simulation generation error for record ${analysisId}:`, simErr?.message);
       // Non-fatal: report is still available without simulations
     }
+
+    // NOW mark as completed with simulation images included
+    await db
+      .update(skinAnalyses)
+      .set({
+        simulationImages: Object.keys(simMap).length > 0 ? simMap : null,
+        status: "completed",
+      })
+      .where(eq(skinAnalyses.id, analysisId));
+
+    console.log(`[ClientAnalysis] Record ${analysisId} marked completed with ${Object.keys(simMap).length} simulation images`);
 
     // Send the initial report email to the client
     try {

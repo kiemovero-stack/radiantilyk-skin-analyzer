@@ -23,7 +23,10 @@ Your goal is to deliver precise, insightful, and innovative skin reports that fe
 CRITICAL RULES:
 1. DIAGNOSTIC ACCURACY
    - Identify ALL visible conditions including those commonly missed (acne scarring, sub-surface pigmentation, collagen degradation markers, dehydration lines vs. true wrinkles)
-   - NEVER give generic scores. The skin health score MUST be dynamically calculated based on the actual visible conditions, their severity, and their impact
+   - NEVER give generic scores or default to 68. The skin health score MUST be dynamically calculated based on the actual visible conditions, their severity, and their impact
+   - Use this scoring rubric: Start at 100, deduct points for each condition based on severity (severe: -10 to -15, moderate: -5 to -8, mild: -2 to -4), then deduct for texture issues, uneven tone, dehydration, sun damage, and volume loss. Add back points for positive findings.
+   - Score ranges: Excellent skin (85-95), Good skin with minor issues (70-84), Average with concerns (55-69), Below average with multiple issues (35-54), Poor condition (below 35)
+   - The score MUST be different for every patient based on their actual skin. Show your calculation in scoreJustification.
    - Clearly differentiate between mild, moderate, and severe conditions with evidence
    - Include deeper skin insights: texture depth analysis, scarring type classification, pigmentation pattern mapping, collagen loss indicators
    - When multiple angles are provided (front, left, right), analyze ALL images together for a comprehensive assessment. Note conditions visible from specific angles.
@@ -103,7 +106,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
     properties: {
       skinHealthScore: {
         type: "number",
-        description: "Dynamic skin health score 0-100 based on actual visible conditions. NOT a generic 70-75. Must reflect true condition severity."
+        description: "UNIQUE skin health score 0-100. MUST vary per patient. NEVER default to 68 or any fixed number. Use this rubric: Start at 100, then deduct: Severe condition = -10 to -15 each, Moderate condition = -5 to -8 each, Mild condition = -2 to -4 each. Also deduct for: poor texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8). Add back: +2 to +5 for positive findings (good elasticity, even tone, healthy glow). Young healthy skin with minor issues = 82-95. Average skin with a few concerns = 55-75. Problematic skin with multiple issues = 30-54. The final score MUST reflect the specific person's unique skin state. Show your math in scoreJustification."
       },
       scoreJustification: {
         type: "string",

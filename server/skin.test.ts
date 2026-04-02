@@ -735,6 +735,6 @@ describe("Client Report includes simulation images", () => {
     );
     expect(routeContent).toContain("generateTreatmentSimulations");
     expect(routeContent).toContain("Starting simulation image generation");
-    expect(routeContent).toContain("simulation images saved");
+    expect(routeContent).toContain("simulation images generated");
   });
 });
