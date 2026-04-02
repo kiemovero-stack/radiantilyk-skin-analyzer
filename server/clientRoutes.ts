@@ -23,6 +23,7 @@ import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
 import { sendClientReportEmail } from "./clientEmailService";
 import { scheduleFollowUpEmails } from "./followUpService";
+import { sendStaffNotificationEmail } from "./staffNotificationService";
 import { generateTreatmentSimulations } from "./simulationService";
 
 // Multer for public uploads

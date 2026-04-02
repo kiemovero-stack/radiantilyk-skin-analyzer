@@ -76,7 +76,7 @@ export async function sendClientReportEmail(
             </p>
 
             <div style="text-align: center; margin: 0 0 24px;">
-              <a href="https://radiantapp.click/" style="display: inline-block; background: linear-gradient(135deg, #e8b4b8, #a855f7); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+              <a href="https://rkaemr.click/portal" style="display: inline-block; background: linear-gradient(135deg, #e8b4b8, #a855f7); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
                 Book Your Consultation
               </a>
             </div>

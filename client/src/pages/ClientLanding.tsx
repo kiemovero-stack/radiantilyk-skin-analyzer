@@ -25,7 +25,7 @@ import {
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 
-const CHECKIN_URL = "https://radiantapp.click/";
+const CHECKIN_URL = "https://rkaemr.click/portal";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },

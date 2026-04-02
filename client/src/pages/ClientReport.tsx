@@ -3,7 +3,7 @@
  * 
  * Public (no login required). Fetches report from /api/client/report/:id.
  * Uses warm, encouraging language and a client-friendly design.
- * Includes booking CTA linking to radiantapp.click.
+ * Includes booking CTA linking to rkaemr.click/portal.
  */
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,12 +30,17 @@ import {
   Clock,
   ArrowRight,
   Zap,
+  Share2,
+  Copy,
+  Mail,
+  MessageSquare,
+  Check,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { motion } from "framer-motion";
 
-const CHECKIN_URL = "https://radiantapp.click/";
+const CHECKIN_URL = "https://rkaemr.click/portal";
 const SHOP_URL = "https://rkaskin.co";
 
 const fadeUp = {
@@ -141,11 +146,11 @@ function SectionHeader({
 function BeforeAfterSlider({
   beforeUrl,
   afterUrl,
-  label,
+  treatmentName,
 }: {
   beforeUrl: string;
   afterUrl: string;
-  label: string;
+  treatmentName: string;
 }) {
   const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -163,7 +168,7 @@ function BeforeAfterSlider({
     <div className="relative select-none">
       <p className="text-xs font-semibold text-purple-600 mb-2 flex items-center gap-1">
         <Eye className="w-3 h-3" />
-        {label}
+        AI Treatment Simulation — {treatmentName}
       </p>
       <div
         ref={(el) => { divRef.current = el; }}
@@ -177,7 +182,7 @@ function BeforeAfterSlider({
         {/* After image (full) */}
         <img
           src={afterUrl}
-          alt="After treatment simulation"
+          alt={`After ${treatmentName}`}
           className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Before image (clipped) */}
@@ -215,6 +220,112 @@ function BeforeAfterSlider({
       <p className="text-[10px] text-gray-400 mt-1 text-center">
         Drag the slider to compare — AI-generated simulation for illustration purposes
       </p>
+    </div>
+  );
+}
+
+
+function ShareResults({ reportId, patientName }: { reportId: number; patientName: string }) {
+  const [copied, setCopied] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+
+  const reportUrl = `${window.location.origin}/client/report/${reportId}`;
+  const shareText = `Check out my AI skin analysis results from RadiantilyK!`;
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${patientName}'s Skin Analysis`,
+          text: shareText,
+          url: reportUrl,
+        });
+      } catch { /* user cancelled */ }
+    } else {
+      setShowOptions(!showOptions);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(reportUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const input = document.createElement("input");
+      input.value = reportUrl;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(`My AI Skin Analysis Results`);
+    const body = encodeURIComponent(`${shareText}\n\nView my results here: ${reportUrl}`);
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+  };
+
+  const handleTextShare = () => {
+    const body = encodeURIComponent(`${shareText} ${reportUrl}`);
+    window.open(`sms:?body=${body}`);
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 text-center">
+      <h3 className="text-lg font-bold mb-2 flex items-center justify-center gap-2">
+        <Share2 className="w-5 h-5 text-purple-500" />
+        Share Your Results
+      </h3>
+      <p className="text-sm text-gray-600 mb-4">
+        Share your skin analysis with friends or family &mdash; they might want one too!
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button
+          onClick={handleNativeShare}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+        >
+          <Share2 className="w-4 h-4" />
+          Share
+        </button>
+        <button
+          onClick={handleCopyLink}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+        >
+          {copied ? (
+            <>
+              <Check className="w-4 h-4 text-emerald-500" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4" />
+              Copy Link
+            </>
+          )}
+        </button>
+      </div>
+      {showOptions && (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={handleEmailShare}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+          >
+            <Mail className="w-4 h-4 text-blue-500" />
+            Email
+          </button>
+          <button
+            onClick={handleTextShare}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+          >
+            <MessageSquare className="w-4 h-4 text-green-500" />
+            Text Message
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -613,50 +724,7 @@ export default function ClientReport() {
             </div>
           </motion.section>
 
-          {/* Combined Treatment Simulation — ONE image for all procedures */}
-          {(() => {
-            const combinedUrl = data.simulationImages?.["__combined__"];
-            const hasOldStyle = data.simulationImages && Object.keys(data.simulationImages).some(k => k !== "__combined__");
-            const simUrl = combinedUrl || (hasOldStyle ? Object.values(data.simulationImages)[0] : null);
-            const procedureNames = report.skinProcedures.map((p: any) => p.name).join(", ");
-
-            return (
-              <motion.section
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                className="mb-8 p-6 md:p-8 rounded-2xl border border-pink-100 bg-white shadow-sm"
-              >
-                <SectionHeader
-                  icon={Eye}
-                  title="Your Treatment Preview"
-                  subtitle="AI-generated simulation showing your potential results"
-                />
-                {simUrl ? (
-                  <BeforeAfterSlider
-                    beforeUrl={data.imageUrl}
-                    afterUrl={simUrl}
-                    label={`Combined Results — ${procedureNames}`}
-                  />
-                ) : simulationsLoading ? (
-                  <div className="flex items-center gap-3 p-5 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border border-purple-200">
-                    <Loader2 className="w-5 h-5 animate-spin text-purple-500 shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold text-purple-700">Generating Your Treatment Preview</p>
-                      <p className="text-xs text-purple-500 mt-0.5">Our AI is creating a personalized before/after simulation showing the combined results of all your recommended treatments...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">
-                    <p className="text-sm text-gray-500">Treatment simulation will appear here once generated.</p>
-                  </div>
-                )}
-              </motion.section>
-            );
-          })()}
-
-          {/* Section: Procedures with Treatment Details */}
+          {/* Section: Procedures with Treatment Simulation */}
           <motion.section
             initial="hidden"
             whileInView="visible"
@@ -712,6 +780,28 @@ export default function ClientReport() {
                   {/* Treatment Simulation Section */}
                   {proc.simulation && (
                     <div className="border-t border-gray-100">
+                      {/* AI-Generated Before/After Image Slider */}
+                      {simulationsLoading && !(data.simulationImages && data.simulationImages[proc.name]) && (
+                        <div className="p-5 border-b border-gray-100">
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border border-purple-200">
+                            <Loader2 className="w-5 h-5 animate-spin text-purple-500 shrink-0" />
+                            <div>
+                              <p className="text-sm font-semibold text-purple-700">Generating Your Treatment Preview</p>
+                              <p className="text-xs text-purple-500 mt-0.5">Our AI is creating a personalized before/after simulation for {proc.name}...</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {data.simulationImages && data.simulationImages[proc.name] && (
+                        <div className="p-5 border-b border-gray-100">
+                          <BeforeAfterSlider
+                            beforeUrl={data.imageUrl}
+                            afterUrl={data.simulationImages[proc.name]}
+                            treatmentName={proc.name}
+                          />
+                        </div>
+                      )}
+
                       {/* Before / After Text Comparison */}
                       <div className="grid grid-cols-1 md:grid-cols-2">
                         <div className="p-4 bg-gray-50">
@@ -1061,6 +1151,28 @@ export default function ClientReport() {
                 </p>
               </div>
             </div>
+          </motion.div>
+
+          {/* Share Results */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mb-8"
+          >
+            <ShareResults reportId={reportId} patientName={`${data.patientFirstName} ${data.patientLastName}`} />
+          </motion.div>
+
+          {/* Share Results */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mb-8"
+          >
+            <ShareResults reportId={reportId} patientName={`${data.patientFirstName} ${data.patientLastName}`} />
           </motion.div>
 
           {/* Footer */}

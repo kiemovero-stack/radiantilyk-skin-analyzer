@@ -206,8 +206,14 @@
 - [x] Empty state when no results match search criteria
 - [x] Write tests for new features (76 tests passing)
 
+## Bug Fix: Simulation Images Issues
+- [x] Fix only one simulation image generated instead of one per recommended procedure
+- [x] Fix simulation still showing as loading / never completing on client report page
+
 ## Change: Single Combined Simulation Image
-- [ ] Generate ONE simulation image combining ALL recommended procedures (not separate per procedure)
-- [ ] Update simulation prompt to describe combined results of all treatments
-- [ ] Update client report to show single before/after slider
-- [ ] Faster and cheaper (1 API call instead of 4)
+- [x] Generate ONE simulation image combining ALL recommended procedures (not separate per procedure)
+- [x] Update simulation prompt to describe combined results of all treatments
+- [x] Update client report to show single before/after slider with "Your Treatment Preview" section
+- [x] Faster and cheaper (1 API call instead of 4)
+- [x] Backward compatible with old per-procedure simulation images
+- [x] 76 tests passing

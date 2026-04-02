@@ -10,7 +10,7 @@
 import nodemailer from "nodemailer";
 
 const SENDER_EMAIL = "kV@rkaglow.com";
-const CHECKIN_URL = "https://radiantapp.click/";
+const CHECKIN_URL = "https://rkaemr.click/portal";
 
 function getTransporter() {
   const appPassword = process.env.GMAIL_APP_PASSWORD;

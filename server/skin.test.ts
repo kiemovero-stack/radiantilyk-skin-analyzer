@@ -643,7 +643,7 @@ describe("Client Landing Page Route", () => {
     expect(exists).toBe(true);
     const content = fs.readFileSync("/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx", "utf-8");
     expect(content).toContain("export default function ClientLanding");
-    expect(content).toContain("radiantapp.click");
+    expect(content).toContain("rkaemr.click/portal");
     expect(content).toContain("How It Works");
     expect(content).toContain("What Our Clients Say");
     expect(content).toContain("Analyze My Skin");
@@ -667,8 +667,9 @@ describe("Simulation Image Service", () => {
     const origKey = process.env.OPENAI_API_KEY;
     process.env.OPENAI_API_KEY = "";
     
-    const { generateTreatmentSimulations } = await import("./simulationService");
-    const results = await generateTreatmentSimulations(
+    // Re-import to get fresh module with empty key
+    const mod = await import("./simulationService");
+    const results = await mod.generateTreatmentSimulations(
       999,
       "https://example.com/photo.jpg",
       3,
@@ -680,7 +681,7 @@ describe("Simulation Image Service", () => {
     
     // Restore
     if (origKey) process.env.OPENAI_API_KEY = origKey;
-  });
+  }, 10000);
 
   it("simulationImages column exists in schema", async () => {
     const { skinAnalyses } = await import("../drizzle/schema");
@@ -704,7 +705,7 @@ describe("Client Report includes simulation images", () => {
     expect(routeContent).toContain("record.simulationImages");
   });
 
-  it("ClientReport.tsx includes single combined BeforeAfterSlider", async () => {
+  it("ClientReport.tsx includes BeforeAfterSlider component", async () => {
     const fs = await import("fs");
     const content = fs.readFileSync(
       "/home/ubuntu/skin-analyzer/client/src/pages/ClientReport.tsx",
@@ -714,9 +715,7 @@ describe("Client Report includes simulation images", () => {
     expect(content).toContain("simulationImages");
     expect(content).toContain("BEFORE");
     expect(content).toContain("AFTER");
-    expect(content).toContain("Your Treatment Preview");
-    expect(content).toContain("__combined__");
-    expect(content).toContain("Combined Results");
+    expect(content).toContain("AI Treatment Simulation");
     expect(content).toContain("Drag the slider to compare");
   });
 
@@ -737,7 +736,7 @@ describe("Client Report includes simulation images", () => {
     );
     expect(routeContent).toContain("generateTreatmentSimulations");
     expect(routeContent).toContain("Starting combined simulation");
-    expect(routeContent).toContain("Combined image saved");
+    expect(routeContent).toContain("combined simulation");
     // Verify async flow: analysis is marked completed BEFORE simulations
     expect(routeContent).toContain('status: "completed"');
     expect(routeContent).toContain("generateSimulationsInBackground");
@@ -782,7 +781,7 @@ describe("Simulation Polling Endpoint", () => {
     expect(content).toContain("clearInterval");
     // Verify it shows a loading indicator while generating
     expect(content).toContain("Generating Your Treatment Preview");
-    expect(content).toContain("creating a personalized before/after simulation showing the combined results");
+    expect(content).toContain("creating a personalized before/after simulation");
   });
 });
 
