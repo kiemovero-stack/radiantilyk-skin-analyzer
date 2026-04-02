@@ -8,7 +8,6 @@
  * - Explains WHY each condition matters and what causes it
  * - Fitzpatrick-aware treatment stacking (safe combos for each skin type)
  * - Includes treatment simulation descriptions
- * - REQUIRES step-by-step score calculation to prevent default scores
  */
 
 import { getServiceCatalogText } from "../shared/serviceCatalog";
@@ -19,47 +18,6 @@ export function buildClientSystemPrompt(): string {
   const productCatalogText = getProductCatalogText();
 
   return `You are a friendly, knowledgeable skin care expert helping a client understand their skin. Your job is to analyze their photos and explain everything in SIMPLE, EASY-TO-UNDERSTAND language — like you're talking to a friend, not reading a medical textbook.
-
-##############################################
-# MANDATORY SCORING RULES — READ THIS FIRST #
-##############################################
-
-Your FIRST task before anything else is to calculate a UNIQUE skin health score for this specific person. You MUST:
-
-1. Start at exactly 100 points
-2. List EVERY condition you detect and deduct points:
-   - Severe condition: -10 to -15 each
-   - Moderate condition: -5 to -8 each  
-   - Mild condition: -2 to -4 each
-   - Poor texture: -3 to -8
-   - Uneven tone: -3 to -7
-   - Dehydration signs: -2 to -5
-   - Sun damage: -5 to -12
-   - Volume loss/sagging: -3 to -8
-   - Large pores: -2 to -5
-   - Fine lines/wrinkles: -3 to -10
-   - Dark circles: -2 to -5
-   - Acne/breakouts: -5 to -15
-   - Scarring: -5 to -12
-3. Add back points for positive findings:
-   - Good elasticity: +2 to +4
-   - Even tone areas: +1 to +3
-   - Healthy glow: +2 to +4
-   - Good hydration: +1 to +3
-4. The final score is the result of this calculation
-
-SCORE RANGES:
-- 85-95: Excellent skin, minimal issues
-- 70-84: Good skin with minor concerns
-- 55-69: Average skin with noticeable concerns
-- 40-54: Below average with multiple issues
-- Below 40: Significant skin concerns
-
-ABSOLUTELY FORBIDDEN: Giving a score of 68 to any client. The number 68 is BANNED. If your calculation lands on 68, round to 67 or 69.
-
-You MUST write out your full calculation in the scoreCalculation field showing: "Starting at 100. [Condition]: -X. [Condition]: -X. [Positive]: +X. Final: [number]"
-
-##############################################
 
 IMPORTANT COMMUNICATION STYLE:
 - Use everyday language. Instead of "post-inflammatory hyperpigmentation," say "dark marks left behind after breakouts"
@@ -74,7 +32,10 @@ CRITICAL RULES:
 
 1. ANALYSIS ACCURACY
    - Identify ALL visible conditions but describe them in plain English
-   - The score MUST come from your step-by-step calculation — NEVER pick a number without showing math
+   - Give honest, UNIQUE scores — NEVER default to 68 or any fixed number
+   - Use this scoring rubric: Start at 100, deduct points for each condition based on severity (severe: -10 to -15, moderate: -5 to -8, mild: -2 to -4), then deduct for texture issues, uneven tone, dehydration, sun damage, and volume loss. Add back points for positive findings.
+   - Score ranges: Excellent skin (85-95), Good skin with minor issues (70-84), Average with concerns (55-69), Below average with multiple issues (35-54), Poor condition (below 35)
+   - The score MUST be different for every person based on their actual skin
    - For each condition, explain: what it is, what causes it, and what can help
    - When multiple angles are provided, analyze ALL images together
 
@@ -125,8 +86,6 @@ CRITICAL RULES:
 
 IMPORTANT: Analyze the actual image(s) provided. Base your analysis on what you can see. Be honest about limitations.
 
-REMINDER: Your skinHealthScore MUST match the result of your scoreCalculation math. Do NOT pick a number — CALCULATE it.
-
 ${catalogText}
 
 ${productCatalogText}`;
@@ -138,7 +97,6 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
   schema: {
     type: "object",
     required: [
-      "scoreCalculation",
       "skinHealthScore",
       "scoreJustification",
       "skinType",
@@ -159,17 +117,13 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
     ],
     additionalProperties: false,
     properties: {
-      scoreCalculation: {
-        type: "string",
-        description: "MANDATORY step-by-step score calculation. You MUST write this BEFORE setting skinHealthScore. Format: 'Starting at 100. [Condition name]: -[points]. [Condition name]: -[points]. ... [Positive finding]: +[points]. ... Final score: [number]'. Example: 'Starting at 100. Moderate acne scarring: -7. Mild hyperpigmentation: -3. Mild dehydration: -3. Early fine lines: -4. Good elasticity: +3. Healthy glow: +2. Final score: 88'. The skinHealthScore field MUST exactly match the final number in this calculation. NEVER skip this step."
-      },
       skinHealthScore: {
         type: "number",
-        description: "The final number from your scoreCalculation above. MUST exactly match the 'Final score' in scoreCalculation. MUST be between 0-100. MUST NOT be 68 — that number is banned. If your calculation results in 68, adjust to 67 or 69."
+        description: "UNIQUE skin health score 0-100. MUST vary based on actual conditions. NEVER default to 68. Use this rubric: Start at 100, then deduct: Severe condition = -10 to -15 each, Moderate condition = -5 to -8 each, Mild condition = -2 to -4 each. Also deduct for: poor texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8). Add back: +2 to +5 for positive findings (good elasticity, even tone, healthy glow). Young healthy skin with minor issues = 82-95. Average skin with a few concerns = 55-75. Problematic skin with multiple issues = 30-54. The final score MUST reflect the specific person's unique skin state."
       },
       scoreJustification: {
         type: "string",
-        description: "Explain the score in simple, friendly language — what's great about their skin and what could be improved. Reference specific things you see in their photos."
+        description: "Explain the score in simple language — what's great about their skin and what could be improved."
       },
       skinType: {
         type: "string",

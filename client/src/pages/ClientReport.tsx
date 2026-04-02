@@ -146,11 +146,11 @@ function SectionHeader({
 function BeforeAfterSlider({
   beforeUrl,
   afterUrl,
-  treatmentName,
+  label,
 }: {
   beforeUrl: string;
   afterUrl: string;
-  treatmentName: string;
+  label: string;
 }) {
   const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -168,7 +168,7 @@ function BeforeAfterSlider({
     <div className="relative select-none">
       <p className="text-xs font-semibold text-purple-600 mb-2 flex items-center gap-1">
         <Eye className="w-3 h-3" />
-        AI Treatment Simulation — {treatmentName}
+        {label}
       </p>
       <div
         ref={(el) => { divRef.current = el; }}
@@ -182,7 +182,7 @@ function BeforeAfterSlider({
         {/* After image (full) */}
         <img
           src={afterUrl}
-          alt={`After ${treatmentName}`}
+          alt="After treatment simulation"
           className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Before image (clipped) */}
@@ -223,7 +223,6 @@ function BeforeAfterSlider({
     </div>
   );
 }
-
 
 function ShareResults({ reportId, patientName }: { reportId: number; patientName: string }) {
   const [copied, setCopied] = useState(false);
@@ -730,6 +729,7 @@ export default function ClientReport() {
             const hasOldStyle = data.simulationImages && Object.keys(data.simulationImages).some(k => k !== "__combined__");
             const simUrl = combinedUrl || (hasOldStyle ? Object.values(data.simulationImages)[0] : null);
             const procedureNames = report.skinProcedures.map((p: any) => p.name).join(", ");
+
             return (
               <motion.section
                 initial="hidden"
@@ -765,7 +765,8 @@ export default function ClientReport() {
               </motion.section>
             );
           })()}
-          {/* Section: Procedures with Treatment Simulation */}
+
+          {/* Section: Procedures with Treatment Details */}
           <motion.section
             initial="hidden"
             whileInView="visible"
@@ -821,8 +822,6 @@ export default function ClientReport() {
                   {/* Treatment Simulation Section */}
                   {proc.simulation && (
                     <div className="border-t border-gray-100">
-
-
                       {/* Before / After Text Comparison */}
                       <div className="grid grid-cols-1 md:grid-cols-2">
                         <div className="p-4 bg-gray-50">
@@ -954,55 +953,80 @@ export default function ClientReport() {
               </a>
             </p>
             <div className="space-y-4">
-              {report.skincareProducts.map((product: any, i: number) => (
-                <div
-                  key={i}
-                  className="p-5 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-pink-50 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-pink-600">
-                        #{i + 1}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div>
-                          <h3 className="font-semibold">{product.name}</h3>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            {product.sku && (
-                              <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-                                {product.sku}
-                              </span>
-                            )}
-                            <span className="text-xs text-purple-600 font-medium">
-                              {product.type}
-                            </span>
-                          </div>
-                        </div>
-                        {product.price && (
-                          <span className="shrink-0 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-bold">
-                            {product.price}
-                          </span>
-                        )}
+              {report.skincareProducts.map((product: any, i: number) => {
+                const categoryIcon: Record<string, string> = {
+                  cleanser: "\ud83e\uddf4",
+                  cream: "\ud83e\ude75",
+                  serum: "\ud83d\udca7",
+                  toner: "\ud83c\udf3f",
+                  mask: "\ud83c\udfad",
+                  sunscreen: "\u2600\ufe0f",
+                  moisturizer: "\ud83d\udca6",
+                  exfoliant: "\u2728",
+                  eye: "\ud83d\udc41\ufe0f",
+                  lip: "\ud83d\udc8b",
+                };
+                const typeKey = (product.type || "").toLowerCase();
+                const icon = Object.entries(categoryIcon).find(([k]) => typeKey.includes(k))?.[1] || "\ud83e\uddea";
+                return (
+                  <div
+                    key={i}
+                    className="p-5 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors bg-gradient-to-r from-white to-pink-50/30"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shrink-0 mt-0.5 text-lg">
+                        {icon}
                       </div>
-                      <p className="text-sm text-gray-600 mt-2">
-                        {product.purpose}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {product.keyIngredients.map((ing: string, j: number) => (
-                          <span
-                            key={j}
-                            className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-medium border border-pink-200"
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div>
+                            <h3 className="font-semibold">{product.name}</h3>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {product.sku && (
+                                <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                                  {product.sku}
+                                </span>
+                              )}
+                              <span className="text-xs text-purple-600 font-medium">
+                                {product.type}
+                              </span>
+                            </div>
+                          </div>
+                          {product.price && (
+                            <span className="shrink-0 px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-bold">
+                              {product.price}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                          {product.purpose}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {product.keyIngredients.map((ing: string, j: number) => (
+                            <span
+                              key={j}
+                              className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-medium border border-pink-200"
+                            >
+                              {ing}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-3">
+                          <a
+                            href={SHOP_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium hover:underline"
                           >
-                            {ing}
-                          </span>
-                        ))}
+                            <ExternalLink className="w-3 h-3" />
+                            Shop Now
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-4 text-center">
               <a
@@ -1172,17 +1196,6 @@ export default function ClientReport() {
                 </p>
               </div>
             </div>
-          </motion.div>
-
-          {/* Share Results */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            className="mb-8"
-          >
-            <ShareResults reportId={reportId} patientName={`${data.patientFirstName} ${data.patientLastName}`} />
           </motion.div>
 
           {/* Share Results */}

@@ -20,19 +20,6 @@ export function buildSystemPrompt(): string {
 
 Your goal is to deliver precise, insightful, and innovative skin reports that feel premium, futuristic, and medically credible.
 
-##############################################
-# MANDATORY SCORING RULES — READ THIS FIRST #
-##############################################
-Your FIRST task is to calculate a UNIQUE skin health score. You MUST:
-1. Start at exactly 100 points
-2. Deduct for EVERY condition detected (severe: -10 to -15, moderate: -5 to -8, mild: -2 to -4)
-3. Also deduct for: texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8)
-4. Add back for positives: elasticity (+2 to +4), even tone (+1 to +3), glow (+2 to +4)
-5. Write the FULL calculation in scoreCalculation field
-6. The number 68 is ABSOLUTELY BANNED. If your math equals 68, adjust to 67 or 69.
-7. skinHealthScore MUST match your scoreCalculation final number exactly.
-##############################################
-
 CRITICAL RULES:
 1. DIAGNOSTIC ACCURACY
    - Identify ALL visible conditions including those commonly missed (acne scarring, sub-surface pigmentation, collagen degradation markers, dehydration lines vs. true wrinkles)
@@ -97,6 +84,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
   schema: {
     type: "object",
     required: [
+      "scoreCalculation",
       "skinHealthScore",
       "scoreJustification",
       "skinType",
@@ -117,9 +105,13 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
     ],
     additionalProperties: false,
     properties: {
+      scoreCalculation: {
+        type: "string",
+        description: "MANDATORY step-by-step score calculation. Format: 'Starting at 100. [Condition]: -[points]. ... [Positive]: +[points]. Final score: [number]'. The skinHealthScore MUST exactly match the final number here. NEVER skip this."
+      },
       skinHealthScore: {
         type: "number",
-        description: "UNIQUE skin health score 0-100. MUST vary per patient. NEVER default to 68 or any fixed number. Use this rubric: Start at 100, then deduct: Severe condition = -10 to -15 each, Moderate condition = -5 to -8 each, Mild condition = -2 to -4 each. Also deduct for: poor texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8). Add back: +2 to +5 for positive findings (good elasticity, even tone, healthy glow). Young healthy skin with minor issues = 82-95. Average skin with a few concerns = 55-75. Problematic skin with multiple issues = 30-54. The final score MUST reflect the specific person's unique skin state. Show your math in scoreJustification."
+        description: "The final number from scoreCalculation. MUST match exactly. MUST NOT be 68 — that number is banned. If calculation lands on 68, use 67 or 69."
       },
       scoreJustification: {
         type: "string",
