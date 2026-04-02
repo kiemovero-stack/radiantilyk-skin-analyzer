@@ -317,8 +317,7 @@ export const skinRouter = router({
     }),
 
   /**
-   * List ALL analyses (staff-initiated + client portal), most recent first.
-   * Staff users can see all analyses including client self-service ones (userId=0).
+   * List all analyses for the current user, most recent first.
    */
   listAnalyses: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
@@ -327,8 +326,9 @@ export const skinRouter = router({
     const results = await db
       .select()
       .from(skinAnalyses)
+      .where(eq(skinAnalyses.userId, ctx.user.id))
       .orderBy(desc(skinAnalyses.createdAt))
-      .limit(100);
+      .limit(50);
 
     return results;
   }),
@@ -351,7 +351,10 @@ export const skinRouter = router({
         .select()
         .from(skinAnalyses)
         .where(
-          inArray(skinAnalyses.id, input.ids)
+          and(
+            eq(skinAnalyses.userId, ctx.user.id),
+            inArray(skinAnalyses.id, input.ids)
+          )
         )
         .orderBy(skinAnalyses.createdAt);
 
