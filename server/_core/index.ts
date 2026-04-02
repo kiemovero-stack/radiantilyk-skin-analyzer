@@ -5,6 +5,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerUploadRoute } from "../uploadRoute";
+import { registerClientRoutes } from "../clientRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -38,6 +39,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Direct multipart upload route (bypasses tRPC body size limits)
   registerUploadRoute(app);
+  // Public client-facing routes (no auth required)
+  registerClientRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

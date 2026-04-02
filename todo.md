@@ -139,3 +139,16 @@
 ## Email Sender Change
 - [x] Update sender email from RadiantilyK@gmail.com to kV@rkaglow.com
 - [x] Update GMAIL_APP_PASSWORD secret for new account
+
+## Client-Facing Portal
+- [x] Public client intake page (full name, DOB, email) — no login required
+- [x] Skin concerns questionnaire (multi-select with common concerns)
+- [x] Guided photo capture with visual guides for front/left/right views (face + body)
+- [x] Public upload route (no auth required for client flow)
+- [x] Client-specific AI prompt — layman-friendly language, Fitzpatrick-aware treatment stacking
+- [x] Client-facing report page with simple explanations in plain English
+- [ ] Treatment simulation using AI image generation (fillers, laser, microneedling)
+- [x] Automated 24hr follow-up email with check-in link to radiantapp.click
+- [x] Automated 48hr follow-up email with check-in link to radiantapp.click
+- [x] Add /client routes to App.tsx router
+- [x] Write tests for client portal features (52 tests passing)

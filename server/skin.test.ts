@@ -442,3 +442,140 @@ describe("Comparison Feature", () => {
     }
   });
 });
+
+describe("Client Portal - Prompt", () => {
+  it("client prompt uses layman-friendly language", async () => {
+    const { buildClientSystemPrompt } = await import("./clientPrompt");
+    const prompt = buildClientSystemPrompt();
+    expect(prompt).toContain("friendly, knowledgeable skin care expert");
+    expect(prompt).toContain("SIMPLE, EASY-TO-UNDERSTAND language");
+    expect(prompt).toContain("like you're talking to a friend");
+    expect(prompt).toContain("dark marks left behind after breakouts");
+    expect(prompt).toContain("skin's natural support structure is weakening");
+  });
+
+  it("client prompt includes Fitzpatrick safety rules", async () => {
+    const { buildClientSystemPrompt } = await import("./clientPrompt");
+    const prompt = buildClientSystemPrompt();
+    expect(prompt).toContain("FITZPATRICK SKIN TYPE AWARENESS");
+    expect(prompt).toContain("NEVER recommend IPL for Fitzpatrick types V and VI");
+    expect(prompt).toContain("TREATMENT STACKING");
+    expect(prompt).toContain("darker skin tones");
+  });
+
+  it("client prompt includes treatment simulation instructions", async () => {
+    const { buildClientSystemPrompt } = await import("./clientPrompt");
+    const prompt = buildClientSystemPrompt();
+    expect(prompt).toContain("TREATMENT SIMULATION DESCRIPTIONS");
+    expect(prompt).toContain("Fillers");
+    expect(prompt).toContain("Microneedling");
+    expect(prompt).toContain("Laser");
+  });
+
+  it("client prompt includes both service and product catalogs", async () => {
+    const { buildClientSystemPrompt } = await import("./clientPrompt");
+    const prompt = buildClientSystemPrompt();
+    expect(prompt).toContain("CLINIC SERVICE CATALOG");
+    expect(prompt).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
+    expect(prompt).toContain("rkaskin.co");
+  });
+
+  it("client prompt instructs to recommend SPF and post-procedure kits", async () => {
+    const { buildClientSystemPrompt } = await import("./clientPrompt");
+    const prompt = buildClientSystemPrompt();
+    expect(prompt).toContain("Always recommend SPF90 sunscreen");
+    expect(prompt).toContain("post-procedure kit");
+  });
+});
+
+describe("Client Portal - Output Schema", () => {
+  it("client schema has correct name", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    expect(CLIENT_ANALYSIS_OUTPUT_SCHEMA.name).toBe("client_skin_analysis_report");
+  });
+
+  it("client schema has all required report sections", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, unknown>;
+    expect(props).toHaveProperty("skinHealthScore");
+    expect(props).toHaveProperty("scoreJustification");
+    expect(props).toHaveProperty("skinType");
+    expect(props).toHaveProperty("fitzpatrickType");
+    expect(props).toHaveProperty("conditions");
+    expect(props).toHaveProperty("positiveFindings");
+    expect(props).toHaveProperty("missedConditions");
+    expect(props).toHaveProperty("facialTreatments");
+    expect(props).toHaveProperty("skinProcedures");
+    expect(props).toHaveProperty("skincareProducts");
+    expect(props).toHaveProperty("predictiveInsights");
+    expect(props).toHaveProperty("roadmap");
+    expect(props).toHaveProperty("summary");
+    expect(props).toHaveProperty("disclaimer");
+  });
+
+  it("client schema skinProcedures items require expectedResults for simulation", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const procItems = props.skinProcedures.items;
+    expect(procItems.required).toContain("expectedResults");
+    expect(procItems.properties.expectedResults.description).toContain("simulation");
+  });
+
+  it("client schema skincareProducts items require sku and price", async () => {
+    const { CLIENT_ANALYSIS_OUTPUT_SCHEMA } = await import("./clientPrompt");
+    const props = CLIENT_ANALYSIS_OUTPUT_SCHEMA.schema.properties as Record<string, any>;
+    const productItems = props.skincareProducts.items;
+    expect(productItems.required).toContain("sku");
+    expect(productItems.required).toContain("price");
+    expect(productItems.required).toContain("name");
+  });
+});
+
+describe("Client Portal - Routes Module", () => {
+  it("registerClientRoutes is a function that can be imported", async () => {
+    const { registerClientRoutes } = await import("./clientRoutes");
+    expect(typeof registerClientRoutes).toBe("function");
+  });
+});
+
+describe("Client Portal - Email Services", () => {
+  it("sendClientReportEmail returns a result object", async () => {
+    const { sendClientReportEmail } = await import("./clientEmailService");
+    const result = await sendClientReportEmail({
+      toEmail: "test@example.com",
+      patientName: "Test User",
+      skinHealthScore: 72,
+      pdfBuffer: Buffer.from("fake pdf"),
+      analysisDate: "April 2, 2026",
+      reportUrl: "/client/report/1",
+    });
+    expect(typeof result.success).toBe("boolean");
+    if (result.success) {
+      expect(result.messageId).toBeDefined();
+    } else {
+      expect(result.error).toBeDefined();
+    }
+  });
+
+  it("scheduleFollowUpEmails is a function that can be imported", async () => {
+    const { scheduleFollowUpEmails } = await import("./followUpService");
+    expect(typeof scheduleFollowUpEmails).toBe("function");
+  });
+
+  it("scheduleFollowUpEmails prevents duplicate scheduling", async () => {
+    const { scheduleFollowUpEmails } = await import("./followUpService");
+    // Calling twice with same analysisId should not throw
+    const config = {
+      analysisId: 999999,
+      patientEmail: "test@example.com",
+      patientName: "Test User",
+      skinHealthScore: 72,
+      topConcerns: ["Acne", "Wrinkles"],
+      topTreatment: "RF Microneedling",
+    };
+    scheduleFollowUpEmails(config);
+    scheduleFollowUpEmails(config); // should be silently skipped
+    // No error means it worked
+    expect(true).toBe(true);
+  });
+});

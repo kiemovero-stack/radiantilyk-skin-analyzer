@@ -9,6 +9,8 @@ import Analyze from "./pages/Analyze";
 import Report from "./pages/Report";
 import History from "./pages/History";
 import Compare from "./pages/Compare";
+import ClientAnalyze from "./pages/ClientAnalyze";
+import ClientReport from "./pages/ClientReport";
 
 function Router() {
   return (
@@ -18,6 +20,9 @@ function Router() {
       <Route path="/report/:id" component={Report} />
       <Route path="/history" component={History} />
       <Route path="/compare" component={Compare} />
+      {/* Public client-facing routes (no login required) */}
+      <Route path="/client" component={ClientAnalyze} />
+      <Route path="/client/report/:id" component={ClientReport} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
