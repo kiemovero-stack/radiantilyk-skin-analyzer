@@ -134,6 +134,91 @@ function SectionHeader({
   );
 }
 
+/**
+ * Interactive Before/After Image Slider.
+ * Allows clients to drag a slider to compare their original photo with the AI-generated simulation.
+ */
+function BeforeAfterSlider({
+  beforeUrl,
+  afterUrl,
+  treatmentName,
+}: {
+  beforeUrl: string;
+  afterUrl: string;
+  treatmentName: string;
+}) {
+  const [sliderPos, setSliderPos] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const divRef = { current: null as HTMLDivElement | null };
+
+  const handleMove = (clientX: number) => {
+    const el = divRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setSliderPos((x / rect.width) * 100);
+  };
+
+  return (
+    <div className="relative select-none">
+      <p className="text-xs font-semibold text-purple-600 mb-2 flex items-center gap-1">
+        <Eye className="w-3 h-3" />
+        AI Treatment Simulation — {treatmentName}
+      </p>
+      <div
+        ref={(el) => { divRef.current = el; }}
+        className="relative w-full aspect-square rounded-xl overflow-hidden cursor-col-resize border border-purple-200 shadow-sm"
+        onMouseDown={() => setIsDragging(true)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+        onMouseMove={(e) => isDragging && handleMove(e.clientX)}
+        onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+      >
+        {/* After image (full) */}
+        <img
+          src={afterUrl}
+          alt={`After ${treatmentName}`}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Before image (clipped) */}
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ width: `${sliderPos}%` }}
+        >
+          <img
+            src={beforeUrl}
+            alt="Before treatment"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ minWidth: `${100 / (sliderPos / 100)}%`, maxWidth: `${100 / (sliderPos / 100)}%` }}
+          />
+        </div>
+        {/* Slider line */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
+          style={{ left: `${sliderPos}%`, transform: "translateX(-50%)" }}
+        >
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
+            <div className="flex items-center gap-0.5">
+              <ChevronRight className="w-3 h-3 text-purple-500 rotate-180" />
+              <ChevronRight className="w-3 h-3 text-purple-500" />
+            </div>
+          </div>
+        </div>
+        {/* Labels */}
+        <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/60 text-white text-[10px] font-bold z-20">
+          BEFORE
+        </div>
+        <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[10px] font-bold z-20">
+          AFTER
+        </div>
+      </div>
+      <p className="text-[10px] text-gray-400 mt-1 text-center">
+        Drag the slider to compare — AI-generated simulation for illustration purposes
+      </p>
+    </div>
+  );
+}
+
 function BookingCTA() {
   return (
     <div className="p-6 rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 text-center">
@@ -164,6 +249,7 @@ interface ReportData {
   patientLastName: string;
   patientEmail: string;
   imageUrl: string;
+  simulationImages: Record<string, string>;
   createdAt: string;
 }
 
@@ -551,7 +637,18 @@ export default function ClientReport() {
                   {/* Treatment Simulation Section */}
                   {proc.simulation && (
                     <div className="border-t border-gray-100">
-                      {/* Before / After Comparison */}
+                      {/* AI-Generated Before/After Image Slider */}
+                      {data.simulationImages && data.simulationImages[proc.name] && (
+                        <div className="p-5 border-b border-gray-100">
+                          <BeforeAfterSlider
+                            beforeUrl={data.imageUrl}
+                            afterUrl={data.simulationImages[proc.name]}
+                            treatmentName={proc.name}
+                          />
+                        </div>
+                      )}
+
+                      {/* Before / After Text Comparison */}
                       <div className="grid grid-cols-1 md:grid-cols-2">
                         <div className="p-4 bg-gray-50">
                           <div className="flex items-center gap-2 mb-2">

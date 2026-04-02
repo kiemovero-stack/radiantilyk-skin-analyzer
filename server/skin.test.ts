@@ -655,3 +655,86 @@ describe("Client Landing Page Route", () => {
     expect(content).toContain("/client/start");
   });
 });
+
+describe("Simulation Image Service", () => {
+  it("simulationService module exports generateTreatmentSimulations function", async () => {
+    const mod = await import("./simulationService");
+    expect(typeof mod.generateTreatmentSimulations).toBe("function");
+  });
+
+  it("generateTreatmentSimulations returns empty map when no API key", async () => {
+    // When OPENAI_API_KEY is not set, it should gracefully return empty
+    const origKey = process.env.OPENAI_API_KEY;
+    process.env.OPENAI_API_KEY = "";
+    
+    const { generateTreatmentSimulations } = await import("./simulationService");
+    const results = await generateTreatmentSimulations(
+      999,
+      "https://example.com/photo.jpg",
+      3,
+      [{ name: "Botox", reason: "Wrinkle reduction", targetConditions: ["Wrinkles"] }]
+    );
+    
+    expect(results).toBeInstanceOf(Map);
+    expect(results.size).toBe(0);
+    
+    // Restore
+    if (origKey) process.env.OPENAI_API_KEY = origKey;
+  });
+
+  it("simulationImages column exists in schema", async () => {
+    const { skinAnalyses } = await import("../drizzle/schema");
+    expect(skinAnalyses.simulationImages).toBeDefined();
+  });
+
+  it("ENV includes openaiApiKey field", async () => {
+    const { ENV } = await import("./_core/env");
+    expect(ENV).toHaveProperty("openaiApiKey");
+  });
+});
+
+describe("Client Report includes simulation images", () => {
+  it("client report endpoint returns simulationImages field", async () => {
+    const fs = await import("fs");
+    const routeContent = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/clientRoutes.ts",
+      "utf-8"
+    );
+    expect(routeContent).toContain("simulationImages");
+    expect(routeContent).toContain("record.simulationImages");
+  });
+
+  it("ClientReport.tsx includes BeforeAfterSlider component", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/ClientReport.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("BeforeAfterSlider");
+    expect(content).toContain("simulationImages");
+    expect(content).toContain("BEFORE");
+    expect(content).toContain("AFTER");
+    expect(content).toContain("AI Treatment Simulation");
+    expect(content).toContain("Drag the slider to compare");
+  });
+
+  it("ClientReport ReportData interface includes simulationImages", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/ClientReport.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("simulationImages: Record<string, string>");
+  });
+
+  it("simulation generation is triggered after analysis completion", async () => {
+    const fs = await import("fs");
+    const routeContent = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/clientRoutes.ts",
+      "utf-8"
+    );
+    expect(routeContent).toContain("generateTreatmentSimulations");
+    expect(routeContent).toContain("Starting simulation image generation");
+    expect(routeContent).toContain("simulation images saved");
+  });
+});

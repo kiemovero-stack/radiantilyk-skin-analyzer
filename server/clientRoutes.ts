@@ -22,6 +22,7 @@ import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
 import { sendClientReportEmail } from "./clientEmailService";
 import { scheduleFollowUpEmails } from "./followUpService";
+import { generateTreatmentSimulations } from "./simulationService";
 
 // Multer for public uploads
 const upload = multer({
@@ -119,6 +120,40 @@ async function runClientAnalysisInBackground(
       .where(eq(skinAnalyses.id, analysisId));
 
     console.log(`[ClientAnalysis] Record ${analysisId} updated to completed`);
+
+    // Generate treatment simulation images in the background
+    // Uses the client's front-facing photo to create "after" previews
+    try {
+      const frontImageUrl = imageUrls[0]; // First image is always front view
+      if (frontImageUrl) {
+        console.log(`[ClientAnalysis] Starting simulation image generation for record ${analysisId}`);
+        const simulations = await generateTreatmentSimulations(
+          analysisId,
+          frontImageUrl,
+          report.fitzpatrickType || 3,
+          report.skinProcedures.map((p) => ({
+            name: p.name,
+            reason: p.reason,
+            targetConditions: p.targetConditions,
+          }))
+        );
+
+        if (simulations.size > 0) {
+          const simMap: Record<string, string> = {};
+          simulations.forEach((url, name) => { simMap[name] = url; });
+
+          await db
+            .update(skinAnalyses)
+            .set({ simulationImages: simMap })
+            .where(eq(skinAnalyses.id, analysisId));
+
+          console.log(`[ClientAnalysis] ${simulations.size} simulation images saved for record ${analysisId}`);
+        }
+      }
+    } catch (simErr: any) {
+      console.error(`[ClientAnalysis] Simulation generation error for record ${analysisId}:`, simErr?.message);
+      // Non-fatal: report is still available without simulations
+    }
 
     // Send the initial report email to the client
     try {
@@ -365,6 +400,7 @@ export function registerClientRoutes(app: Express) {
         patientLastName: record.patientLastName,
         patientEmail: record.patientEmail,
         imageUrl: record.imageUrl,
+        simulationImages: record.simulationImages || {},
         createdAt: record.createdAt,
       });
     } catch (error: any) {

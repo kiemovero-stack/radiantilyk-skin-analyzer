@@ -36,6 +36,8 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   skinType: varchar("skinType", { length: 64 }),
   status: varchar("status", { length: 32 }).notNull().default("completed"),
   errorMessage: text("errorMessage"),
+  /** JSON map of treatment name → simulation image URL */
+  simulationImages: json("simulationImages"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

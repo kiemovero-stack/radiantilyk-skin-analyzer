@@ -15,6 +15,13 @@
       "when": 1773707458660,
       "tag": "0001_wakeful_madelyne_pryor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775146327191,
+      "tag": "0002_sturdy_forge",
+      "breakpoints": true
     }
   ]
 }

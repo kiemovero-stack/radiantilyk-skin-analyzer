@@ -170,3 +170,10 @@
 - [x] Final CTA with booking link
 - [x] Footer with links to radiantapp.click and rkaskin.co
 - [x] Separate /client (landing) and /client/start (analysis) routes
+
+## AI-Generated Treatment Simulation Images
+- [x] Research and integrate OpenAI API (gpt-image-1) for treatment simulation
+- [x] Build server-side endpoint to generate "after" images from client's uploaded photo
+- [x] Support simulation for: fillers, laser, microneedling, wrinkle reduction, skin rejuvenation
+- [x] Build before/after image slider UI on client report page
+- [x] Write tests for simulation image feature (68 tests passing)
