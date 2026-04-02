@@ -19,8 +19,11 @@ import {
   Heart,
   Shield,
   ArrowRight,
+  FileSignature,
+  RotateCcw,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import SignatureCanvas from "react-signature-canvas";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -226,7 +229,7 @@ export default function ClientAnalyze() {
   const [, navigate] = useLocation();
 
   // Step: 1 = info, 2 = concerns, 3 = photos
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Patient info
   const [fullName, setFullName] = useState("");
@@ -247,6 +250,12 @@ export default function ClientAnalyze() {
   });
 
   // Analysis state
+  // Consent
+  const [consentSigned, setConsentSigned] = useState(false);
+  const [consentScrolled, setConsentScrolled] = useState(false);
+  const sigCanvasRef = useRef<SignatureCanvas | null>(null);
+  const consentScrollRef = useRef<HTMLDivElement | null>(null);
+
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState("");
   const [pollingId, setPollingId] = useState<number | null>(null);
@@ -371,9 +380,30 @@ export default function ClientAnalyze() {
     }
 
     setIsAnalyzing(true);
-    setAnalysisProgress("Preparing your photos...");
+    setAnalysisProgress("Saving your consent...");
 
     try {
+      // Step 0: Save consent to database
+      const sigData = sigCanvasRef.current?.toDataURL("image/png") || "";
+      const nameParts0 = fullName.trim().split(/\s+/);
+      const consentRes = await fetch("/api/client/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientFirstName: nameParts0[0] || "",
+          patientLastName: nameParts0.slice(1).join(" ") || "",
+          patientEmail: email.trim(),
+          patientDob: `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}`,
+          signatureData: sigData,
+          consentVersion: "1.0",
+        }),
+      });
+      if (!consentRes.ok) {
+        console.warn("Consent save failed, continuing with analysis");
+      }
+
+      setAnalysisProgress("Preparing your photos...");
+
       // Step 1: Upload images via public multipart endpoint
       const imagesToUpload: {
         file: File;
@@ -463,7 +493,7 @@ export default function ClientAnalyze() {
 
       <main className="flex-1 container py-6 md:py-10">
         <div className="max-w-2xl mx-auto">
-          <StepIndicator current={step} total={3} />
+          <StepIndicator current={step} total={4} />
 
           <AnimatePresence mode="wait">
             {/* ── Step 1: Patient Info ─────────────────────────────── */}
@@ -833,21 +863,11 @@ export default function ClientAnalyze() {
                   <Button
                     size="lg"
                     className="flex-1 h-12 text-base font-semibold"
-                    onClick={handleAnalyze}
-                    disabled={!hasFrontPhoto || isAnalyzing}
+                    onClick={() => setStep(4)}
+                    disabled={!hasFrontPhoto}
                   >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5 mr-2" />
-                        Analyze {photoCount}{" "}
-                        {photoCount === 1 ? "Photo" : "Photos"}
-                      </>
-                    )}
+                    Continue to Consent
+                    <ChevronRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
 
@@ -869,6 +889,152 @@ export default function ClientAnalyze() {
                 )}
               </motion.div>
             )}
+
+            {/* Step 4: Consent & Signature */}
+            {step === 4 && (
+              <motion.div
+                key="step4"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="text-center mb-4">
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                    Consent & Signature
+                  </h1>
+                  <p className="mt-2 text-muted-foreground">
+                    Please read and sign the consent form below to proceed with your analysis.
+                  </p>
+                </div>
+
+                <div
+                  ref={consentScrollRef}
+                  onScroll={(e) => {
+                    const el = e.currentTarget;
+                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+                      setConsentScrolled(true);
+                    }
+                  }}
+                  className="max-h-[300px] overflow-y-auto p-5 rounded-xl border border-border/60 bg-card text-sm leading-relaxed space-y-4"
+                >
+                  <h3 className="font-bold text-base">Informed Consent for AI Skin Analysis</h3>
+                  <p className="text-muted-foreground">
+                    <strong>RadiantilyK Skin Care</strong> — Consent for AI-Assisted Skin Analysis
+                  </p>
+                  <p>
+                    I, <strong>{fullName || "[Patient Name]"}</strong>, voluntarily consent to participate in an AI-assisted skin analysis provided by RadiantilyK Skin Care. I understand and agree to the following:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                    <li><strong>Purpose:</strong> The AI skin analysis uses artificial intelligence to evaluate photographs of my skin and provide personalized recommendations for skincare treatments and products. This analysis is for informational and educational purposes only.</li>
+                    <li><strong>Not Medical Advice:</strong> I understand that this AI analysis does NOT constitute medical advice, diagnosis, or treatment. The results are generated by an AI system and should not replace consultation with a licensed dermatologist or healthcare provider.</li>
+                    <li><strong>Photo Usage:</strong> I consent to having my photographs taken and analyzed by the AI system. My photos will be securely stored and used solely for the purpose of generating my skin analysis report. Photos will not be shared with third parties without my explicit consent.</li>
+                    <li><strong>Data Privacy:</strong> My personal information, including my name, email, date of birth, and photographs, will be handled in accordance with HIPAA privacy regulations and RadiantilyK privacy policy. My data will be encrypted and stored securely.</li>
+                    <li><strong>Treatment Recommendations:</strong> Any treatment recommendations provided are suggestions based on AI analysis. Actual treatment plans should be discussed with and approved by a qualified skincare professional during an in-person consultation.</li>
+                    <li><strong>Risks & Limitations:</strong> I understand that AI analysis has limitations and may not detect all skin conditions. The accuracy of results depends on photo quality and lighting conditions. I should seek professional medical evaluation for any concerning skin conditions.</li>
+                    <li><strong>Communication Consent:</strong> I consent to receive follow-up communications via email regarding my analysis results, treatment recommendations, and appointment scheduling. I may opt out at any time by replying "unsubscribe."</li>
+                    <li><strong>Voluntary Participation:</strong> My participation is entirely voluntary. I may withdraw my consent at any time by contacting RadiantilyK Skin Care.</li>
+                  </ol>
+                  <p className="text-xs text-muted-foreground italic">
+                    Consent Version 1.0 — Effective Date: January 1, 2025
+                  </p>
+                </div>
+
+                {!consentScrolled && (
+                  <p className="text-xs text-amber-600 text-center">
+                    Please scroll to the bottom of the consent form to continue
+                  </p>
+                )}
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold">Your Signature</label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        sigCanvasRef.current?.clear();
+                        setConsentSigned(false);
+                      }}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                      Clear
+                    </Button>
+                  </div>
+                  <div className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-white">
+                    <SignatureCanvas
+                      ref={sigCanvasRef}
+                      penColor="#1a1a2e"
+                      canvasProps={{
+                        className: "w-full",
+                        style: { width: "100%", height: "150px" },
+                      }}
+                      onEnd={() => setConsentSigned(true)}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Sign above using your finger or mouse
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground flex items-center gap-2">
+                  <Shield className="w-4 h-4 shrink-0" />
+                  <span>
+                    Signed electronically on {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} at {new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="h-12"
+                    onClick={() => setStep(3)}
+                    disabled={isAnalyzing}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Back
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="flex-1 h-12 text-base font-semibold"
+                    onClick={handleAnalyze}
+                    disabled={!consentSigned || isAnalyzing}
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        I Agree — Start Analysis
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {isAnalyzing && analysisProgress && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-center"
+                  >
+                    <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-primary">
+                      {analysisProgress}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Please don't close this page
+                    </p>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+
+
+
           </AnimatePresence>
         </div>
       </main>

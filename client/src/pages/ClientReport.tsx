@@ -724,6 +724,47 @@ export default function ClientReport() {
             </div>
           </motion.section>
 
+          {/* Combined Treatment Simulation — ONE image for all procedures */}
+          {(() => {
+            const combinedUrl = data.simulationImages?.["__combined__"];
+            const hasOldStyle = data.simulationImages && Object.keys(data.simulationImages).some(k => k !== "__combined__");
+            const simUrl = combinedUrl || (hasOldStyle ? Object.values(data.simulationImages)[0] : null);
+            const procedureNames = report.skinProcedures.map((p: any) => p.name).join(", ");
+            return (
+              <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="mb-8 p-6 md:p-8 rounded-2xl border border-pink-100 bg-white shadow-sm"
+              >
+                <SectionHeader
+                  icon={Eye}
+                  title="Your Treatment Preview"
+                  subtitle="AI-generated simulation showing your potential results"
+                />
+                {simUrl ? (
+                  <BeforeAfterSlider
+                    beforeUrl={data.imageUrl}
+                    afterUrl={simUrl}
+                    treatmentName={`Combined Results — ${procedureNames}`}
+                  />
+                ) : simulationsLoading ? (
+                  <div className="flex items-center gap-3 p-5 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border border-purple-200">
+                    <Loader2 className="w-5 h-5 animate-spin text-purple-500 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-purple-700">Generating Your Treatment Preview</p>
+                      <p className="text-xs text-purple-500 mt-0.5">Our AI is creating a personalized before/after simulation showing the combined results of all your recommended treatments...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">
+                    <p className="text-sm text-gray-500">Treatment simulation will appear here once generated.</p>
+                  </div>
+                )}
+              </motion.section>
+            );
+          })()}
           {/* Section: Procedures with Treatment Simulation */}
           <motion.section
             initial="hidden"
@@ -780,27 +821,7 @@ export default function ClientReport() {
                   {/* Treatment Simulation Section */}
                   {proc.simulation && (
                     <div className="border-t border-gray-100">
-                      {/* AI-Generated Before/After Image Slider */}
-                      {simulationsLoading && !(data.simulationImages && data.simulationImages[proc.name]) && (
-                        <div className="p-5 border-b border-gray-100">
-                          <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 border border-purple-200">
-                            <Loader2 className="w-5 h-5 animate-spin text-purple-500 shrink-0" />
-                            <div>
-                              <p className="text-sm font-semibold text-purple-700">Generating Your Treatment Preview</p>
-                              <p className="text-xs text-purple-500 mt-0.5">Our AI is creating a personalized before/after simulation for {proc.name}...</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {data.simulationImages && data.simulationImages[proc.name] && (
-                        <div className="p-5 border-b border-gray-100">
-                          <BeforeAfterSlider
-                            beforeUrl={data.imageUrl}
-                            afterUrl={data.simulationImages[proc.name]}
-                            treatmentName={proc.name}
-                          />
-                        </div>
-                      )}
+
 
                       {/* Before / After Text Comparison */}
                       <div className="grid grid-cols-1 md:grid-cols-2">

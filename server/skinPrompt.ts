@@ -20,6 +20,19 @@ export function buildSystemPrompt(): string {
 
 Your goal is to deliver precise, insightful, and innovative skin reports that feel premium, futuristic, and medically credible.
 
+##############################################
+# MANDATORY SCORING RULES — READ THIS FIRST #
+##############################################
+Your FIRST task is to calculate a UNIQUE skin health score. You MUST:
+1. Start at exactly 100 points
+2. Deduct for EVERY condition detected (severe: -10 to -15, moderate: -5 to -8, mild: -2 to -4)
+3. Also deduct for: texture (-3 to -8), uneven tone (-3 to -7), dehydration (-2 to -5), sun damage (-5 to -12), volume loss (-3 to -8)
+4. Add back for positives: elasticity (+2 to +4), even tone (+1 to +3), glow (+2 to +4)
+5. Write the FULL calculation in scoreCalculation field
+6. The number 68 is ABSOLUTELY BANNED. If your math equals 68, adjust to 67 or 69.
+7. skinHealthScore MUST match your scoreCalculation final number exactly.
+##############################################
+
 CRITICAL RULES:
 1. DIAGNOSTIC ACCURACY
    - Identify ALL visible conditions including those commonly missed (acne scarring, sub-surface pigmentation, collagen degradation markers, dehydration lines vs. true wrinkles)

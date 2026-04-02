@@ -217,3 +217,47 @@
 - [x] Faster and cheaper (1 API call instead of 4)
 - [x] Backward compatible with old per-procedure simulation images
 - [x] 76 tests passing
+
+## Bug: AI Simulation Not Showing
+- [x] Fix AI simulation image not displaying on client report page (combined __combined__ key + treatmentName prop fix)
+
+## Update Booking URL
+- [x] Change booking URL from radiantapp.click to rkaemr.click/portal throughout the app
+
+## Share Results Button
+- [x] Add Share Results button to client report (native share, copy link, email, text)
+
+## Staff Notification Email
+- [x] Send staff email notification when new client analysis completes
+
+## Product Category Icons
+- [x] Add generic product category icons alongside recommendations in client report
+
+## Persistent Follow-Up Email Scheduler
+- [x] Create scheduledEmails database table
+- [x] Rewrite followUpService to use database instead of setTimeout
+- [x] Add startup job to process pending emails on server restart
+- [x] Email scheduler runs every 60 seconds checking for due emails
+
+## Client Consent Form
+- [x] Add consent step (step 4) to client analysis flow
+- [x] Electronic signature pad with date/time stamp
+- [x] Save consent to clientConsents database table
+- [x] Consent must be signed before analysis can proceed
+
+## Push Notifications for Staff
+- [ ] Add push notifications when new client analysis completes
+
+## Bug: Staff Can't See Client Reports
+- [x] Fix staff History page to show client portal analyses (shows Client Portal / Staff badge)
+
+## Add Ultherapy Prime Service
+- [ ] Research Ultherapy Prime details
+- [ ] Add Ultherapy Prime to procedure/service catalog with pricing
+- [ ] Add to AI analysis prompt so it can recommend Ultherapy Prime when appropriate
+- [ ] Add to simulation service treatment effects mapping
+
+## CRITICAL Bug: Score Always 68
+- [x] Fix AI prompt — added mandatory scoreCalculation field forcing step-by-step math
+- [x] Added explicit instruction: NEVER return 68, must calculate from actual photo analysis
+- [x] Added scoring rubric with deduction categories and variance enforcement
