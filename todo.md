@@ -317,3 +317,11 @@
 - [x] Update photo tips to be body-relevant when body concern is selected
 - [x] Keep face photo instructions for face concerns
 - [x] Add body silhouette SVGs for body photo capture cards
+
+## Body Treatment Recommendation Rules & RKsculpt Rename
+- [x] Rename "Body Sculpting" to "RKsculpt" in service catalog
+- [x] Rename "Body Sculpting" to "RKsculpt" in all AI prompts
+- [x] Add body-specific treatment recommendation rules to client prompt (stretch marks, skin laxity, body acne, hyperpigmentation, fat reduction)
+- [x] Add body-specific treatment recommendation rules to staff prompt
+- [x] Never use the word "emsculpt" — always use "RKsculpt"
+- [x] Update tests for new body treatment rules

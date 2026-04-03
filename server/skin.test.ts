@@ -996,3 +996,48 @@ describe("Copy Protection", () => {
     expect(content).toContain("nofollow");
   });
 });
+
+describe("Body Treatment Rules & RKsculpt", () => {
+  it("service catalog uses RKsculpt instead of Body Sculpting", () => {
+    const catalogText = getServiceCatalogText();
+    expect(catalogText).toContain("RKsculpt");
+    expect(catalogText).not.toContain("Body Sculpting");
+  });
+
+  it("service catalog does not mention emsculpt", () => {
+    const catalogText = getServiceCatalogText();
+    expect(catalogText.toLowerCase()).not.toContain("emsculpt");
+  });
+
+  it("staff prompt includes body treatment recommendations", () => {
+    expect(systemPrompt).toContain("BODY TREATMENT RECOMMENDATIONS");
+    expect(systemPrompt).toContain("RKsculpt");
+    expect(systemPrompt).toContain("Stretch marks");
+    expect(systemPrompt).toContain("RF Skin Tightening");
+    expect(systemPrompt).toContain("Lipolytic Injections");
+  });
+
+  it("client prompt includes body treatment recommendations", () => {
+    expect(clientPrompt).toContain("BODY TREATMENT RECOMMENDATIONS");
+    expect(clientPrompt).toContain("RKsculpt");
+    expect(clientPrompt).toContain("Stretch marks");
+    expect(clientPrompt).toContain("RF Skin Tightening");
+    expect(clientPrompt).toContain("Lipolytic Injections");
+  });
+
+  it("prompts never use the word emsculpt", () => {
+    expect(systemPrompt.toLowerCase()).not.toMatch(/(?<!\")emsculpt/);
+    expect(clientPrompt.toLowerCase()).not.toMatch(/(?<!\")emsculpt/);
+    // emsculpt only appears in the context of "NEVER use the word emsculpt"
+    expect(systemPrompt).toContain('NEVER use the word "emsculpt"');
+    expect(clientPrompt).toContain('NEVER use the word "emsculpt"');
+  });
+
+  it("RKsculpt service has correct pricing", () => {
+    const rksculptCategory = SERVICE_CATALOG.find(c => c.category === "RKsculpt");
+    expect(rksculptCategory).toBeDefined();
+    expect(rksculptCategory!.services).toHaveLength(4);
+    expect(rksculptCategory!.services[0].price).toBe("$400");
+    expect(rksculptCategory!.services[1].price).toBe("$1,200");
+  });
+});

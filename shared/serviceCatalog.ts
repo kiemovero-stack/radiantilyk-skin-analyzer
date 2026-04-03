@@ -55,12 +55,12 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
     ],
   },
   {
-    category: "Body Sculpting",
+    category: "RKsculpt",
     services: [
-      { name: "Body Sculpting - Single Session", price: "$400", category: "Body Sculpting" },
-      { name: "Body Sculpting - Pack of 4", price: "$1,200", category: "Body Sculpting" },
-      { name: "Body Sculpting - Pack of 6", price: "$1,500", category: "Body Sculpting" },
-      { name: "Body Sculpting - Pack of 10", price: "$2,000", category: "Body Sculpting" },
+      { name: "RKsculpt - Single Session", price: "$400", category: "RKsculpt" },
+      { name: "RKsculpt - Pack of 4", price: "$1,200", category: "RKsculpt" },
+      { name: "RKsculpt - Pack of 6", price: "$1,500", category: "RKsculpt" },
+      { name: "RKsculpt - Pack of 10", price: "$2,000", category: "RKsculpt" },
     ],
   },
   {
