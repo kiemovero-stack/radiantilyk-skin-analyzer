@@ -356,3 +356,10 @@
 - [x] Update 72-hour email content: urgent tone, guide them to book consultation, emphasize limited-time offer expiring
 - [x] Ensure emails include direct booking link (rkaemr.click/portal)
 - [x] Update tests for new email timing and content
+
+## AI Simulation Image Realism Improvement
+- [x] Update simulation prompt to produce subtle, realistic, human-like enhancements
+- [x] Ensure simulation shows believable treatment results (not dramatic/artificial)
+- [x] Added percentage-based improvement targets (e.g., 30% reduction, not elimination)
+- [x] Added critical rules: keep pores, texture, imperfections; less is more
+- [x] Each treatment prompt specifies realistic timeframe expectations

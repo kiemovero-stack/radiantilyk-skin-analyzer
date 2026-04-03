@@ -60,25 +60,27 @@ function buildSimulationPrompt(req: SimulationRequest): string {
 
   const skinDesc = fitzDescriptions[req.fitzpatrickType] || "medium skin tone";
 
-  // Treatment-specific prompts
+  // Treatment-specific prompts — designed for SUBTLE, BELIEVABLE, HUMAN-LIKE results.
+  // Each prompt emphasizes minimal changes that look like a real person who got a real treatment,
+  // NOT a digitally enhanced or airbrushed version.
   const treatmentPrompts: Record<string, string> = {
-    filler: `Subtly enhance facial volume: slightly fuller cheeks, smoother nasolabial folds, and more defined jawline. The changes should look natural and subtle — like a well-rested, refreshed version. Keep the same ${skinDesc}, same facial features, same lighting. No dramatic changes.`,
-    botox: `Subtly smooth forehead lines and crow's feet wrinkles. The skin should look smoother and more relaxed around the forehead and eye area, but still natural with some expression lines remaining. Keep the same ${skinDesc}, same person, same lighting.`,
-    neurotoxin: `Subtly smooth forehead lines and crow's feet wrinkles. The skin should look smoother and more relaxed around the forehead and eye area, but still natural with some expression lines remaining. Keep the same ${skinDesc}, same person, same lighting.`,
-    laser: `Show clearer, more even skin tone with reduced hyperpigmentation, dark spots, and redness. The skin should look more luminous and even-toned while maintaining the same ${skinDesc}. Keep the same person, same features, same lighting. Subtle improvement only.`,
-    ipl: `Show clearer, more even skin tone with reduced redness, broken capillaries, and sun spots. The skin should look more even and clear while maintaining the same ${skinDesc}. Keep the same person, same lighting.`,
-    microneedling: `Show smoother skin texture with visibly reduced pore size, fewer fine lines, and a more refined skin surface. The skin should appear plumper and more youthful while maintaining the same ${skinDesc}. Keep the same person, same lighting.`,
-    "chemical peel": `Show brighter, more radiant skin with reduced dullness, smoother texture, and more even tone. The skin should look refreshed and glowing while maintaining the same ${skinDesc}. Keep the same person, same lighting.`,
-    peel: `Show brighter, more radiant skin with reduced dullness, smoother texture, and more even tone. The skin should look refreshed and glowing while maintaining the same ${skinDesc}. Keep the same person, same lighting.`,
-    pico: `Show significantly reduced pigmentation, dark spots, and sun damage. The skin tone should be more even and clear while maintaining the same ${skinDesc}. Keep the same person, same lighting.`,
-    hifu: `Show subtle skin tightening and lifting effect — slightly more defined jawline, lifted cheeks, and tighter neck area. The changes should look natural, like the skin is firmer. Keep the same ${skinDesc}, same person, same lighting.`,
-    "radio frequency": `Show tighter, firmer skin with improved contours around the jawline and cheeks. Subtle lifting effect. Keep the same ${skinDesc}, same person, same lighting.`,
-    rf: `Show tighter, firmer skin with improved contours around the jawline and cheeks. Subtle lifting effect with smoother texture. Keep the same ${skinDesc}, same person, same lighting.`,
-    facial: `Show refreshed, glowing skin with improved hydration, reduced puffiness, and a healthy radiance. The skin should look revitalized and well-nourished while maintaining the same ${skinDesc}. Keep the same person, same lighting.`,
-    hydrafacial: `Show deeply hydrated, plump skin with minimized pores, improved clarity, and a dewy glow. Keep the same ${skinDesc}, same person, same lighting.`,
-    prp: `Show improved skin texture and tone with a natural healthy glow. Reduced fine lines and improved skin elasticity. Keep the same ${skinDesc}, same person, same lighting.`,
-    sculptra: `Show subtle volume restoration with improved facial contours and reduced hollowness. Natural-looking fullness. Keep the same ${skinDesc}, same person, same lighting.`,
-    ultherapy: `Show subtle but noticeable skin lifting and tightening — firmer jawline, slightly lifted cheeks, smoother neck skin. The micro-focused ultrasound results should look like natural rejuvenation over 2-3 months. Keep the same ${skinDesc}, same person, same lighting.`,
+    filler: `Make very slight, barely noticeable volume improvements: soften nasolabial folds by about 30%, add just a hint of cheek fullness, and very slightly smooth marionette lines. The person should look like they got a conservative, natural filler treatment — like they slept really well and are slightly more hydrated. Do NOT make lips bigger unless they have very thin lips. Keep all skin texture, pores, and natural imperfections. Same ${skinDesc}, same exact face shape, same lighting, same expression.`,
+    botox: `Very slightly relax the forehead lines and crow's feet — reduce them by about 30-40%, NOT eliminate them. Some natural expression lines MUST remain so the face still looks alive and expressive. The skin between the brows should look slightly smoother. Do NOT make the skin look airbrushed or poreless. Keep all natural skin texture, pores, and minor imperfections. Same ${skinDesc}, same person, same lighting.`,
+    neurotoxin: `Very slightly relax the forehead lines and crow's feet — reduce them by about 30-40%, NOT eliminate them. Some natural expression lines MUST remain so the face still looks alive and expressive. The skin between the brows should look slightly smoother. Do NOT make the skin look airbrushed or poreless. Keep all natural skin texture, pores, and minor imperfections. Same ${skinDesc}, same person, same lighting.`,
+    laser: `Very slightly even out the skin tone — reduce the most visible dark spots and redness patches by about 40%. The skin should look a touch more even but still have natural variation in tone. Do NOT make the skin look flawless or porcelain. Keep all pores, fine lines, and natural texture. Same ${skinDesc}, same person, same features, same lighting. This should look like 4-6 weeks after one laser session.`,
+    ipl: `Slightly reduce visible redness, broken capillaries, and the most prominent sun spots — by about 30-40%. The skin should look a bit more even-toned but still completely natural with normal skin variation. Do NOT remove all spots or make skin look filtered. Keep all pores, texture, and natural imperfections. Same ${skinDesc}, same person, same lighting. This should look like results after one IPL session.`,
+    microneedling: `Very slightly improve skin texture — make pores look about 20% smaller and fine lines about 25% softer. The skin should have a slightly healthier, more refined appearance but still look completely real with visible pores and natural texture. Do NOT make skin look airbrushed or filtered. Same ${skinDesc}, same person, same lighting. This should look like 4 weeks after one microneedling session.`,
+    "chemical peel": `Make the skin look slightly brighter and more refreshed — like the person just had a really good facial. Reduce dullness slightly, make the complexion look a tiny bit more even. Do NOT make dramatic changes. Keep all natural skin texture, pores, and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    peel: `Make the skin look slightly brighter and more refreshed — like the person just had a really good facial. Reduce dullness slightly, make the complexion look a tiny bit more even. Do NOT make dramatic changes. Keep all natural skin texture, pores, and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    pico: `Reduce the most visible pigmentation spots and sun damage by about 40%. The skin tone should look slightly more even while still having natural variation. Do NOT make skin look flawless. Keep all pores, texture, and natural imperfections. Same ${skinDesc}, same person, same lighting.`,
+    hifu: `Very subtly tighten the jawline and midface — the difference should be barely noticeable, like the person looks slightly more defined. About 10-15% improvement in skin firmness. Do NOT change the face shape. Keep all natural skin texture, wrinkles, and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    "radio frequency": `Very subtly firm the skin along the jawline and cheeks — about 10-15% tighter appearance. The difference should be barely noticeable. Do NOT change face shape or remove wrinkles. Keep all natural texture and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    rf: `Very subtly firm the skin along the jawline and cheeks — about 10-15% tighter appearance with slightly smoother texture. The difference should be barely noticeable. Do NOT change face shape or remove wrinkles. Keep all natural texture and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    facial: `Make the skin look slightly more hydrated and refreshed — like the person drank a lot of water and got great sleep. A very subtle healthy glow, slightly less puffiness. Do NOT change skin texture or remove any imperfections. Same ${skinDesc}, same person, same lighting.`,
+    hydrafacial: `Make the skin look slightly more hydrated with a very subtle dewy quality. Pores should look very slightly minimized (about 15%). The skin should look like the person just had a great facial — refreshed but completely natural. Same ${skinDesc}, same person, same lighting.`,
+    prp: `Show a very subtle improvement in skin quality — slightly healthier glow, marginally improved texture. The changes should be almost imperceptible but give an overall "healthier skin" impression. Keep all natural texture, pores, and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    sculptra: `Show very subtle, gradual volume restoration — slightly less hollowness in the cheeks and temples, about 15-20% improvement. The results should look like natural aging reversal over 3-4 months, NOT like filler. Keep all natural skin texture and imperfections. Same ${skinDesc}, same person, same lighting.`,
+    ultherapy: `Show very subtle skin firming — about 10-15% improvement in jawline definition and midface lift. The results should look like natural rejuvenation over 2-3 months. Do NOT change face shape. Keep all natural skin texture, wrinkles, and imperfections. Same ${skinDesc}, same person, same lighting.`,
   };
 
   // Find the best matching treatment prompt
@@ -94,15 +96,15 @@ function buildSimulationPrompt(req: SimulationRequest): string {
 
   if (!specificPrompt) {
     // Generic treatment prompt
-    specificPrompt = `Show subtle skin improvement from ${req.treatmentName} treatment: ${req.treatmentDescription}. The changes should look natural and realistic. Keep the same ${skinDesc}, same person, same facial features, same lighting. Only show the specific treatment results.`;
+    specificPrompt = `Show very subtle, barely noticeable skin improvement from ${req.treatmentName} treatment: ${req.treatmentDescription}. The changes should be minimal and look completely natural — like the person looks slightly healthier, NOT like they were digitally edited. Keep the same ${skinDesc}, same person, same facial features, same lighting. Keep all natural skin texture, pores, and imperfections.`;
   }
 
   // Add condition-specific details
   const conditionDetails = req.targetConditions.length > 0
-    ? ` Focus on improving these specific concerns: ${req.targetConditions.join(", ")}.`
+    ? ` Focus on slightly improving these specific concerns: ${req.targetConditions.join(", ")}.`
     : "";
 
-  return `Edit this photo to show realistic results of a ${req.treatmentName} treatment. ${specificPrompt}${conditionDetails} IMPORTANT: Keep the person's identity, face shape, hair, clothing, and background exactly the same. Only modify the skin/facial areas affected by the treatment. The result should look like a realistic, achievable outcome — not overly edited or artificial.`;
+  return `You are editing a real person's photo to show what they would realistically look like after a ${req.treatmentName} treatment. ${specificPrompt}${conditionDetails} CRITICAL RULES: 1) The person MUST be 100% recognizable — same identity, face shape, bone structure, hair, clothing, background, lighting, and camera angle. 2) Keep ALL natural skin texture, pores, fine lines, and minor imperfections — real skin is not poreless or airbrushed. 3) Changes should be VERY SUBTLE — a viewer should have to look closely to notice the difference. 4) The result must look like a real photograph of a real person, NOT a digitally enhanced or filtered image. 5) If in doubt, make LESS change rather than more — believability is more important than dramatic results.`;
 }
 
 /**
