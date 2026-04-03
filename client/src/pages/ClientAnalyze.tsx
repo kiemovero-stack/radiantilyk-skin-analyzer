@@ -19,11 +19,8 @@ import {
   Heart,
   Shield,
   ArrowRight,
-  FileSignature,
-  RotateCcw,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import SignatureCanvas from "react-signature-canvas";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,13 +54,15 @@ const SKIN_CONCERNS = [
 ];
 
 // ── Photo Angle Config ─────────────────────────────────────────────────
-const ANGLE_CONFIG: {
+type AngleConfig = {
   key: AngleKey;
   label: string;
   required: boolean;
   description: string;
   instruction: string;
-}[] = [
+};
+
+const FACE_ANGLE_CONFIG: AngleConfig[] = [
   {
     key: "front",
     label: "Front View",
@@ -87,6 +86,33 @@ const ANGLE_CONFIG: {
     description: "Turn head to show right profile",
     instruction:
       "Turn your head to the left so the camera sees your RIGHT side. Keep your chin level — don't tilt up or down. Show your full profile from forehead to chin.",
+  },
+];
+
+const BODY_ANGLE_CONFIG: AngleConfig[] = [
+  {
+    key: "front",
+    label: "Target Area — Close Up",
+    required: true,
+    description: "Photo of the area you want analyzed",
+    instruction:
+      "Take a close-up photo of the body area you're concerned about (e.g., neck, chest, arms, legs, stomach). Make sure the area is well-lit and clearly visible. Remove clothing from the area if possible.",
+  },
+  {
+    key: "left",
+    label: "Wider View",
+    required: false,
+    description: "Step back to show the surrounding area",
+    instruction:
+      "Take a slightly wider photo showing the area in context. This helps our AI understand the full scope. Stand about 2-3 feet from the camera.",
+  },
+  {
+    key: "right",
+    label: "Different Angle",
+    required: false,
+    description: "Show the area from another angle",
+    instruction:
+      "Take the area from a different angle or side. This gives our AI a more complete picture for accurate analysis.",
   },
 ];
 
@@ -167,6 +193,71 @@ function FaceSilhouette({
   );
 }
 
+// ── Body Silhouette SVGs ───────────────────────────────────────────────
+function BodySilhouette({
+  angle,
+  className,
+}: {
+  angle: AngleKey;
+  className?: string;
+}) {
+  if (angle === "front") {
+    // Target/close-up icon: a magnifying glass over skin
+    return (
+      <svg
+        viewBox="0 0 80 100"
+        className={cn("w-20 h-24", className)}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        {/* Body outline */}
+        <ellipse cx="40" cy="20" rx="10" ry="12" />
+        <path d="M30 30 L20 55 L25 55 L28 40 L32 65 L35 90 L40 90 L42 65 L48 65 L45 90 L50 90 L52 65 L55 40 L58 55 L63 55 L52 30" />
+        {/* Target circle */}
+        <circle cx="42" cy="50" r="12" strokeDasharray="3 2" opacity="0.6" />
+        <line x1="42" y1="42" x2="42" y2="58" strokeDasharray="2 2" opacity="0.4" />
+        <line x1="34" y1="50" x2="50" y2="50" strokeDasharray="2 2" opacity="0.4" />
+      </svg>
+    );
+  }
+  if (angle === "left") {
+    // Wider view icon
+    return (
+      <svg
+        viewBox="0 0 80 100"
+        className={cn("w-20 h-24", className)}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        {/* Body outline */}
+        <ellipse cx="40" cy="20" rx="10" ry="12" />
+        <path d="M30 30 L20 55 L25 55 L28 40 L32 65 L35 90 L40 90 L42 65 L48 65 L45 90 L50 90 L52 65 L55 40 L58 55 L63 55 L52 30" />
+        {/* Wider frame */}
+        <rect x="10" y="5" width="60" height="90" rx="4" strokeDasharray="4 3" opacity="0.3" />
+      </svg>
+    );
+  }
+  // Different angle icon
+  return (
+    <svg
+      viewBox="0 0 80 100"
+      className={cn("w-20 h-24", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      {/* Body outline - slightly rotated perspective */}
+      <ellipse cx="40" cy="20" rx="10" ry="12" />
+      <path d="M30 30 L20 55 L25 55 L28 40 L32 65 L35 90 L40 90 L42 65 L48 65 L45 90 L50 90 L52 65 L55 40 L58 55 L63 55 L52 30" />
+      {/* Rotation arrow */}
+      <path d="M62 25 Q70 35 62 45" />
+      <path d="M62 45 L65 40 L58 42" fill="currentColor" />
+    </svg>
+  );
+}
+
 // ── Step Indicator ─────────────────────────────────────────────────────
 function StepIndicator({
   current,
@@ -229,7 +320,7 @@ export default function ClientAnalyze() {
   const [, navigate] = useLocation();
 
   // Step: 1 = info, 2 = concerns, 3 = photos
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Patient info
   const [fullName, setFullName] = useState("");
@@ -250,12 +341,6 @@ export default function ClientAnalyze() {
   });
 
   // Analysis state
-  // Consent
-  const [consentSigned, setConsentSigned] = useState(false);
-  const [consentScrolled, setConsentScrolled] = useState(false);
-  const sigCanvasRef = useRef<SignatureCanvas | null>(null);
-  const consentScrollRef = useRef<HTMLDivElement | null>(null);
-
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState("");
   const [pollingId, setPollingId] = useState<number | null>(null);
@@ -380,30 +465,9 @@ export default function ClientAnalyze() {
     }
 
     setIsAnalyzing(true);
-    setAnalysisProgress("Saving your consent...");
+    setAnalysisProgress("Preparing your photos...");
 
     try {
-      // Step 0: Save consent to database
-      const sigData = sigCanvasRef.current?.toDataURL("image/png") || "";
-      const nameParts0 = fullName.trim().split(/\s+/);
-      const consentRes = await fetch("/api/client/consent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          patientFirstName: nameParts0[0] || "",
-          patientLastName: nameParts0.slice(1).join(" ") || "",
-          patientEmail: email.trim(),
-          patientDob: `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}`,
-          signatureData: sigData,
-          consentVersion: "1.0",
-        }),
-      });
-      if (!consentRes.ok) {
-        console.warn("Consent save failed, continuing with analysis");
-      }
-
-      setAnalysisProgress("Preparing your photos...");
-
       // Step 1: Upload images via public multipart endpoint
       const imagesToUpload: {
         file: File;
@@ -493,7 +557,7 @@ export default function ClientAnalyze() {
 
       <main className="flex-1 container py-6 md:py-10">
         <div className="max-w-2xl mx-auto">
-          <StepIndicator current={step} total={4} />
+          <StepIndicator current={step} total={3} />
 
           <AnimatePresence mode="wait">
             {/* ── Step 1: Patient Info ─────────────────────────────── */}
@@ -697,7 +761,11 @@ export default function ClientAnalyze() {
             )}
 
             {/* ── Step 3: Photo Capture ───────────────────────────── */}
-            {step === 3 && (
+            {step === 3 && (() => {
+              const isBodyConcern = selectedConcerns.includes("body_skin") && !selectedConcerns.some(c => !["body_skin", "other", "general"].includes(c));
+              const activeAngleConfig = isBodyConcern ? BODY_ANGLE_CONFIG : FACE_ANGLE_CONFIG;
+              const SilhouetteComponent = isBodyConcern ? BodySilhouette : FaceSilhouette;
+              return (
               <motion.div
                 key="step3"
                 initial={{ opacity: 0, x: 20 }}
@@ -707,38 +775,43 @@ export default function ClientAnalyze() {
               >
                 <div className="text-center mb-6">
                   <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                    Take Your Photos
+                    {isBodyConcern ? "Take Your Body Photos" : "Take Your Photos"}
                   </h1>
                   <p className="mt-2 text-muted-foreground">
-                    Follow the guides below for the best results. Good
-                    lighting and a neutral expression work best.
+                    {isBodyConcern
+                      ? "Follow the guides below to capture the body area you'd like analyzed. Good lighting is key."
+                      : "Follow the guides below for the best results. Good lighting and a neutral expression work best."}
                   </p>
                 </div>
 
                 {/* Photo tips banner */}
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
                   <p className="text-sm font-medium mb-2">
-                    Tips for Great Photos:
+                    {isBodyConcern ? "Tips for Great Body Photos:" : "Tips for Great Photos:"}
                   </p>
                   <ul className="text-xs space-y-1 list-disc list-inside text-amber-700">
-                    <li>
-                      Use natural daylight or bright, even lighting
-                    </li>
-                    <li>Remove makeup and glasses if possible</li>
-                    <li>Pull hair away from your face</li>
-                    <li>
-                      Keep a neutral expression — no smiling
-                    </li>
-                    <li>
-                      Hold the camera at eye level, about arm's length
-                      away
-                    </li>
+                    <li>Use natural daylight or bright, even lighting</li>
+                    {isBodyConcern ? (
+                      <>
+                        <li>Remove clothing from the target area if possible</li>
+                        <li>Include a close-up of the specific area of concern</li>
+                        <li>Keep the camera steady and in focus</li>
+                        <li>Stand about 1–3 feet from the camera depending on the area</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Remove makeup and glasses if possible</li>
+                        <li>Pull hair away from your face</li>
+                        <li>Keep a neutral expression — no smiling</li>
+                        <li>Hold the camera at eye level, about arm's length away</li>
+                      </>
+                    )}
                   </ul>
                 </div>
 
                 {/* Photo upload cards */}
                 <div className="space-y-4">
-                  {ANGLE_CONFIG.map((angle) => {
+                  {activeAngleConfig.map((angle) => {
                     const photo = photos[angle.key];
                     return (
                       <div
@@ -748,7 +821,7 @@ export default function ClientAnalyze() {
                         <div className="flex items-start gap-4">
                           {/* Silhouette guide */}
                           <div className="shrink-0 flex flex-col items-center">
-                            <FaceSilhouette
+                            <SilhouetteComponent
                               angle={angle.key}
                               className="text-muted-foreground/50"
                             />
@@ -863,11 +936,21 @@ export default function ClientAnalyze() {
                   <Button
                     size="lg"
                     className="flex-1 h-12 text-base font-semibold"
-                    onClick={() => setStep(4)}
-                    disabled={!hasFrontPhoto}
+                    onClick={handleAnalyze}
+                    disabled={!hasFrontPhoto || isAnalyzing}
                   >
-                    Continue to Consent
-                    <ChevronRight className="w-4 h-4 ml-2" />
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        Analyze {photoCount}{" "}
+                        {photoCount === 1 ? "Photo" : "Photos"}
+                      </>
+                    )}
                   </Button>
                 </div>
 
@@ -888,153 +971,8 @@ export default function ClientAnalyze() {
                   </motion.div>
                 )}
               </motion.div>
-            )}
-
-            {/* Step 4: Consent & Signature */}
-            {step === 4 && (
-              <motion.div
-                key="step4"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <div className="text-center mb-4">
-                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                    Consent & Signature
-                  </h1>
-                  <p className="mt-2 text-muted-foreground">
-                    Please read and sign the consent form below to proceed with your analysis.
-                  </p>
-                </div>
-
-                <div
-                  ref={consentScrollRef}
-                  onScroll={(e) => {
-                    const el = e.currentTarget;
-                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
-                      setConsentScrolled(true);
-                    }
-                  }}
-                  className="max-h-[300px] overflow-y-auto p-5 rounded-xl border border-border/60 bg-card text-sm leading-relaxed space-y-4"
-                >
-                  <h3 className="font-bold text-base">Informed Consent for AI Skin Analysis</h3>
-                  <p className="text-muted-foreground">
-                    <strong>RadiantilyK Skin Care</strong> — Consent for AI-Assisted Skin Analysis
-                  </p>
-                  <p>
-                    I, <strong>{fullName || "[Patient Name]"}</strong>, voluntarily consent to participate in an AI-assisted skin analysis provided by RadiantilyK Skin Care. I understand and agree to the following:
-                  </p>
-                  <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                    <li><strong>Purpose:</strong> The AI skin analysis uses artificial intelligence to evaluate photographs of my skin and provide personalized recommendations for skincare treatments and products. This analysis is for informational and educational purposes only.</li>
-                    <li><strong>Not Medical Advice:</strong> I understand that this AI analysis does NOT constitute medical advice, diagnosis, or treatment. The results are generated by an AI system and should not replace consultation with a licensed dermatologist or healthcare provider.</li>
-                    <li><strong>Photo Usage:</strong> I consent to having my photographs taken and analyzed by the AI system. My photos will be securely stored and used solely for the purpose of generating my skin analysis report. Photos will not be shared with third parties without my explicit consent.</li>
-                    <li><strong>Data Privacy:</strong> My personal information, including my name, email, date of birth, and photographs, will be handled in accordance with HIPAA privacy regulations and RadiantilyK privacy policy. My data will be encrypted and stored securely.</li>
-                    <li><strong>Treatment Recommendations:</strong> Any treatment recommendations provided are suggestions based on AI analysis. Actual treatment plans should be discussed with and approved by a qualified skincare professional during an in-person consultation.</li>
-                    <li><strong>Risks & Limitations:</strong> I understand that AI analysis has limitations and may not detect all skin conditions. The accuracy of results depends on photo quality and lighting conditions. I should seek professional medical evaluation for any concerning skin conditions.</li>
-                    <li><strong>Communication Consent:</strong> I consent to receive follow-up communications via email regarding my analysis results, treatment recommendations, and appointment scheduling. I may opt out at any time by replying "unsubscribe."</li>
-                    <li><strong>Voluntary Participation:</strong> My participation is entirely voluntary. I may withdraw my consent at any time by contacting RadiantilyK Skin Care.</li>
-                  </ol>
-                  <p className="text-xs text-muted-foreground italic">
-                    Consent Version 1.0 — Effective Date: January 1, 2025
-                  </p>
-                </div>
-
-                {!consentScrolled && (
-                  <p className="text-xs text-amber-600 text-center">
-                    Please scroll to the bottom of the consent form to continue
-                  </p>
-                )}
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-semibold">Your Signature</label>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        sigCanvasRef.current?.clear();
-                        setConsentSigned(false);
-                      }}
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                      Clear
-                    </Button>
-                  </div>
-                  <div className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-white">
-                    <SignatureCanvas
-                      ref={sigCanvasRef}
-                      penColor="#1a1a2e"
-                      canvasProps={{
-                        className: "w-full",
-                        style: { width: "100%", height: "150px" },
-                      }}
-                      onEnd={() => setConsentSigned(true)}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Sign above using your finger or mouse
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground flex items-center gap-2">
-                  <Shield className="w-4 h-4 shrink-0" />
-                  <span>
-                    Signed electronically on {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} at {new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="h-12"
-                    onClick={() => setStep(3)}
-                    disabled={isAnalyzing}
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Back
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="flex-1 h-12 text-base font-semibold"
-                    onClick={handleAnalyze}
-                    disabled={!consentSigned || isAnalyzing}
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5 mr-2" />
-                        I Agree — Start Analysis
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {isAnalyzing && analysisProgress && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-center"
-                  >
-                    <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
-                    <p className="text-sm font-medium text-primary">
-                      {analysisProgress}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Please don't close this page
-                    </p>
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
-
-
-
+            );
+            })()}
           </AnimatePresence>
         </div>
       </main>

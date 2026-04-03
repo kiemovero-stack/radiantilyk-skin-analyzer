@@ -446,9 +446,13 @@ export default function History() {
                               ? `${analysis.patientFirstName} ${analysis.patientLastName}`
                               : analysis.skinType || "Skin Analysis"}
                           </h3>
-                          {(analysis as any).userId === 0 && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-600 font-medium border border-violet-500/20">
+                          {(analysis as any).userId === 0 ? (
+                            <span className="shrink-0 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-semibold">
                               Client Portal
+                            </span>
+                          ) : (
+                            <span className="shrink-0 px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-semibold">
+                              Staff
                             </span>
                           )}
                           {isProcessing && (
@@ -520,7 +524,7 @@ export default function History() {
                     }}
                   >
                     {!compareMode && isCompleted ? (
-                      <Link href={(analysis as any).userId === 0 ? `/client/report/${analysis.id}` : `/report/${analysis.id}`}>
+                      <Link href={`/report/${analysis.id}`}>
                         {cardContent}
                       </Link>
                     ) : (
