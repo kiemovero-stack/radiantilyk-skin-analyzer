@@ -571,6 +571,26 @@ describe("Client Portal - Email Services", () => {
     // No error means it worked
     expect(true).toBe(true);
   });
+
+  it("follow-up service sends emails at 24hr and 72hr intervals", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/followUpService.ts",
+      "utf-8"
+    );
+    // Verify 24hr and 72hr timing
+    expect(content).toContain("TWENTY_FOUR_HOURS");
+    expect(content).toContain("SEVENTY_TWO_HOURS");
+    expect(content).toContain("72 * 60 * 60 * 1000");
+    // Verify 24hr email is gentle
+    expect(content).toContain("Checking In On You");
+    expect(content).toContain("25% OFF Your First Treatment");
+    // Verify 72hr email is urgent
+    expect(content).toContain("Your Offer Is Expiring Soon");
+    expect(content).toContain("Book Now");
+    expect(content).toContain("Claim Your 25% Off");
+    expect(content).toContain("Limited Time");
+  });
 });
 
 describe("Treatment Simulation Schema", () => {

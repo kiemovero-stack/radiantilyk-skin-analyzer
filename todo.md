@@ -349,3 +349,10 @@
 - [x] Add BeforeAfterSlider component to staff Report.tsx
 - [x] Add simulation polling with useEffect to staff Report.tsx
 - [x] Verify simulations appear on both staff and client reports
+
+## Follow-Up Email Timing & Content Update
+- [x] Update follow-up email timing: 24 hours (gentle reminder) and 72 hours (urgent booking push)
+- [x] Update 24-hour email content: friendly reminder of their analysis results, mention 25% off offer
+- [x] Update 72-hour email content: urgent tone, guide them to book consultation, emphasize limited-time offer expiring
+- [x] Ensure emails include direct booking link (rkaemr.click/portal)
+- [x] Update tests for new email timing and content

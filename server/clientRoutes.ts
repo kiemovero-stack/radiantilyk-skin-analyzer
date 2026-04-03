@@ -228,7 +228,7 @@ async function runClientAnalysisInBackground(
 
         console.log(`[ClientAnalysis] Report email sent to ${analysis.patientEmail}`);
 
-        // Schedule follow-up emails at 24hr and 48hr
+        // Schedule follow-up emails at 24hr and 72hr
         scheduleFollowUpEmails({
           analysisId,
           patientEmail: analysis.patientEmail,
