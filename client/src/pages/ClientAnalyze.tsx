@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
+import { fbPixel } from "@/lib/fbPixel";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -371,6 +372,8 @@ export default function ClientAnalyze() {
           setIsAnalyzing(false);
           setAnalysisProgress("");
           setPollingId(null);
+          fbPixel.completeAnalysis();
+          fbPixel.lead({ content_name: "skin_analysis" });
           navigate(`/client/report/${data.id}`);
         } else if (data.status === "failed") {
           clearInterval(interval);
@@ -395,6 +398,7 @@ export default function ClientAnalyze() {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleStep1Next = () => {
+    fbPixel.startAnalysis();
     if (!fullName.trim()) {
       toast.error("Please enter your full name");
       return;
@@ -459,6 +463,7 @@ export default function ClientAnalyze() {
   ).length;
 
   const handleAnalyze = async () => {
+    fbPixel.submitPhotos();
     if (!photos.front.file) {
       toast.error("Front view photo is required");
       return;

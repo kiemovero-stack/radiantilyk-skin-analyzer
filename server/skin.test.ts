@@ -1041,3 +1041,86 @@ describe("Body Treatment Rules & RKsculpt", () => {
     expect(rksculptCategory!.services[1].price).toBe("$1,200");
   });
 });
+
+describe("Staff Report - Simulation Images", () => {
+  it("skinRouter has getSimulations endpoint", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/skinRouter.ts",
+      "utf-8"
+    );
+    expect(content).toContain("getSimulations: protectedProcedure");
+    expect(content).toContain("simulationImages");
+    expect(content).toContain("ready");
+  });
+
+  it("skinRouter triggers simulation generation after analysis", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/server/skinRouter.ts",
+      "utf-8"
+    );
+    expect(content).toContain("generateSimulationsInBackground");
+    expect(content).toContain("generateTreatmentSimulations");
+    expect(content).toContain("Fire-and-forget");
+  });
+
+  it("staff Report.tsx includes BeforeAfterSlider component", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/Report.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("BeforeAfterSlider");
+    expect(content).toContain("BEFORE");
+    expect(content).toContain("AFTER");
+    expect(content).toContain("Treatment Preview");
+  });
+
+  it("staff Report.tsx polls for simulation images", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/Report.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("simulationsLoading");
+    expect(content).toContain("setSimulationsLoading");
+    expect(content).toContain("setSimulationImages");
+    expect(content).toContain("getSimulations");
+  });
+});
+
+describe("Marketing Features", () => {
+  it("client landing page has special offer banner with 25% off", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("25% off");
+    expect(content).toContain("48 hours");
+    expect(content).toContain("Limited Offer");
+  });
+
+  it("client landing page has Google Maps embeds", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx",
+      "utf-8"
+    );
+    expect(content).toContain("google.com/maps/embed");
+    expect(content).toContain("embedUrl");
+    expect(content).toContain("iframe");
+  });
+
+  it("Facebook Pixel tracking utility exists", async () => {
+    const fs = await import("fs");
+    const content = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/src/lib/fbPixel.ts",
+      "utf-8"
+    );
+    expect(content).toContain("fbq");
+    expect(content).toContain("startAnalysis");
+    expect(content).toContain("completeAnalysis");
+  });
+});

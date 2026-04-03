@@ -325,3 +325,27 @@
 - [x] Add body-specific treatment recommendation rules to staff prompt
 - [x] Never use the word "emsculpt" — always use "RKsculpt"
 - [x] Update tests for new body treatment rules
+
+## Facebook Pixel / Meta Tracking
+- [ ] Add Facebook Pixel base code to index.html (configurable via env variable)
+- [ ] Add conversion events: PageView, StartAnalysis, CompleteAnalysis, ViewReport
+- [ ] Create a reusable tracking utility for firing custom events
+- [ ] Request Facebook Pixel ID from user via secrets
+
+## Special Offer Banner (25% Off)
+- [x] Add animated special offer banner to client landing page ("Book within 48 hours and get 25% off")
+- [ ] Add special offer reminder on the client report page after analysis completes
+- [ ] Include countdown timer showing 48-hour window
+
+## Google Maps Embeds
+- [x] Add Google Maps embed for San Jose location (2100 Curtner Ave, Ste 1B)
+- [x] Add Google Maps embed for San Mateo location (1528 S El Camino Real #200)
+- [x] Style maps to fit within location cards
+
+## Bug Fix: Before/After Treatment Simulation Images Missing from Report
+- [x] Diagnose why before/after simulation images are not showing on patient report
+- [x] Add generateSimulationsInBackground to staff skinRouter (was only in clientRoutes)
+- [x] Add getSimulations tRPC endpoint for staff polling
+- [x] Add BeforeAfterSlider component to staff Report.tsx
+- [x] Add simulation polling with useEffect to staff Report.tsx
+- [x] Verify simulations appear on both staff and client reports

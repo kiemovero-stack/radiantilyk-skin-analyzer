@@ -8,6 +8,50 @@ import { buildSystemPrompt, SKIN_ANALYSIS_OUTPUT_SCHEMA } from "./skinPrompt";
 import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
 import { sendReportEmail } from "./emailService";
+import { generateTreatmentSimulations } from "./simulationService";
+
+/**
+ * Generate ONE combined simulation image in the background AFTER the analysis is completed.
+ * This is non-blocking — the staff sees their report immediately.
+ */
+async function generateSimulationsInBackground(
+  analysisId: number,
+  frontImageUrl: string,
+  fitzpatrickType: number,
+  procedures: Array<{ name: string; reason: string; targetConditions: string[] }>
+) {
+  try {
+    const procedureNames = procedures.map((p) => p.name).join(", ");
+    console.log(`[SkinAnalysis] Starting combined simulation for record ${analysisId} (${procedures.length} procedures: ${procedureNames})`);
+
+    const simulations = await generateTreatmentSimulations(
+      analysisId,
+      frontImageUrl,
+      fitzpatrickType,
+      procedures
+    );
+
+    if (simulations.size > 0) {
+      const simMap: Record<string, string> = {};
+      simulations.forEach((url, name) => { simMap[name] = url; });
+
+      const db = await getDb();
+      if (db) {
+        await db
+          .update(skinAnalyses)
+          .set({ simulationImages: simMap })
+          .where(eq(skinAnalyses.id, analysisId));
+
+        console.log(`[SkinAnalysis] Combined simulation image saved for record ${analysisId}`);
+      }
+    } else {
+      console.log(`[SkinAnalysis] No simulation image generated for record ${analysisId}`);
+    }
+  } catch (err: any) {
+    console.error(`[SkinAnalysis] Simulation generation failed for record ${analysisId}:`, err?.message);
+    // Non-fatal — report is still available without simulation
+  }
+}
 
 /**
  * Run the AI analysis in the background.
@@ -90,6 +134,19 @@ async function runAnalysisInBackground(
       .where(eq(skinAnalyses.id, analysisId));
 
     console.log(`[SkinAnalysis] Background: Record ${analysisId} updated to completed`);
+
+    // Fire-and-forget: Generate simulation images in background
+    const frontImageUrl = imageUrls[0];
+    if (frontImageUrl) {
+      generateSimulationsInBackground(
+        analysisId,
+        frontImageUrl,
+        report.fitzpatrickType || 3,
+        report.skinProcedures || []
+      ).catch((err) => {
+        console.error(`[SkinAnalysis] Simulation generation failed for record ${analysisId}:`, err?.message);
+      });
+    }
   } catch (error: any) {
     console.error(`[SkinAnalysis] Background: Analysis failed for record ${analysisId}:`, error?.message || error);
 
@@ -227,6 +284,34 @@ export const skinRouter = router({
       }
 
       return results[0];
+    }),
+
+  /**
+   * Get simulation images for a report (poll for readiness).
+   */
+  getSimulations: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const results = await db
+        .select({ simulationImages: skinAnalyses.simulationImages })
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, input.id))
+        .limit(1);
+
+      if (results.length === 0) {
+        throw new Error("Report not found");
+      }
+
+      const simImages = results[0].simulationImages;
+      const hasImages = simImages && typeof simImages === "object" && Object.keys(simImages).length > 0;
+
+      return {
+        ready: hasImages,
+        simulationImages: (simImages || {}) as Record<string, string>,
+      };
     }),
 
   /**

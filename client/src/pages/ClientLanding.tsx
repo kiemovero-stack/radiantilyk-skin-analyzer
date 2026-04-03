@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
+import { fbPixel } from "@/lib/fbPixel";
 
 const CHECKIN_URL = "https://rkaemr.click/portal";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/IMG_2517_3c23507d.PNG";
@@ -141,6 +142,7 @@ const LOCATIONS = [
     city: "San Jose, CA 95124",
     hours: "Tue, Thu, Sat, Sun",
     mapUrl: "https://maps.google.com/?q=2100+Curtner+Ave+Ste+1B+San+Jose+CA+95124",
+    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3173.5!2d-121.8886!3d37.2843!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808e34d5c6b2f7e5%3A0x0!2s2100+Curtner+Ave+Ste+1B%2C+San+Jose%2C+CA+95124!5e0!3m2!1sen!2sus!4v1",
   },
   {
     name: "San Mateo",
@@ -148,6 +150,7 @@ const LOCATIONS = [
     city: "San Mateo, CA 94402",
     hours: "Thu, Fri, Sat",
     mapUrl: "https://maps.google.com/?q=1528+S+El+Camino+Real+200+San+Mateo+CA+94402",
+    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3163.5!2d-122.3248!3d37.5512!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808f9e3c6b2f7e5%3A0x0!2s1528+S+El+Camino+Real+%23200%2C+San+Mateo%2C+CA+94402!5e0!3m2!1sen!2sus!4v1",
   },
 ];
 
@@ -189,7 +192,7 @@ export default function ClientLanding() {
             <Button
               size="sm"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs font-semibold hover:opacity-90 border-0 shadow-md"
-              onClick={() => navigate("/client/start")}
+              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
             >
               Get Free Analysis
               <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -197,6 +200,19 @@ export default function ClientLanding() {
           </div>
         </div>
       </header>
+
+      {/* Special Offer Banner */}
+      <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-2.5 px-4">
+        <div className="container flex items-center justify-center gap-2 text-center">
+          <Zap className="w-4 h-4 shrink-0 animate-pulse" />
+          <p className="text-xs md:text-sm font-semibold">
+            Limited Offer: Book within 48 hours of your analysis and get{" "}
+            <span className="underline decoration-2 underline-offset-2">25% off</span>{" "}
+            your first treatment!
+          </p>
+          <Zap className="w-4 h-4 shrink-0 animate-pulse" />
+        </div>
+      </div>
 
       {/* Hero Section — Optimized for Facebook Ad Traffic */}
       <section className="relative overflow-hidden">
@@ -241,7 +257,7 @@ export default function ClientLanding() {
               <Button
                 size="lg"
                 className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-base px-8 py-6 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50 w-full sm:w-auto"
-                onClick={() => navigate("/client/start")}
+                onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
               >
                 <Camera className="w-5 h-5 mr-2" />
                 Get My Free Skin Analysis
@@ -369,7 +385,7 @@ export default function ClientLanding() {
             <Button
               size="lg"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-5 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50"
-              onClick={() => navigate("/client/start")}
+              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
             >
               Start My Free Analysis Now
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -525,6 +541,19 @@ export default function ClientLanding() {
                     <span>{location.hours}</span>
                   </div>
                 </div>
+                {/* Google Maps Embed */}
+                <div className="mt-3 rounded-xl overflow-hidden border border-pink-100">
+                  <iframe
+                    src={location.embedUrl}
+                    width="100%"
+                    height="180"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={`${location.name} location map`}
+                  />
+                </div>
                 <a
                   href={location.mapUrl}
                   target="_blank"
@@ -588,7 +617,7 @@ export default function ClientLanding() {
             <Button
               size="lg"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-6 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50 w-full sm:w-auto"
-              onClick={() => navigate("/client/start")}
+              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
             >
               <Camera className="w-5 h-5 mr-2" />
               Start My Free Skin Analysis

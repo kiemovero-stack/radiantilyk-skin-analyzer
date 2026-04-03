@@ -25,8 +25,9 @@ import {
   Download,
   Send,
   Check,
+  Eye,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 import { motion } from "framer-motion";
@@ -97,6 +98,90 @@ function ScoreGauge({ score }: { score: number }) {
   );
 }
 
+/**
+ * Before/After slider for treatment simulation images.
+ */
+function BeforeAfterSlider({
+  beforeUrl,
+  afterUrl,
+  label,
+}: {
+  beforeUrl: string;
+  afterUrl: string;
+  label: string;
+}) {
+  const [sliderPos, setSliderPos] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const divRef = { current: null as HTMLDivElement | null };
+
+  const handleMove = (clientX: number) => {
+    const el = divRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setSliderPos((x / rect.width) * 100);
+  };
+
+  return (
+    <div className="relative select-none">
+      <p className="text-xs font-semibold text-primary mb-2 flex items-center gap-1">
+        <Eye className="w-3 h-3" />
+        {label}
+      </p>
+      <div
+        ref={(el) => { divRef.current = el; }}
+        className="relative w-full aspect-square rounded-xl overflow-hidden cursor-col-resize border border-primary/20 shadow-sm"
+        onMouseDown={() => setIsDragging(true)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+        onMouseMove={(e) => isDragging && handleMove(e.clientX)}
+        onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+      >
+        {/* After image (full) */}
+        <img
+          src={afterUrl}
+          alt="After treatment simulation"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Before image (clipped) */}
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ width: `${sliderPos}%` }}
+        >
+          <img
+            src={beforeUrl}
+            alt="Before treatment"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ minWidth: `${100 / (sliderPos / 100)}%`, maxWidth: `${100 / (sliderPos / 100)}%` }}
+          />
+        </div>
+        {/* Slider line */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
+          style={{ left: `${sliderPos}%`, transform: "translateX(-50%)" }}
+        >
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
+            <div className="flex items-center gap-0.5">
+              <ChevronRight className="w-3 h-3 text-primary rotate-180" />
+              <ChevronRight className="w-3 h-3 text-primary" />
+            </div>
+          </div>
+        </div>
+        {/* Labels */}
+        <div className="absolute top-3 left-3 px-2 py-1 rounded-full bg-black/60 text-white text-[10px] font-bold z-20">
+          BEFORE
+        </div>
+        <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold z-20">
+          AFTER
+        </div>
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-1 text-center">
+        Drag the slider to compare — AI-generated simulation for illustration purposes
+      </p>
+    </div>
+  );
+}
+
 function SectionHeader({
   icon: Icon,
   number,
@@ -134,6 +219,42 @@ export default function Report() {
   const [downloading, setDownloading] = useState(false);
   const [emailing, setEmailing] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [simulationImages, setSimulationImages] = useState<Record<string, string>>({});
+  const [simulationsLoading, setSimulationsLoading] = useState(false);
+
+  // Poll for simulation images
+  useEffect(() => {
+    if (!data || isLoading) return;
+    // Check if simulations already exist in the data
+    const existingSims = (data as any).simulationImages;
+    if (existingSims && typeof existingSims === "object" && Object.keys(existingSims).length > 0) {
+      setSimulationImages(existingSims);
+      return;
+    }
+    // Start polling
+    setSimulationsLoading(true);
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/trpc/skin.getSimulations?batch=1&input=${encodeURIComponent(JSON.stringify({ "0": { json: { id: reportId } } }))}`);
+        const json = await res.json();
+        const result = json?.[0]?.result?.data?.json;
+        if (result?.ready && result?.simulationImages) {
+          setSimulationImages(result.simulationImages);
+          setSimulationsLoading(false);
+          clearInterval(interval);
+        }
+      } catch { /* ignore polling errors */ }
+    }, 5000);
+    // Stop polling after 3 minutes
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      setSimulationsLoading(false);
+    }, 180000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [data, isLoading, reportId]);
 
   const downloadPdf = trpc.skin.downloadPdf.useMutation({
     onSuccess: (result) => {
@@ -571,6 +692,49 @@ export default function Report() {
               ))}
             </div>
           </motion.section>
+
+          {/* Treatment Simulation — Before/After Preview */}
+          {(() => {
+            const combinedUrl = simulationImages?.["__combined__"];
+            const hasOldStyle = simulationImages && Object.keys(simulationImages).some(k => k !== "__combined__");
+            const simUrl = combinedUrl || (hasOldStyle ? Object.values(simulationImages)[0] : null);
+            const procedureNames = report.skinProcedures.map((p: any) => p.name).join(", ");
+
+            return (
+              <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="mb-10 p-6 md:p-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent"
+              >
+                <SectionHeader
+                  icon={Eye}
+                  number=""
+                  title="Treatment Preview"
+                />
+                {simUrl ? (
+                  <BeforeAfterSlider
+                    beforeUrl={data.imageUrl}
+                    afterUrl={simUrl}
+                    label={`Combined Results — ${procedureNames}`}
+                  />
+                ) : simulationsLoading ? (
+                  <div className="flex items-center gap-3 p-5 rounded-xl bg-primary/5 border border-primary/20">
+                    <Loader2 className="w-5 h-5 animate-spin text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold">Generating Treatment Preview</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">AI is creating a before/after simulation showing the combined results of all recommended treatments...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-muted/50 border border-border/60 text-center">
+                    <p className="text-sm text-muted-foreground">Treatment simulation will appear here once generated.</p>
+                  </div>
+                )}
+              </motion.section>
+            );
+          })()}
 
           {/* Section 6: Skincare Products */}
           <motion.section
