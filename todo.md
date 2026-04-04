@@ -363,3 +363,11 @@
 - [x] Added percentage-based improvement targets (e.g., 30% reduction, not elimination)
 - [x] Added critical rules: keep pores, texture, imperfections; less is more
 - [x] Each treatment prompt specifies realistic timeframe expectations
+
+## Update Storefront Products in AI Recommendations
+- [x] Update skincare product catalog with all 53 products from rkaskin.co
+- [x] Add new product lines: MOV, SkinCeuticals, Sisley, EltaMD, BARUBT, RadiantilyK new serums
+- [x] Update product recommendation guidelines by skin concern (acne, aging, hyperpigmentation, dryness, sensitive, post-procedure, texture, under-eye, scars, lash, sun protection)
+- [x] Include storefront link (rkaskin.co) in product recommendations
+- [x] Update prices to match current storefront
+- [x] Update tests for new product catalog (107 tests passing)

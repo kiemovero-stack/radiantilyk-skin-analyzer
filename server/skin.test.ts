@@ -47,7 +47,7 @@ describe("Skin Analysis Prompt", () => {
   it("system prompt contains key products from the catalog", () => {
     expect(systemPrompt).toContain("RadiantilyK Aesthetic Vitamin C Facial Serum 30ml");
     expect(systemPrompt).toContain("RKA-010");
-    expect(systemPrompt).toContain("$49.00");
+    expect(systemPrompt).toContain("$28.00");
     expect(systemPrompt).toContain("EELHOE Sun Cream SPF90");
     expect(systemPrompt).toContain("Dermagarden Peptide-7 Cream");
     expect(systemPrompt).toContain("AIXIN Beauty");
@@ -246,7 +246,7 @@ describe("PDF Report Generation", () => {
         {
           name: "RadiantilyK Aesthetic Vitamin C Facial Serum 30ml",
           sku: "RKA-010",
-          price: "$49.00",
+          price: "$28.00",
           type: "Serum",
           purpose: "Brightening and antioxidant protection",
           keyIngredients: ["Vitamin C", "L-Ascorbic Acid"],
@@ -359,14 +359,14 @@ describe("Product Catalog", () => {
     expect(categories).toContain("Trial Kits");
   });
 
-  it("has exactly 32 products total", () => {
-    expect(getProductCount()).toBe(32);
+  it("has exactly 53 products total", () => {
+    expect(getProductCount()).toBe(53);
   });
 
   it("all products have sku, name, price, and description", () => {
     for (const cat of PRODUCT_CATALOG) {
       for (const prod of cat.products) {
-        expect(prod.sku).toMatch(/^RKA-\d{3}$/);
+        expect(prod.sku).toBeTruthy();
         expect(prod.name).toBeTruthy();
         expect(prod.price).toMatch(/^\$\d+\.\d{2}$/);
         expect(prod.description).toBeTruthy();
@@ -375,16 +375,16 @@ describe("Product Catalog", () => {
     }
   });
 
-  it("serums category has 13 products", () => {
+  it("serums category has 19 products", () => {
     const serums = PRODUCT_CATALOG.find((c) => c.category === "Serums");
     expect(serums).toBeDefined();
-    expect(serums!.products).toHaveLength(13);
+    expect(serums!.products).toHaveLength(19);
   });
 
-  it("creams category has 10 products", () => {
+  it("creams category has 14 products", () => {
     const creams = PRODUCT_CATALOG.find((c) => c.category === "Creams");
     expect(creams).toBeDefined();
-    expect(creams!.products).toHaveLength(10);
+    expect(creams!.products).toHaveLength(14);
   });
 
   it("getProductCatalogText returns formatted text", () => {
@@ -401,11 +401,14 @@ describe("Product Catalog", () => {
     expect(rkaProducts.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("includes sunscreen product", () => {
+  it("includes 7 sunscreen products including EltaMD and BARUBT", () => {
     const sunscreen = PRODUCT_CATALOG.find((c) => c.category === "Sunscreen");
     expect(sunscreen).toBeDefined();
-    expect(sunscreen!.products).toHaveLength(1);
-    expect(sunscreen!.products[0].name).toContain("SPF90");
+    expect(sunscreen!.products).toHaveLength(7);
+    const names = sunscreen!.products.map((p) => p.name);
+    expect(names.some((n) => n.includes("EltaMD"))).toBe(true);
+    expect(names.some((n) => n.includes("BARUBT"))).toBe(true);
+    expect(names.some((n) => n.includes("SPF90"))).toBe(true);
   });
 });
 
