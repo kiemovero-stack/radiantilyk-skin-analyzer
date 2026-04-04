@@ -407,3 +407,6 @@
 ## Facebook Pixel Setup Guide
 - [x] Help user set up Facebook Pixel ID via secrets (ID: 1557621865295729 — 001: RKA (SA))
 - [x] Verify pixel events are firing correctly (109 tests passing)
+
+## Remove Walk-ins Welcome
+- [x] Remove "Walk-ins Welcome" text from the website — changed to "By appointment only"

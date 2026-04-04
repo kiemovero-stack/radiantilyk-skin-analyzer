@@ -510,7 +510,7 @@ export default function ClientLanding() {
               Visit Us
             </h2>
             <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
-              Two convenient locations in the Bay Area. Walk-ins welcome for consultations.
+              Two convenient locations in the Bay Area. By appointment only.
             </p>
           </motion.div>
 
