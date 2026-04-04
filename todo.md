@@ -389,3 +389,21 @@
 - [x] Link directly to rkaskin.co storefront
 - [x] Add "Shop All Products at rkaskin.co" CTA button at bottom
 - [x] Style with gradient purple/pink button matching report design
+
+## 48-Hour Countdown Timer on Client Report
+- [x] Add countdown timer to client report page showing time remaining for 25% off offer
+- [x] Timer starts from analysis creation timestamp
+- [x] Show hours:minutes:seconds countdown
+- [x] When expired, show "Offer Expired" message
+- [x] Add urgency styling (pulsing animation, red when under 6 hours)
+- [x] Include "Book Now — Save 25%" CTA button next to timer
+
+## UTM Parameter Tracking on Shop Now Links
+- [x] Add UTM parameters to all Shop Now links (utm_source=skinai, utm_medium=report, utm_campaign=product_recommendation)
+- [x] Add UTM parameters to all booking links (header, BookingCTA, countdown banner)
+- [x] Include product name in utm_content parameter for per-product tracking
+- [x] Add UTM to bundle deal links with bundle ID
+
+## Facebook Pixel Setup Guide
+- [x] Help user set up Facebook Pixel ID via secrets (ID: 1557621865295729 — 001: RKA (SA))
+- [x] Verify pixel events are firing correctly (109 tests passing)

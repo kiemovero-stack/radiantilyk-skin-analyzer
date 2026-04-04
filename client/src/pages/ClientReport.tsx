@@ -47,6 +47,109 @@ import { motion } from "framer-motion";
 const CHECKIN_URL = "https://rkaemr.click/portal";
 const SHOP_URL = "https://rkaskin.co";
 
+/** Add UTM tracking parameters to any URL */
+function withUtm(baseUrl: string, content?: string): string {
+  const sep = baseUrl.includes("?") ? "&" : "?";
+  let utm = `${sep}utm_source=skinai&utm_medium=report&utm_campaign=product_recommendation`;
+  if (content) utm += `&utm_content=${encodeURIComponent(content)}`;
+  return `${baseUrl}${utm}`;
+}
+
+/** 48-hour countdown timer from analysis creation */
+function CountdownBanner({ createdAt }: { createdAt: string }) {
+  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number; expired: boolean }>({ hours: 0, minutes: 0, seconds: 0, expired: false });
+
+  useEffect(() => {
+    const deadline = new Date(createdAt).getTime() + 48 * 60 * 60 * 1000;
+
+    function update() {
+      const now = Date.now();
+      const diff = deadline - now;
+      if (diff <= 0) {
+        setTimeLeft({ hours: 0, minutes: 0, seconds: 0, expired: true });
+        return;
+      }
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      setTimeLeft({ hours, minutes, seconds, expired: false });
+    }
+
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [createdAt]);
+
+  const isUrgent = !timeLeft.expired && timeLeft.hours < 6;
+
+  if (timeLeft.expired) {
+    return (
+      <div className="mb-6 p-4 rounded-2xl border border-gray-200 bg-gray-50 text-center">
+        <p className="text-sm text-gray-500 font-medium">This special offer has expired</p>
+        <p className="text-xs text-gray-400 mt-1">Contact us for current promotions</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(
+      "mb-6 p-4 md:p-5 rounded-2xl border text-center relative overflow-hidden",
+      isUrgent
+        ? "border-red-200 bg-gradient-to-r from-red-50 to-pink-50"
+        : "border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50"
+    )}>
+      {isUrgent && (
+        <div className="absolute inset-0 animate-pulse bg-red-100/30 pointer-events-none" />
+      )}
+      <div className="relative z-10">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Tag className={cn("w-4 h-4", isUrgent ? "text-red-500" : "text-purple-500")} />
+          <span className={cn("text-sm font-bold", isUrgent ? "text-red-700" : "text-purple-700")}>
+            {isUrgent ? "HURRY — Offer Expiring Soon!" : "Exclusive 25% Off Your First Treatment"}
+          </span>
+        </div>
+        <div className="flex items-center justify-center gap-3 my-3">
+          <div className={cn("flex flex-col items-center px-3 py-2 rounded-xl min-w-[60px]", isUrgent ? "bg-red-100" : "bg-purple-100")}>
+            <span className={cn("text-2xl font-bold tabular-nums", isUrgent ? "text-red-700" : "text-purple-700")}>
+              {String(timeLeft.hours).padStart(2, "0")}
+            </span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Hours</span>
+          </div>
+          <span className={cn("text-xl font-bold", isUrgent ? "text-red-400" : "text-purple-400")}>:</span>
+          <div className={cn("flex flex-col items-center px-3 py-2 rounded-xl min-w-[60px]", isUrgent ? "bg-red-100" : "bg-purple-100")}>
+            <span className={cn("text-2xl font-bold tabular-nums", isUrgent ? "text-red-700" : "text-purple-700")}>
+              {String(timeLeft.minutes).padStart(2, "0")}
+            </span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Min</span>
+          </div>
+          <span className={cn("text-xl font-bold", isUrgent ? "text-red-400" : "text-purple-400")}>:</span>
+          <div className={cn("flex flex-col items-center px-3 py-2 rounded-xl min-w-[60px]", isUrgent ? "bg-red-100" : "bg-purple-100")}>
+            <span className={cn("text-2xl font-bold tabular-nums", isUrgent ? "text-red-700" : "text-purple-700")}>
+              {String(timeLeft.seconds).padStart(2, "0")}
+            </span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">Sec</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">Book within 48 hours of your analysis to claim your discount</p>
+        <a
+          href={withUtm(CHECKIN_URL, "countdown_banner")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            "inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-semibold hover:opacity-90 transition-all",
+            isUrgent
+              ? "bg-gradient-to-r from-red-500 to-pink-500 animate-bounce"
+              : "bg-gradient-to-r from-pink-400 to-purple-500"
+          )}
+        >
+          <CalendarCheck className="w-4 h-4" />
+          Book Now — Save 25%
+        </a>
+      </div>
+    </div>
+  );
+}
+
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -341,7 +444,7 @@ function BookingCTA() {
         Book a free consultation and our expert team will create a personalized plan just for you.
       </p>
       <a
-        href={CHECKIN_URL}
+        href={withUtm(CHECKIN_URL, "booking_cta")}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
@@ -481,7 +584,7 @@ export default function ClientReport() {
             <span className="font-bold text-sm">RadiantilyK Skin Analysis</span>
           </div>
           <a
-            href={CHECKIN_URL}
+            href={withUtm(CHECKIN_URL, "header_book_now")}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs font-semibold hover:opacity-90 transition-opacity"
@@ -512,6 +615,9 @@ export default function ClientReport() {
               We've analyzed your photos and put together a personalized plan to help you achieve your skin goals. Let's dive in!
             </p>
           </motion.div>
+
+          {/* 48-Hour Countdown Timer */}
+          <CountdownBanner createdAt={data.createdAt} />
 
           {/* Section 1: Score */}
           <motion.section
@@ -949,7 +1055,7 @@ export default function ClientReport() {
             <p className="text-sm text-gray-500 mb-4">
               Shop these products at{" "}
               <a
-                href={SHOP_URL}
+                href={withUtm(SHOP_URL, "shop_header")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-purple-600 hover:underline font-medium"
@@ -972,7 +1078,7 @@ export default function ClientReport() {
                       {matchedBundles.map((bundle: BundleDeal) => (
                         <a
                           key={bundle.id}
-                          href={SHOP_URL}
+                          href={withUtm(SHOP_URL, `bundle_${bundle.id}`)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block p-4 rounded-xl border-2 border-pink-200 bg-gradient-to-r from-pink-50 to-purple-50 hover:border-pink-400 transition-all hover:shadow-md"
@@ -1090,7 +1196,7 @@ export default function ClientReport() {
                         </div>
                         <div className="mt-2">
                           <a
-                            href={SHOP_URL}
+                            href={withUtm(SHOP_URL, product.name)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition-colors shadow-sm"
@@ -1107,7 +1213,7 @@ export default function ClientReport() {
             </div>
             <div className="mt-4 text-center">
               <a
-                href={SHOP_URL}
+                href={withUtm(SHOP_URL, "shop_all_products")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-medium hover:shadow-lg transition-all"

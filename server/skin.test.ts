@@ -1147,3 +1147,23 @@ describe("Marketing Features", () => {
     expect(content).toContain("completeAnalysis");
   });
 });
+
+describe("Facebook Pixel Configuration", () => {
+  it("VITE_FB_PIXEL_ID environment variable is set and looks like a valid Pixel ID", () => {
+    const pixelId = process.env.VITE_FB_PIXEL_ID;
+    expect(pixelId).toBeDefined();
+    expect(pixelId).toBeTruthy();
+    // Facebook Pixel IDs are numeric strings, typically 15-16 digits
+    expect(pixelId).toMatch(/^\d{10,20}$/);
+  });
+
+  it("Facebook Pixel base code in index.html references the env variable", async () => {
+    const fs = await import("fs");
+    const html = fs.readFileSync(
+      "/home/ubuntu/skin-analyzer/client/index.html",
+      "utf-8"
+    );
+    expect(html).toContain("fbq");
+    expect(html).toContain("VITE_FB_PIXEL_ID");
+  });
+});
