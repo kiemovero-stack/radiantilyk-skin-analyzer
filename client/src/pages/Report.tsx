@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import type { SkinAnalysisReport, Severity } from "@shared/types";
+import { PRODUCT_CATALOG } from "@shared/productCatalog";
 import {
   Sparkles,
   ArrowLeft,
@@ -761,65 +762,88 @@ export default function Report() {
               </a>
             </p>
             <div className="space-y-4">
-              {report.skincareProducts.map((product, i) => (
-                <div
-                  key={i}
-                  className="p-5 rounded-xl border border-border/60 hover:border-primary/20 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-primary">
-                        #{i + 1}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div>
-                          <h3 className="font-semibold">{product.name}</h3>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            {product.sku && (
-                              <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
-                                {product.sku}
-                              </span>
-                            )}
-                            <span className="text-xs text-primary font-medium">
-                              {product.type}
-                            </span>
-                          </div>
+              {report.skincareProducts.map((product, i) => {
+                const allCatalogProducts = PRODUCT_CATALOG.flatMap((c) => c.products);
+                const catalogMatch = allCatalogProducts.find(
+                  (cp) => cp.name.toLowerCase() === product.name.toLowerCase() ||
+                    cp.sku === product.sku
+                );
+                const imageUrl = catalogMatch?.imageUrl;
+                return (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border border-border/60 hover:border-primary/20 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      {imageUrl ? (
+                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-border bg-white">
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).parentElement!.innerHTML = `<div class="w-full h-full flex items-center justify-center"><span class="text-xs font-bold text-primary">#${i + 1}</span></div>`;
+                            }}
+                          />
                         </div>
-                        {product.price && (
-                          <span className="shrink-0 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                            {product.price}
+                      ) : (
+                        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-bold text-primary">
+                            #{i + 1}
                           </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {product.purpose}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {product.keyIngredients.map((ing, j) => (
-                          <span
-                            key={j}
-                            className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[10px] font-medium"
-                          >
-                            {ing}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 mt-1.5">
-                        {product.targetConditions.map((c, j) => (
-                          <span
-                            key={j}
-                            className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium"
-                          >
-                            {c}
-                          </span>
-                        ))}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div>
+                            <h3 className="font-semibold">{product.name}</h3>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {product.sku && (
+                                <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+                                  {product.sku}
+                                </span>
+                              )}
+                              <span className="text-xs text-primary font-medium">
+                                {product.type}
+                              </span>
+                            </div>
+                          </div>
+                          {product.price && (
+                            <span className="shrink-0 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                              {product.price}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {product.purpose}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {product.keyIngredients.map((ing, j) => (
+                            <span
+                              key={j}
+                              className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-[10px] font-medium"
+                            >
+                              {ing}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {product.targetConditions.map((c, j) => (
+                            <span
+                              key={j}
+                              className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </motion.section>
 

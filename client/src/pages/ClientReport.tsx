@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { ReportWatermark } from "@/components/CopyProtection";
 import { cn } from "@/lib/utils";
 import type { SkinAnalysisReport, Severity } from "@shared/types";
+import { PRODUCT_CATALOG, BUNDLE_DEALS, findMatchingBundlesByName } from "@shared/productCatalog";
+import type { BundleDeal } from "@shared/productCatalog";
+import { ShoppingBag, Gift, Tag } from "lucide-react";
 import {
   Sparkles,
   Activity,
@@ -954,8 +957,59 @@ export default function ClientReport() {
                 rkaskin.co
               </a>
             </p>
+            {/* Bundle Deals */}
+            {(() => {
+              const recNames = report.skincareProducts.map((p: any) => p.name);
+              const matchedBundles = findMatchingBundlesByName(recNames);
+              if (matchedBundles.length > 0) {
+                return (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Gift className="w-4 h-4 text-pink-500" />
+                      Bundle Deals — Save More!
+                    </h3>
+                    <div className="space-y-3">
+                      {matchedBundles.map((bundle: BundleDeal) => (
+                        <a
+                          key={bundle.id}
+                          href={SHOP_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block p-4 rounded-xl border-2 border-pink-200 bg-gradient-to-r from-pink-50 to-purple-50 hover:border-pink-400 transition-all hover:shadow-md"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-gray-900">{bundle.name}</span>
+                            <span className="px-2 py-0.5 rounded-full bg-pink-500 text-white text-xs font-bold">
+                              {bundle.discount}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mb-2">{bundle.tagline}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-purple-600">{bundle.bundlePrice}</span>
+                            <span className="text-sm text-gray-400 line-through">{bundle.originalPrice}</span>
+                            <span className="text-xs text-green-600 font-medium">Save {bundle.savings}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 mt-1">
+                            Includes: {bundle.productNames.join(" + ")}
+                          </p>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <div className="space-y-4">
               {report.skincareProducts.map((product: any, i: number) => {
+                // Find matching product image from catalog
+                const allCatalogProducts = PRODUCT_CATALOG.flatMap((c) => c.products);
+                const catalogMatch = allCatalogProducts.find(
+                  (cp) => cp.name.toLowerCase() === product.name.toLowerCase() ||
+                    cp.sku === product.sku
+                );
+                const imageUrl = catalogMatch?.imageUrl;
                 const categoryIcon: Record<string, string> = {
                   cleanser: "\ud83e\uddf4",
                   cream: "\ud83e\ude75",
@@ -973,16 +1027,32 @@ export default function ClientReport() {
                 return (
                   <div
                     key={i}
-                    className="p-5 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors bg-gradient-to-r from-white to-pink-50/30"
+                    className="p-4 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors bg-gradient-to-r from-white to-pink-50/30"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shrink-0 mt-0.5 text-lg">
-                        {icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <div>
-                            <h3 className="font-semibold">{product.name}</h3>
+                      {/* Product Image or Icon */}
+                      {imageUrl ? (
+                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-100 bg-white">
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).parentElement!.innerHTML = `<div class="w-full h-full flex items-center justify-center text-2xl bg-gradient-to-br from-pink-100 to-purple-100">${icon}</div>`;
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center shrink-0 text-2xl">
+                          {icon}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-sm leading-tight">{product.name}</h3>
                             <div className="flex items-center gap-2 mt-0.5">
                               {product.sku && (
                                 <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
@@ -1000,27 +1070,32 @@ export default function ClientReport() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mt-2">
+                        <p className="text-xs text-gray-600 mt-1.5 line-clamp-2">
                           {product.purpose}
                         </p>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {product.keyIngredients.map((ing: string, j: number) => (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {product.keyIngredients.slice(0, 4).map((ing: string, j: number) => (
                             <span
                               key={j}
-                              className="px-2 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-medium border border-pink-200"
+                              className="px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-medium border border-pink-200"
                             >
                               {ing}
                             </span>
                           ))}
+                          {product.keyIngredients.length > 4 && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-500 text-[10px]">
+                              +{product.keyIngredients.length - 4} more
+                            </span>
+                          )}
                         </div>
-                        <div className="mt-3">
+                        <div className="mt-2">
                           <a
                             href={SHOP_URL}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium hover:underline"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition-colors shadow-sm"
                           >
-                            <ExternalLink className="w-3 h-3" />
+                            <ShoppingBag className="w-3 h-3" />
                             Shop Now
                           </a>
                         </div>
@@ -1035,9 +1110,9 @@ export default function ClientReport() {
                 href={SHOP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-purple-600 hover:underline font-medium"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-medium hover:shadow-lg transition-all"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ShoppingBag className="w-4 h-4" />
                 Shop All Products at rkaskin.co
               </a>
             </div>

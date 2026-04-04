@@ -327,15 +327,15 @@
 - [x] Update tests for new body treatment rules
 
 ## Facebook Pixel / Meta Tracking
-- [ ] Add Facebook Pixel base code to index.html (configurable via env variable)
-- [ ] Add conversion events: PageView, StartAnalysis, CompleteAnalysis, ViewReport
-- [ ] Create a reusable tracking utility for firing custom events
-- [ ] Request Facebook Pixel ID from user via secrets
+- [x] Add Facebook Pixel base code to index.html (configurable via env variable)
+- [x] Add conversion events: PageView, StartAnalysis, CompleteAnalysis, ViewReport
+- [x] Create a reusable tracking utility for firing custom events
+- [x] Request Facebook Pixel ID from user via secrets
 
 ## Special Offer Banner (25% Off)
 - [x] Add animated special offer banner to client landing page ("Book within 48 hours and get 25% off")
 - [ ] Add special offer reminder on the client report page after analysis completes
-- [ ] Include countdown timer showing 48-hour window
+- [ ] Include countdown timer showing 48-hour window (future)
 
 ## Google Maps Embeds
 - [x] Add Google Maps embed for San Jose location (2100 Curtner Ave, Ste 1B)
@@ -371,3 +371,21 @@
 - [x] Include storefront link (rkaskin.co) in product recommendations
 - [x] Update prices to match current storefront
 - [x] Update tests for new product catalog (107 tests passing)
+
+## Scrape Product Images for New Products
+- [x] Scrape all 53 product images from rkaskin.co via browser JS extraction
+- [x] Add imageUrl and shopUrl fields to ProductItem interface
+- [x] Map all 53 images to products in catalog
+- [x] Display product images in both client and staff report pages
+
+## Bundle Deal Recommendations
+- [x] Add BundleDeal interface and 5 bundle deals to product catalog
+- [x] Add bundle deal section to AI prompt text (20% off bundles)
+- [x] Display matching bundle deals with discount pricing in client report
+- [x] Add findMatchingBundlesByName helper function
+
+## Shop Now Button on Client Report
+- [x] Add purple "Shop Now" button next to each product recommendation in client report
+- [x] Link directly to rkaskin.co storefront
+- [x] Add "Shop All Products at rkaskin.co" CTA button at bottom
+- [x] Style with gradient purple/pink button matching report design
