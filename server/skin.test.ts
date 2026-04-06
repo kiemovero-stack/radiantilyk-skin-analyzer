@@ -1167,3 +1167,50 @@ describe("Facebook Pixel Configuration", () => {
     expect(html).toContain("VITE_FB_PIXEL_ID");
   });
 });
+
+
+describe("CO2 Laser Services", () => {
+  it("service catalog includes CO2 Laser Full Face, Face & Neck, and Neck Only", () => {
+    const co2Category = SERVICE_CATALOG.find(c => c.category === "CO2 Laser Resurfacing");
+    expect(co2Category).toBeDefined();
+    expect(co2Category!.services).toHaveLength(3);
+    const names = co2Category!.services.map(s => s.name);
+    expect(names).toContain("CO2 Laser - Full Face");
+    expect(names).toContain("CO2 Laser - Face & Neck");
+    expect(names).toContain("CO2 Laser - Neck Only");
+  });
+
+  it("CO2 Laser pricing is affordable and competitive", () => {
+    const co2Category = SERVICE_CATALOG.find(c => c.category === "CO2 Laser Resurfacing");
+    const fullFace = co2Category!.services.find(s => s.name.includes("Full Face"));
+    const faceNeck = co2Category!.services.find(s => s.name.includes("Face & Neck"));
+    const neckOnly = co2Category!.services.find(s => s.name.includes("Neck Only"));
+    expect(fullFace!.price).toBe("$750");
+    expect(faceNeck!.price).toBe("$1,100");
+    expect(neckOnly!.price).toBe("$500");
+  });
+
+  it("client prompt includes CO2 laser recommendation rules", () => {
+    expect(clientPrompt).toContain("CO2 LASER RESURFACING RECOMMENDATIONS");
+    expect(clientPrompt).toContain("CO2 Laser - Full Face ($750)");
+    expect(clientPrompt).toContain("CO2 Laser - Neck Only ($500)");
+    expect(clientPrompt).toContain("CO2 Laser - Face & Neck ($1,100)");
+  });
+
+  it("staff prompt includes CO2 laser recommendation rules", () => {
+    expect(systemPrompt).toContain("CO2 LASER RESURFACING RECOMMENDATIONS");
+    expect(systemPrompt).toContain("CO2 Laser - Full Face ($750)");
+  });
+
+  it("CO2 laser is contraindicated for Fitzpatrick V-VI in both prompts", () => {
+    expect(clientPrompt).toContain("CO2 Laser is NOT recommended for Fitzpatrick V-VI");
+    expect(systemPrompt).toContain("CONTRAINDICATED for Fitzpatrick V-VI");
+  });
+
+  it("service catalog text includes CO2 Laser entries", () => {
+    const catalogText = getServiceCatalogText();
+    expect(catalogText).toContain("CO2 Laser Resurfacing");
+    expect(catalogText).toContain("CO2 Laser - Full Face");
+    expect(catalogText).toContain("$750");
+  });
+});

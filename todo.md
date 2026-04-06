@@ -410,3 +410,12 @@
 
 ## Remove Walk-ins Welcome
 - [x] Remove "Walk-ins Welcome" text from the website — changed to "By appointment only"
+
+## Add CO2 Laser Services
+- [x] Add CO2 Laser Full Face ($750) to service catalog
+- [x] Add CO2 Laser Face & Neck ($1,100) to service catalog
+- [x] Add CO2 Laser Neck Only ($500) to service catalog
+- [x] Update client AI prompt with CO2 laser recommendation rules
+- [x] Update staff AI prompt with CO2 laser recommendation rules
+- [x] Added Fitzpatrick V-VI contraindication for CO2 laser
+- [x] Update tests (115 tests passing)

@@ -72,6 +72,17 @@ CRITICAL RULES:
    - For body concerns, the "EXACTLY 2 facial treatments" rule does NOT apply — adjust treatment count based on body area and concerns.
    - NEVER use the word "emsculpt" or "EmSculpt" anywhere. The branded name is "RKsculpt".
 
+   CO2 LASER RESURFACING RECOMMENDATIONS:
+   CO2 Laser is the most aggressive resurfacing option. Recommend for:
+   - Deep wrinkles / severe photodamage → CO2 Laser - Full Face ($750)
+   - Moderate-to-severe acne scarring → CO2 Laser - Full Face ($750)
+   - Severe sun damage beyond IPL/peel scope → CO2 Laser
+   - Neck lines / crepey neck → CO2 Laser - Neck Only ($500)
+   - Combined face + neck aging → CO2 Laser - Face & Neck ($1,100)
+   - CONTRAINDICATED for Fitzpatrick V-VI (high PIH risk) — use microneedling or peels instead
+   - Requires 5-10 days downtime; must be done as standalone session
+   - One CO2 session can equal 3-5 sessions of milder resurfacing treatments
+
 3. TREATMENT RECOMMENDATIONS — USE ONLY FROM THE CLINIC CATALOG BELOW
    - EXACTLY 2 facial treatments from the clinic's Facials menu (no more, no less)
    - 5 to 6 high-impact skin procedures from the clinic's service menu (MUST include HA fillers like Restylane/Juvederm when appropriate, and IPL for Fitzpatrick I-IV when sun damage/pigmentation/rosacea/vascular concerns are present)

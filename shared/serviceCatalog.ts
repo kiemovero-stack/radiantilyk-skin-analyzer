@@ -93,6 +93,14 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
     ],
   },
   {
+    category: "CO2 Laser Resurfacing",
+    services: [
+      { name: "CO2 Laser - Full Face", price: "$750", category: "CO2 Laser Resurfacing", description: "Fractional CO2 laser for deep wrinkles, acne scars, sun damage, and full skin resurfacing of the face" },
+      { name: "CO2 Laser - Face & Neck", price: "$1,100", category: "CO2 Laser Resurfacing", description: "Comprehensive CO2 laser resurfacing for face and neck — treats wrinkles, texture, laxity, and sun damage" },
+      { name: "CO2 Laser - Neck Only", price: "$500", category: "CO2 Laser Resurfacing", description: "Targeted CO2 laser resurfacing for neck lines, crepey skin, and sun damage on the neck" },
+    ],
+  },
+  {
     category: "Collagen Induction",
     services: [
       { name: "Sculptra", price: "$800", category: "Collagen Induction" },
