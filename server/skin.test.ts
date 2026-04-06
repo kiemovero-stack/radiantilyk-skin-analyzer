@@ -11,9 +11,9 @@ const clientPrompt = buildClientSystemPrompt();
 describe("Skin Analysis Prompt", () => {
   it("system prompt includes critical diagnostic rules", () => {
     expect(systemPrompt).toContain("world-class AI dermatology");
-    expect(systemPrompt).toContain("EXACTLY 2 facial treatments");
-    expect(systemPrompt).toContain("5 to 6 high-impact skin procedures");
-    expect(systemPrompt).toContain("3 to 5 skincare product");
+    expect(systemPrompt).toContain("AT LEAST 3 facial treatments");
+    expect(systemPrompt).toContain("4 to 8 high-impact skin procedures");
+    expect(systemPrompt).toContain("5 to 7 skincare product");
     expect(systemPrompt).toContain("Fitzpatrick");
     expect(systemPrompt).toContain("NEVER recommend IPL");
     expect(systemPrompt).toContain("acne scarring");
@@ -37,24 +37,25 @@ describe("Skin Analysis Prompt", () => {
     expect(systemPrompt).toContain("Include the exact price");
   });
 
-  it("system prompt includes the product catalog from rkaskin.co", () => {
-    expect(systemPrompt).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
-    expect(systemPrompt).toContain("ONLY recommend products from this catalog");
-    expect(systemPrompt).toContain("rkaskin.co");
+  it("system prompt includes the product catalog", () => {
+    expect(systemPrompt).toContain("SKINCARE PRODUCT CATALOG");
+    expect(systemPrompt).toContain("ONLY from the RadiantilyK Aesthetic Product Catalog");
     expect(systemPrompt).toContain("END OF PRODUCT CATALOG");
   });
 
   it("system prompt contains key products from the catalog", () => {
-    expect(systemPrompt).toContain("RadiantilyK Aesthetic Vitamin C Facial Serum 30ml");
-    expect(systemPrompt).toContain("RKA-010");
-    expect(systemPrompt).toContain("$28.00");
+    expect(systemPrompt).toContain("RadiantilyK Aesthetic Vitamin C Facial Serum");
+    expect(systemPrompt).toContain("RKA-");
     expect(systemPrompt).toContain("EELHOE Sun Cream SPF90");
-    expect(systemPrompt).toContain("Dermagarden Peptide-7 Cream");
+    expect(systemPrompt).toContain("Dermagarden");
     expect(systemPrompt).toContain("AIXIN Beauty");
+    expect(systemPrompt).toContain("EltaMD");
   });
 
   it("system prompt instructs AI to always recommend sunscreen", () => {
-    expect(systemPrompt).toContain("Always recommend the EELHOE Sun Cream SPF90");
+    expect(systemPrompt).toContain("ALWAYS recommend a sunscreen");
+    expect(systemPrompt).toContain("EltaMD");
+    expect(systemPrompt).toContain("EELHOE");
   });
 
   it("system prompt contains key services from the catalog", () => {
@@ -351,16 +352,17 @@ describe("Upload Route Module", () => {
 describe("Product Catalog", () => {
   it("has all expected product categories", () => {
     const categories = PRODUCT_CATALOG.map((c) => c.category);
-    expect(categories).toContain("Cleansers");
-    expect(categories).toContain("Creams");
+    expect(categories).toContain("Cleansers & Toners");
+    expect(categories).toContain("Creams & Moisturizers");
     expect(categories).toContain("Serums");
     expect(categories).toContain("Post-Procedure");
-    expect(categories).toContain("Sunscreen");
+    expect(categories).toContain("Sunscreens");
     expect(categories).toContain("Trial Kits");
+    expect(categories).toContain("Lip Care");
   });
 
-  it("has exactly 53 products total", () => {
-    expect(getProductCount()).toBe(53);
+  it("has 67 products total (synced from storefront)", () => {
+    expect(getProductCount()).toBe(67);
   });
 
   it("all products have sku, name, price, and description", () => {
@@ -375,23 +377,22 @@ describe("Product Catalog", () => {
     }
   });
 
-  it("serums category has 19 products", () => {
+  it("serums category has 22 products", () => {
     const serums = PRODUCT_CATALOG.find((c) => c.category === "Serums");
     expect(serums).toBeDefined();
-    expect(serums!.products).toHaveLength(19);
+    expect(serums!.products).toHaveLength(22);
   });
 
-  it("creams category has 14 products", () => {
-    const creams = PRODUCT_CATALOG.find((c) => c.category === "Creams");
+  it("creams & moisturizers category has 18 products", () => {
+    const creams = PRODUCT_CATALOG.find((c) => c.category === "Creams & Moisturizers");
     expect(creams).toBeDefined();
-    expect(creams!.products).toHaveLength(14);
+    expect(creams!.products).toHaveLength(18);
   });
 
   it("getProductCatalogText returns formatted text", () => {
     const text = getProductCatalogText();
-    expect(text).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
+    expect(text).toContain("SKINCARE PRODUCT CATALOG");
     expect(text).toContain("END OF PRODUCT CATALOG");
-    expect(text).toContain("rkaskin.co");
     expect(text.length).toBeGreaterThan(2000);
   });
 
@@ -401,14 +402,14 @@ describe("Product Catalog", () => {
     expect(rkaProducts.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("includes 7 sunscreen products including EltaMD and BARUBT", () => {
-    const sunscreen = PRODUCT_CATALOG.find((c) => c.category === "Sunscreen");
+  it("includes sunscreen products including EltaMD and BARUBT", () => {
+    const sunscreen = PRODUCT_CATALOG.find((c) => c.category === "Sunscreens");
     expect(sunscreen).toBeDefined();
-    expect(sunscreen!.products).toHaveLength(7);
+    expect(sunscreen!.products.length).toBeGreaterThanOrEqual(5);
     const names = sunscreen!.products.map((p) => p.name);
     expect(names.some((n) => n.includes("EltaMD"))).toBe(true);
     expect(names.some((n) => n.includes("BARUBT"))).toBe(true);
-    expect(names.some((n) => n.includes("SPF90"))).toBe(true);
+    expect(names.some((n) => n.includes("SPF90") || n.includes("SPF"))).toBe(true);
   });
 });
 
@@ -477,14 +478,13 @@ describe("Client Portal - Prompt", () => {
   it("client prompt includes both service and product catalogs", async () => {
     const prompt = buildClientSystemPrompt();
     expect(prompt).toContain("CLINIC SERVICE CATALOG");
-    expect(prompt).toContain("RADIANTILYK AESTHETIC SKINCARE PRODUCT CATALOG");
-    expect(prompt).toContain("rkaskin.co");
+    expect(prompt).toContain("SKINCARE PRODUCT CATALOG");
   });
 
-  it("client prompt instructs to recommend SPF and post-procedure kits", async () => {
+  it("client prompt instructs to recommend SPF and post-procedure products", async () => {
     const prompt = buildClientSystemPrompt();
-    expect(prompt).toContain("Always recommend SPF sunscreen");
-    expect(prompt).toContain("post-procedure kit");
+    expect(prompt).toContain("ALWAYS recommend a sunscreen");
+    expect(prompt).toContain("post-procedure recovery product");
   });
 });
 

@@ -40,7 +40,7 @@ import {
   MessageSquare,
   Check,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { motion } from "framer-motion";
 
@@ -331,20 +331,68 @@ function BeforeAfterSlider({
   );
 }
 
-function ShareResults({ reportId, patientName }: { reportId: number; patientName: string }) {
+function ShareResults({ reportId, patientName, patientEmail }: { reportId: number; patientName: string; patientEmail: string }) {
   const [copied, setCopied] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [referralCopied, setReferralCopied] = useState(false);
+  const [referralStats, setReferralStats] = useState<{ timesUsed: number } | null>(null);
 
   const reportUrl = `${window.location.origin}/client/report/${reportId}`;
   const shareText = `Check out my AI skin analysis results from RadiantilyK!`;
 
+  // Generate or fetch referral code
+  const getOrCreateReferralCode = async () => {
+    if (referralCode) return referralCode;
+    setReferralLoading(true);
+    try {
+      const res = await fetch("/api/referral/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referrerName: patientName,
+          referrerEmail: patientEmail,
+          analysisId: reportId,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create referral code");
+      const data = await res.json();
+      setReferralCode(data.code);
+      setReferralStats({ timesUsed: data.timesUsed || 0 });
+      return data.code;
+    } catch (err) {
+      console.error("Referral error:", err);
+      return null;
+    } finally {
+      setReferralLoading(false);
+    }
+  };
+
+  // Auto-generate referral code on mount
+  useEffect(() => {
+    if (patientEmail) {
+      getOrCreateReferralCode();
+    }
+  }, [patientEmail]);
+
+  const referralUrl = referralCode
+    ? `${window.location.origin}/client?ref=${referralCode}`
+    : null;
+
   const handleNativeShare = async () => {
+    const code = await getOrCreateReferralCode();
+    const shareUrl = code ? `${window.location.origin}/client?ref=${code}` : reportUrl;
+    const text = code
+      ? `I just got my AI skin analysis at RadiantilyK! Use my referral code ${code} and we both get 15% off our next treatment.`
+      : shareText;
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: `${patientName}'s Skin Analysis`,
-          text: shareText,
-          url: reportUrl,
+          text,
+          url: shareUrl,
         });
       } catch { /* user cancelled */ }
     } else {
@@ -353,13 +401,14 @@ function ShareResults({ reportId, patientName }: { reportId: number; patientName
   };
 
   const handleCopyLink = async () => {
+    const url = referralUrl || reportUrl;
     try {
-      await navigator.clipboard.writeText(reportUrl);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       const input = document.createElement("input");
-      input.value = reportUrl;
+      input.value = url;
       document.body.appendChild(input);
       input.select();
       document.execCommand("copy");
@@ -369,69 +418,152 @@ function ShareResults({ reportId, patientName }: { reportId: number; patientName
     }
   };
 
-  const handleEmailShare = () => {
-    const subject = encodeURIComponent(`My AI Skin Analysis Results`);
-    const body = encodeURIComponent(`${shareText}\n\nView my results here: ${reportUrl}`);
+  const handleCopyReferralCode = async () => {
+    if (!referralCode) return;
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setReferralCopied(true);
+      setTimeout(() => setReferralCopied(false), 2000);
+    } catch {
+      const input = document.createElement("input");
+      input.value = referralCode;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setReferralCopied(true);
+      setTimeout(() => setReferralCopied(false), 2000);
+    }
+  };
+
+  const handleEmailShare = async () => {
+    const code = await getOrCreateReferralCode();
+    const url = code ? `${window.location.origin}/client?ref=${code}` : reportUrl;
+    const subject = encodeURIComponent(`Get 15% off at RadiantilyK Aesthetic!`);
+    const body = encodeURIComponent(
+      `Hey! I just got my AI skin analysis at RadiantilyK Aesthetic and it was amazing.\n\nUse my referral link and we BOTH get 15% off our next treatment:\n${url}\n\n${code ? `Or use my code: ${code}` : ""}`
+    );
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
 
-  const handleTextShare = () => {
-    const body = encodeURIComponent(`${shareText} ${reportUrl}`);
+  const handleTextShare = async () => {
+    const code = await getOrCreateReferralCode();
+    const url = code ? `${window.location.origin}/client?ref=${code}` : reportUrl;
+    const body = encodeURIComponent(
+      `Hey! Get a free AI skin analysis at RadiantilyK. Use my code ${code || ""} and we both get 15% off! ${url}`
+    );
     window.open(`sms:?body=${body}`);
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 text-center">
-      <h3 className="text-lg font-bold mb-2 flex items-center justify-center gap-2">
-        <Share2 className="w-5 h-5 text-purple-500" />
-        Share Your Results
-      </h3>
-      <p className="text-sm text-gray-600 mb-4">
-        Share your skin analysis with friends or family &mdash; they might want one too!
-      </p>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <button
-          onClick={handleNativeShare}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
-        >
-          <Share2 className="w-4 h-4" />
-          Share
-        </button>
-        <button
-          onClick={handleCopyLink}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4 text-emerald-500" />
-              Copied!
-            </>
+    <div className="space-y-4">
+      {/* Referral Program Card */}
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 border border-purple-200 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-200/30 to-transparent rounded-bl-full" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center">
+              <Heart className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-800">Refer a Friend, Both Save 15%</h3>
+          </div>
+          <p className="text-sm text-gray-600 mb-4 ml-10">
+            Share your unique referral link with friends. When they get their analysis, you <strong>both</strong> receive 15% off your next treatment!
+          </p>
+
+          {referralCode ? (
+            <div className="space-y-3">
+              {/* Referral Code Display */}
+              <div className="flex items-center gap-2 bg-white rounded-xl p-3 border border-purple-100 shadow-sm">
+                <div className="flex-1">
+                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Your Referral Code</p>
+                  <p className="text-xl font-mono font-bold text-purple-600 tracking-wider">{referralCode}</p>
+                </div>
+                <button
+                  onClick={handleCopyReferralCode}
+                  className="px-3 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs font-medium transition-colors flex items-center gap-1.5"
+                >
+                  {referralCopied ? (
+                    <><Check className="w-3.5 h-3.5" /> Copied!</>
+                  ) : (
+                    <><Copy className="w-3.5 h-3.5" /> Copy Code</>
+                  )}
+                </button>
+              </div>
+
+              {/* Shareable Link */}
+              <div className="flex items-center gap-2 bg-white rounded-xl p-3 border border-purple-100 shadow-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Your Referral Link</p>
+                  <p className="text-xs text-gray-500 truncate">{referralUrl}</p>
+                </div>
+                <button
+                  onClick={handleCopyLink}
+                  className="px-3 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 text-xs font-medium transition-colors flex items-center gap-1.5 shrink-0"
+                >
+                  {copied ? (
+                    <><Check className="w-3.5 h-3.5" /> Copied!</>
+                  ) : (
+                    <><Copy className="w-3.5 h-3.5" /> Copy Link</>
+                  )}
+                </button>
+              </div>
+
+              {/* Stats */}
+              {referralStats && referralStats.timesUsed > 0 && (
+                <div className="text-center py-2">
+                  <p className="text-xs text-purple-600 font-medium">
+                    <Sparkles className="w-3 h-3 inline mr-1" />
+                    {referralStats.timesUsed} friend{referralStats.timesUsed !== 1 ? "s" : ""} have used your code!
+                  </p>
+                </div>
+              )}
+
+              {/* Share Buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <button
+                  onClick={handleNativeShare}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-md"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share with Friends
+                </button>
+                <button
+                  onClick={handleEmailShare}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+                >
+                  <Mail className="w-4 h-4 text-blue-500" />
+                  Email
+                </button>
+                <button
+                  onClick={handleTextShare}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4 text-green-500" />
+                  Text
+                </button>
+              </div>
+            </div>
           ) : (
-            <>
-              <Copy className="w-4 h-4" />
-              Copy Link
-            </>
+            <div className="flex items-center justify-center py-4">
+              {referralLoading ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating your referral code...
+                </div>
+              ) : (
+                <button
+                  onClick={getOrCreateReferralCode}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-md"
+                >
+                  <Heart className="w-4 h-4" />
+                  Get My Referral Code
+                </button>
+              )}
+            </div>
           )}
-        </button>
-      </div>
-      {showOptions && (
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-          <button
-            onClick={handleEmailShare}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
-          >
-            <Mail className="w-4 h-4 text-blue-500" />
-            Email
-          </button>
-          <button
-            onClick={handleTextShare}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
-          >
-            <MessageSquare className="w-4 h-4 text-green-500" />
-            Text Message
-          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1389,7 +1521,7 @@ export default function ClientReport() {
             variants={fadeUp}
             className="mb-8"
           >
-            <ShareResults reportId={reportId} patientName={`${data.patientFirstName} ${data.patientLastName}`} />
+            <ShareResults reportId={reportId} patientName={`${data.patientFirstName} ${data.patientLastName}`} patientEmail={data.patientEmail} />
           </motion.div>
 
           {/* Footer */}

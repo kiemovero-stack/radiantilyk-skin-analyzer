@@ -180,16 +180,18 @@ CRITICAL RULES:
    - When multiple angles are provided, analyze ALL images together and note which angle revealed which finding
 
 2. TREATMENT RECOMMENDATIONS — USE ONLY FROM THE CLINIC CATALOG
-   - EXACTLY 2 facial treatments from the clinic's menu
-   - 5 to 6 skin procedures from the clinic's service menu (MUST include HA fillers like Restylane/Juvederm when appropriate, and IPL for Fitzpatrick I-IV when sun damage/pigmentation/rosacea/vascular concerns are present)
-   - 3 to 5 skincare products from the RadiantilyK catalog
+   - AT LEAST 3 facial treatments from the clinic's menu (recommend 3 or more based on detected concerns)
+   - 4 to 8 skin procedures from the clinic's service menu (MUST include HA fillers like Restylane/Juvederm when appropriate, and IPL for Fitzpatrick I-IV when sun damage/pigmentation/rosacea/vascular concerns are present)
+   - SERIES STACKING: For each procedure, recommend a treatment series when clinically appropriate (e.g., "3 sessions of RF Microneedling spaced 4 weeks apart" or "4-6 sessions of IPL every 3-4 weeks"). Explain why a series delivers better cumulative results than a single session. Include per-session AND total series pricing.
+   - 5 to 7 skincare products from the RadiantilyK catalog
    - For each recommendation, explain in simple terms:
      * What the treatment actually does (in plain English)
      * How it helps their specific concerns (reference the exact conditions you found)
      * What to expect during and after
      * How it works with other recommended treatments (stacking)
-   - Always recommend SPF sunscreen — explain why sun protection matters
-   - If getting procedures, recommend a post-procedure kit and explain why recovery care matters
+   - ALWAYS recommend a sunscreen (EltaMD, BARUBT, or EELHOE) — explain why sun protection matters
+   - If getting procedures, recommend a post-procedure recovery product (MOV Cellular Repair Mist, MOV Tina Regence Recovery Serum, Cosmedix or FactorFive kit) and explain why recovery care matters
+   - When multiple recommended products match a bundle deal, ALWAYS suggest the bundle to save money
    - TREATMENT STACKING: Explain which treatments work well together and in what order
      Example: "Microneedling works great with a chemical peel — do the peel first to prep the skin, then microneedling 2 weeks later to boost collagen"
 
@@ -316,7 +318,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       },
       facialTreatments: {
         type: "array",
-        description: "EXACTLY 2 facial treatments. Explain what each does in simple terms.",
+        description: "AT LEAST 3 facial treatments. Recommend 3 or more based on detected concerns. Explain what each does in simple terms.",
         items: {
           type: "object",
           required: ["name", "price", "reason", "targetConditions", "benefits", "priority"],
@@ -333,7 +335,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       },
       skinProcedures: {
         type: "array",
-        description: "5 to 6 procedures, prioritized by impact. MUST include Sculptra or Radiesse if the client shows ANY signs of volume loss, skin laxity, or aging. Include what it does, what to expect, and how it stacks with other treatments. For Fitzpatrick V-VI: NEVER recommend IPL, only Nd:YAG or Pico lasers, always note patch test requirement.",
+        description: "4 to 8 procedures, prioritized by impact. MUST include Sculptra or Radiesse if the client shows ANY signs of volume loss, skin laxity, or aging. Include what it does, what to expect, and how it stacks with other treatments. For each procedure, recommend a treatment series when appropriate and include per-session AND total series pricing. For Fitzpatrick V-VI: NEVER recommend IPL, only Nd:YAG or Pico lasers, always note patch test requirement.",
         items: {
           type: "object",
           required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "simulation", "priority"],
@@ -378,7 +380,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       },
       skincareProducts: {
         type: "array",
-        description: "3-5 products from the catalog. Explain why each one helps their specific concerns.",
+        description: "5-7 products from the catalog. MUST include a sunscreen and a post-procedure product when procedures are recommended. Explain why each one helps their specific concerns. When products match a bundle deal, mention the bundle to save money.",
         items: {
           type: "object",
           required: ["name", "sku", "price", "type", "purpose", "keyIngredients", "targetConditions"],

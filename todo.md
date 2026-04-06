@@ -419,3 +419,29 @@
 - [x] Update staff AI prompt with CO2 laser recommendation rules
 - [x] Added Fitzpatrick V-VI contraindication for CO2 laser
 - [x] Update tests (115 tests passing)
+
+## Referral Program
+- [x] Create referral_codes database table (code, referrer_email, referred_email, discount_percent, used, created_at)
+- [x] Generate unique referral codes for each client after analysis
+- [x] Add "Share & Save" section to client report with shareable referral link
+- [x] When a referred friend completes analysis, both referrer and friend get 15% off
+- [x] Add referral code input field on client landing page
+- [x] Track referral conversions in the database
+- [ ] Send email to referrer when their friend completes an analysis
+
+## Seasonal Promotion Banner
+- [x] Create a configurable promotion banner component on client landing page
+- [x] Make banner content easily swappable (title, description, CTA, colors)
+- [x] Default to "Spring Skin Renewal — CO2 Laser + Free Post-Procedure Kit"
+- [x] Store banner config so it can be updated without code changes
+- [x] Add seasonal styling with spring theme
+
+## Sync Updated Storefront Products (April 2026)
+- [x] Scrape all products from updated radiantshop-gqunaun6.manus.space storefront
+- [x] Update product catalog with new/changed/removed products (53 → 67 products)
+- [x] Update product images and shop URLs
+- [x] Update AI prompts to recommend 5-7 products (was 3-5)
+- [x] Update AI prompts to recommend 4-8 procedures with series stacking (was 4-6)
+- [x] Update AI prompts to recommend AT LEAST 3 facials (was EXACTLY 2)
+- [x] Add treatment series/stacking recommendations to procedures
+- [x] Update tests for new recommendation counts (123 tests passing)

@@ -115,7 +115,7 @@ async function runClientAnalysisInBackground(
 
     imageContents.push({
       type: "text",
-      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${imageAngles.join(", ")}) for a client self-assessment.${concernsText}\n\nProvide a complete, easy-to-understand skin analysis. Remember: explain everything in simple language that anyone can understand. Be warm, encouraging, and thorough. Recommend exactly 2 facials, exactly 4 procedures, and 3-5 skincare products from the catalog. Pay special attention to Fitzpatrick skin type when recommending treatments — some treatments are not suitable for all skin types.`,
+      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${imageAngles.join(", ")}) for a client self-assessment.${concernsText}\n\nProvide a complete, easy-to-understand skin analysis. Remember: explain everything in simple language that anyone can understand. Be warm, encouraging, and thorough. Recommend at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products from the catalog. Pay special attention to Fitzpatrick skin type when recommending treatments — some treatments are not suitable for all skin types.`,
     });
 
     for (let i = 0; i < imageUrls.length; i++) {

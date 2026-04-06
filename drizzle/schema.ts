@@ -43,3 +43,36 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
 
 export type SkinAnalysis = typeof skinAnalyses.$inferSelect;
 export type InsertSkinAnalysis = typeof skinAnalyses.$inferInsert;
+
+/**
+ * Referral codes for the client referral program.
+ * Each client gets a unique code after analysis; when a friend uses it, both get 15% off.
+ */
+export const referralCodes = mysqlTable("referralCodes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 32 }).notNull().unique(),
+  referrerName: varchar("referrerName", { length: 256 }).notNull(),
+  referrerEmail: varchar("referrerEmail", { length: 320 }).notNull(),
+  analysisId: int("analysisId").notNull(),
+  discountPercent: int("discountPercent").notNull().default(15),
+  timesUsed: int("timesUsed").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReferralCode = typeof referralCodes.$inferSelect;
+export type InsertReferralCode = typeof referralCodes.$inferInsert;
+
+/**
+ * Tracks each referral redemption — who used the code and when.
+ */
+export const referralRedemptions = mysqlTable("referralRedemptions", {
+  id: int("id").autoincrement().primaryKey(),
+  referralCodeId: int("referralCodeId").notNull(),
+  referredName: varchar("referredName", { length: 256 }).notNull(),
+  referredEmail: varchar("referredEmail", { length: 320 }).notNull(),
+  referredAnalysisId: int("referredAnalysisId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReferralRedemption = typeof referralRedemptions.$inferSelect;
+export type InsertReferralRedemption = typeof referralRedemptions.$inferInsert;

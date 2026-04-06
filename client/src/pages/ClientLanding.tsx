@@ -30,10 +30,12 @@ import {
   MapPin,
   Phone,
   Mail,
+  Gift,
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
 import { fbPixel } from "@/lib/fbPixel";
+import { useEffect, useState } from "react";
 
 const CHECKIN_URL = "https://rkaemr.click/portal";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/IMG_2517_3c23507d.PNG";
@@ -154,6 +156,125 @@ const LOCATIONS = [
   },
 ];
 
+interface SeasonalPromotion {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  ctaText: string;
+  ctaUrl: string;
+  badgeText?: string;
+  gradient: string;
+  accentColor: string;
+  icon?: string;
+}
+
+function SeasonalPromoBanner() {
+  const [promo, setPromo] = useState<SeasonalPromotion | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/promotions/active")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.promotion) setPromo(data.promotion);
+      })
+      .catch(() => {});
+  }, []);
+
+  if (!promo || dismissed) return null;
+
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-b border-emerald-200">
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-cyan-500/5" />
+      <div className="relative container py-3 px-4">
+        <button
+          onClick={() => setDismissed(true)}
+          className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-lg leading-none"
+          aria-label="Dismiss"
+        >
+          &times;
+        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-2">
+            {promo.icon && <span className="text-xl">{promo.icon}</span>}
+            {promo.badgeText && (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider">
+                {promo.badgeText}
+              </span>
+            )}
+          </div>
+          <div>
+            <p className="text-sm font-bold text-gray-800">
+              {promo.title} &mdash; <span className="text-emerald-600">{promo.subtitle}</span>
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">{promo.description}</p>
+          </div>
+          <a
+            href={promo.ctaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
+          >
+            {promo.ctaText}
+            <ArrowRight className="w-3 h-3 inline ml-1" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReferralBanner() {
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const refCode = params.get("ref");
+  const [referrer, setReferrer] = useState<{ referrerName: string; discountPercent: number } | null>(null);
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!refCode) return;
+    fetch(`/api/referral/lookup/${refCode}`)
+      .then((r) => {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then((data) => {
+        if (data?.valid) {
+          setReferrer({ referrerName: data.referrerName, discountPercent: data.discountPercent });
+          // Store in sessionStorage so the analyze page can use it
+          sessionStorage.setItem("referralCode", refCode);
+          sessionStorage.setItem("referralDiscount", String(data.discountPercent));
+        }
+      })
+      .catch(() => {});
+  }, [refCode]);
+
+  if (!referrer) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 px-4">
+      <div className="container flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
+        <div className="flex items-center gap-2">
+          <Gift className="w-5 h-5 shrink-0" />
+          <p className="text-sm font-semibold">
+            {referrer.referrerName.split(" ")[0]} referred you! You both get{" "}
+            <span className="underline decoration-2 underline-offset-2">{referrer.discountPercent}% off</span>{" "}
+            your next treatment.
+          </p>
+        </div>
+        <button
+          onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+          className="shrink-0 px-4 py-1.5 rounded-full bg-white text-purple-600 text-xs font-bold hover:bg-white/90 transition-colors"
+        >
+          Claim Your Discount
+          <ArrowRight className="w-3 h-3 inline ml-1" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ClientLanding() {
   const [, navigate] = useLocation();
 
@@ -201,7 +322,13 @@ export default function ClientLanding() {
         </div>
       </header>
 
-      {/* Special Offer Banner */}
+      {/* Referral Banner (shows when ?ref=CODE is in URL) */}
+      <ReferralBanner />
+
+      {/* Seasonal Promotion Banner (fetched from API) */}
+      <SeasonalPromoBanner />
+
+      {/* Default Offer Banner */}
       <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-2.5 px-4">
         <div className="container flex items-center justify-center gap-2 text-center">
           <Zap className="w-4 h-4 shrink-0 animate-pulse" />

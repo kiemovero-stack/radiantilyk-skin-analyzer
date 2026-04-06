@@ -84,18 +84,20 @@ CRITICAL RULES:
    - One CO2 session can equal 3-5 sessions of milder resurfacing treatments
 
 3. TREATMENT RECOMMENDATIONS — USE ONLY FROM THE CLINIC CATALOG BELOW
-   - EXACTLY 2 facial treatments from the clinic's Facials menu (no more, no less)
-   - 5 to 6 high-impact skin procedures from the clinic's service menu (MUST include HA fillers like Restylane/Juvederm when appropriate, and IPL for Fitzpatrick I-IV when sun damage/pigmentation/rosacea/vascular concerns are present)
-   - 3 to 5 skincare product recommendations — MUST be selected ONLY from the RadiantilyK Aesthetic Product Catalog below
+   - AT LEAST 3 facial treatments from the clinic's Facials menu (recommend 3 or more based on detected concerns)
+   - 4 to 8 high-impact skin procedures from the clinic's service menu (MUST include HA fillers like Restylane/Juvederm when appropriate, and IPL for Fitzpatrick I-IV when sun damage/pigmentation/rosacea/vascular concerns are present)
+   - SERIES STACKING: For each procedure, recommend a treatment series when appropriate (e.g., "3 sessions of RF Microneedling spaced 4 weeks apart" or "4-6 sessions of IPL every 3-4 weeks"). Explain why a series delivers better cumulative results than a single session. Include per-session AND total series pricing.
+   - 5 to 7 skincare product recommendations — MUST be selected ONLY from the RadiantilyK Aesthetic Product Catalog below
    - Each product recommendation MUST include the exact product name, SKU code, and price from the catalog
    - Match products to the patient's specific detected conditions (e.g., recommend brightening serums for hyperpigmentation, peptide creams for aging)
-   - Always recommend the EELHOE Sun Cream SPF90 ($22.00) as one of the products — sun protection is essential for every patient
-   - If the patient is getting procedures, recommend a post-procedure kit (Cosmedix or FactorFive) as part of their product regimen
+   - ALWAYS recommend a sunscreen (EltaMD, BARUBT, or EELHOE) — sun protection is essential for every patient
+   - If the patient is getting procedures, recommend a post-procedure recovery product (MOV Cellular Repair Mist, MOV Tina Regence Recovery Serum, Cosmedix or FactorFive kit) as part of their product regimen
    - Prioritize treatments based on the MOST CRITICAL issues first
    - Every single recommendation MUST be directly tied to a detected condition
    - Include the EXACT price from the catalog for each facial and procedure
    - You may also suggest relevant add-ons from the "Facial Add-Ons" section
    - If a membership would save the client money, mention the relevant membership option
+   - When multiple recommended products match a bundle deal, ALWAYS suggest the bundle to save money
    - Never use generic spa language. Be specific and clinical.
 
 4. NEXT-LEVEL INSIGHTS
@@ -222,7 +224,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       facialTreatments: {
         type: "array",
-        description: "EXACTLY 2 facial treatments FROM THE CLINIC CATALOG, prioritized by impact. Must include exact price.",
+        description: "AT LEAST 3 facial treatments FROM THE CLINIC CATALOG, prioritized by impact. Must include exact price. Recommend 3 or more facials based on detected concerns.",
         items: {
           type: "object",
           required: ["name", "price", "reason", "targetConditions", "benefits", "priority"],
@@ -239,7 +241,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       skinProcedures: {
         type: "array",
-        description: "5 to 6 high-impact skin procedures FROM THE CLINIC CATALOG, prioritized. MUST include HA fillers (Restylane/Juvederm) when appropriate and IPL for Fitzpatrick I-IV. NEVER recommend Radiesse for under-eye area. Must include exact price.",
+        description: "4 to 8 high-impact skin procedures FROM THE CLINIC CATALOG, prioritized. MUST include HA fillers (Restylane/Juvederm) when appropriate and IPL for Fitzpatrick I-IV. NEVER recommend Radiesse for under-eye area. Must include exact price. For each procedure, recommend a treatment series when appropriate and include series pricing.",
         items: {
           type: "object",
           required: ["name", "price", "reason", "targetConditions", "benefits", "expectedResults", "simulation", "priority"],
@@ -261,7 +263,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
                 afterDescription: { type: "string", description: "Expected state after treatment" },
                 improvementPercent: { type: "number", description: "Estimated improvement 0-100" },
                 timelineWeeks: { type: "number", description: "Weeks to full results" },
-                sessionsNeeded: { type: "string", description: "Number of sessions needed" },
+                sessionsNeeded: { type: "string", description: "Number of sessions needed for optimal results, e.g. '3-4 sessions spaced 4 weeks apart' or 'Series of 6 sessions every 3-4 weeks'. Always recommend a series when clinically appropriate." },
                 milestones: {
                   type: "array",
                   description: "Progressive improvement milestones",
@@ -284,7 +286,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       skincareProducts: {
         type: "array",
-        description: "3-5 skincare product recommendations from the RadiantilyK Aesthetic Product Catalog. Each MUST include exact SKU and price.",
+        description: "5-7 skincare product recommendations from the RadiantilyK Aesthetic Product Catalog. MUST include a sunscreen and a post-procedure product when procedures are recommended. Each MUST include exact SKU and price. When products match a bundle deal, mention the bundle.",
         items: {
           type: "object",
           required: ["name", "sku", "price", "type", "purpose", "keyIngredients", "targetConditions"],
