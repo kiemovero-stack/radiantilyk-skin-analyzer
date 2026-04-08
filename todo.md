@@ -487,7 +487,10 @@
 - [x] Save checkpoint (version 49a438c5)
 
 ## FIX: Standalone Client Site Not Working in Production
-- [ ] Diagnose why skinanalyz-yxdmlvyu.manus.space shows staff dashboard instead of client app
-- [ ] Fix production build to include client-index.html entry point
-- [ ] Fix domain detection logic for production environment
+- [x] Diagnose why skinanalyz-yxdmlvyu.manus.space shows staff dashboard instead of client app
+- [x] Root cause: express.static auto-serves index.html for "/" before domain-aware catch-all route runs
+- [x] Fix: Set index:false on express.static so ALL HTML serving goes through domain-aware catch-all
+- [x] Fix: Add trust proxy to Express for correct hostname detection behind Cloudflare
+- [x] Fix: Check X-Forwarded-Host header in addition to req.hostname
 - [ ] Verify client site works on skinanalyz-yxdmlvyu.manus.space after fix
+- [ ] Verify staff site still works on rkaaiskin.com after fix

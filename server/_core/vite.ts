@@ -18,7 +18,15 @@ const STAFF_DOMAINS = new Set([
 
 /** Determine if a request should be served the client site */
 function isClientDomain(req: Request): boolean {
-  const host = (req.hostname || req.headers.host || "").split(":")[0].toLowerCase();
+  // Check multiple header sources for the hostname — Manus deployment proxy
+  // may forward requests with different Host header values
+  const xfh = req.headers["x-forwarded-host"];
+  const xForwardedHost = Array.isArray(xfh) ? xfh[0] : xfh || "";
+  const host = (xForwardedHost || req.hostname || req.headers.host || "")
+    .split(":")[0]
+    .toLowerCase();
+
+  console.log(`[domain-detect] host="${host}" xfh="${xForwardedHost}" req.hostname="${req.hostname}" headers.host="${req.headers.host}"`);
 
   // Explicit staff domains → staff app
   if (STAFF_DOMAINS.has(host)) return false;
@@ -111,7 +119,15 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Serve static assets (JS, CSS, images) but NOT index.html files.
+  // We need the domain-aware catch-all to decide which HTML to serve.
+  // express.static automatically serves index.html for "/" which bypasses
+  // our domain detection logic — so we must prevent that.
+  app.use(
+    express.static(distPath, {
+      index: false, // Do NOT auto-serve index.html for directory requests
+    })
+  );
 
   // Domain-based SPA fallback: serve the correct index.html
   app.use("*", (req, res) => {
