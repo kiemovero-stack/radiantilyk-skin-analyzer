@@ -705,10 +705,22 @@ describe("Client Landing Page Route", () => {
     expect(content).toContain("Get My Free Skin Analysis");
   });
 
-  it("ClientLanding links to /client/start for the analysis flow", async () => {
+  it("ClientLanding uses clientPaths for navigation to the analysis flow", async () => {
     const fs = await import("fs");
     const content = fs.readFileSync("/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx", "utf-8");
-    expect(content).toContain("/client/start");
+    expect(content).toContain('import { paths } from "@/lib/clientPaths"');
+    expect(content).toContain("paths.start");
+  });
+
+  it("ClientApp.tsx has standalone routes for /, /start, and /report/:id", async () => {
+    const fs = await import("fs");
+    const clientAppContent = fs.readFileSync("/home/ubuntu/skin-analyzer/client/src/ClientApp.tsx", "utf-8");
+    expect(clientAppContent).toContain('path="/"');
+    expect(clientAppContent).toContain('path="/start"');
+    expect(clientAppContent).toContain('path="/report/:id"');
+    expect(clientAppContent).toContain("ClientLanding");
+    expect(clientAppContent).toContain("ClientAnalyze");
+    expect(clientAppContent).toContain("ClientReport");
   });
 });
 

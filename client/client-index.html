@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>RadiantilyK Aesthetic — AI Skin Analysis</title>
+    <meta name="description" content="Get your free AI-powered skin analysis from RadiantilyK Aesthetic. Personalized treatment recommendations for facials, injectables, laser treatments, and more. Serving San Jose & San Mateo." />
+    <meta name="keywords" content="skin analysis, AI skin analyzer, facials, injectables, Botox, fillers, laser treatment, microneedling, San Jose, San Mateo, RadiantilyK" />
+    <meta property="og:title" content="RadiantilyK Aesthetic — Free AI Skin Analysis" />
+    <meta property="og:description" content="Upload a selfie and get personalized treatment recommendations powered by AI. Free, instant, and confidential." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="%VITE_APP_LOGO%" />
+    <link rel="icon" type="image/png" href="%VITE_APP_LOGO%" />
+    <!-- Facebook Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      var pixelId = '%VITE_FB_PIXEL_ID%';
+      if (pixelId && pixelId !== '' && !pixelId.includes('VITE_FB_PIXEL_ID')) {
+        fbq('init', pixelId);
+        fbq('track', 'PageView');
+      }
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=%VITE_FB_PIXEL_ID%&ev=PageView&noscript=1"/>
+    </noscript>
+    <!-- End Facebook Pixel Code -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/client-main.tsx"></script>
+    <script
+      defer
+      src="%VITE_ANALYTICS_ENDPOINT%/umami"
+      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
+  </body>
+</html>

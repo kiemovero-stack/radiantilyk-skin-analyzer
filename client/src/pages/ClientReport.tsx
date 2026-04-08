@@ -43,6 +43,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { motion } from "framer-motion";
+import { paths, clientPath } from "@/lib/clientPaths";
 
 const CHECKIN_URL = "https://rkaemr.click/portal";
 const SHOP_URL = "https://rkaskin.co";
@@ -339,7 +340,7 @@ function ShareResults({ reportId, patientName, patientEmail }: { reportId: numbe
   const [referralCopied, setReferralCopied] = useState(false);
   const [referralStats, setReferralStats] = useState<{ timesUsed: number } | null>(null);
 
-  const reportUrl = `${window.location.origin}/client/report/${reportId}`;
+  const reportUrl = `${window.location.origin}${clientPath(`/report/${reportId}`)}`;  
   const shareText = `Check out my AI skin analysis results from RadiantilyK!`;
 
   // Generate or fetch referral code
@@ -377,12 +378,12 @@ function ShareResults({ reportId, patientName, patientEmail }: { reportId: numbe
   }, [patientEmail]);
 
   const referralUrl = referralCode
-    ? `${window.location.origin}/client?ref=${referralCode}`
+    ? paths.referral(referralCode)
     : null;
 
   const handleNativeShare = async () => {
     const code = await getOrCreateReferralCode();
-    const shareUrl = code ? `${window.location.origin}/client?ref=${code}` : reportUrl;
+    const shareUrl = code ? paths.referral(code) : reportUrl;
     const text = code
       ? `I just got my AI skin analysis at RadiantilyK! Use my referral code ${code} and we both get 15% off our next treatment.`
       : shareText;
@@ -438,7 +439,7 @@ function ShareResults({ reportId, patientName, patientEmail }: { reportId: numbe
 
   const handleEmailShare = async () => {
     const code = await getOrCreateReferralCode();
-    const url = code ? `${window.location.origin}/client?ref=${code}` : reportUrl;
+    const url = code ? paths.referral(code) : reportUrl;
     const subject = encodeURIComponent(`Get 15% off at RadiantilyK Aesthetic!`);
     const body = encodeURIComponent(
       `Hey! I just got my AI skin analysis at RadiantilyK Aesthetic and it was amazing.\n\nUse my referral link and we BOTH get 15% off our next treatment:\n${url}\n\n${code ? `Or use my code: ${code}` : ""}`
@@ -448,7 +449,7 @@ function ShareResults({ reportId, patientName, patientEmail }: { reportId: numbe
 
   const handleTextShare = async () => {
     const code = await getOrCreateReferralCode();
-    const url = code ? `${window.location.origin}/client?ref=${code}` : reportUrl;
+    const url = code ? paths.referral(code) : reportUrl;
     const body = encodeURIComponent(
       `Hey! Get a free AI skin analysis at RadiantilyK. Use my code ${code || ""} and we both get 15% off! ${url}`
     );

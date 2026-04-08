@@ -458,16 +458,30 @@
 
 ## Post-Rollback Tasks (6b9b9bba)
 - [ ] Run test analysis to verify AI recommends weight loss/peptides/hormones when concerns match
-- [ ] Verify Ultherapy/HIFU recommendations for skin laxity concerns
-- [ ] Add Ultherapy to service catalog with competitive San Jose pricing
-- [ ] Update AI prompts to distinguish HIFU vs Ultherapy (NO FDA language, NO "non-surgical facelift")
-- [ ] Add pricing to all service category cards on landing page
-- [ ] Create litigation-tight intake questionnaire for Peptide Therapy (California compliant)
-- [ ] Create litigation-tight intake questionnaire for Hormone Replacement Therapy (California compliant)
-- [ ] Add questionnaire delivery system (PDF download + in-app completion)
+- [x] Verify Ultherapy/HIFU recommendations for skin laxity concerns
+- [x] Add Ultherapy to service catalog with competitive San Jose pricing
+- [x] Update AI prompts to distinguish HIFU vs Ultherapy (NO FDA language, NO "non-surgical facelift")
+- [x] Add pricing to all 10 service category cards on landing page
+- [x] Create litigation-tight intake questionnaire for Peptide Therapy (California compliant, PDF download)
+- [x] Create litigation-tight intake questionnaire for Hormone Replacement Therapy (California compliant, PDF download)
+- [x] Add questionnaire delivery system (PDF download via /api/questionnaires/peptide-therapy and /api/questionnaires/hrt)
 
 ## Remove PRP Hair Restoration
 - [x] Remove PRP from service catalog (user does not offer PRP or PRF)
 - [x] Remove PRP from AI prompts (skinPrompt.ts and clientPrompt.ts) — added "DO NOT recommend PRP or PRF" rule
 - [x] Update Hair Restoration category to only include Exosome therapy (Single $1,200, Pack of 3 $3,000)
 - [x] Update Hair Restoration card on landing page (removed PRP, updated pricing to From $1,200)
+
+## Standalone Client Site (Separate Domain)
+- [x] Create separate client app entry point (ClientApp.tsx, client-main.tsx)
+- [x] Create client-specific index.html with proper meta tags and SEO
+- [x] Build Vite multi-entry config for staff vs client builds
+- [x] Add domain-based routing in Express server (skinanalyz domain → client, rkaaiskin → staff)
+- [x] Client landing page at root "/" instead of "/client"
+- [x] Client analyze at "/start" instead of "/client/start"
+- [x] Client report at "/report/:id" instead of "/client/report/:id"
+- [x] All API calls use relative paths (same server, no CORS needed)
+- [x] Cookie-based dev mode for testing (/__client entry point sets client_mode cookie)
+- [x] Test end-to-end flow — landing, intake, report all working
+- [x] 128 tests passing
+- [ ] Save checkpoint

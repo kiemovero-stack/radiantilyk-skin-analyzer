@@ -35,6 +35,7 @@ import {
 import { useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
 import { fbPixel } from "@/lib/fbPixel";
+import { paths } from "@/lib/clientPaths";
 import { useEffect, useState } from "react";
 
 const CHECKIN_URL = "https://rkaemr.click/portal";
@@ -347,7 +348,7 @@ function ReferralBanner() {
           </p>
         </div>
         <button
-          onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+          onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
           className="shrink-0 px-4 py-1.5 rounded-full bg-white text-purple-600 text-xs font-bold hover:bg-white/90 transition-colors"
         >
           Claim Your Discount
@@ -396,7 +397,7 @@ export default function ClientLanding() {
             <Button
               size="sm"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs font-semibold hover:opacity-90 border-0 shadow-md"
-              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+              onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
               Get Free Analysis
               <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -467,7 +468,7 @@ export default function ClientLanding() {
               <Button
                 size="lg"
                 className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-base px-8 py-6 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50 w-full sm:w-auto"
-                onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+                onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
               >
                 <Camera className="w-5 h-5 mr-2" />
                 Get My Free Skin Analysis
@@ -559,7 +560,7 @@ export default function ClientLanding() {
                 key={i}
                 variants={staggerItem}
                 className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer"
-                onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+                onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
               >
                 {/* Image */}
                 <div className="relative h-44 md:h-48 overflow-hidden">
@@ -607,7 +608,7 @@ export default function ClientLanding() {
             <Button
               size="lg"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-5 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50"
-              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+              onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
               Start My Free Analysis
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -689,7 +690,7 @@ export default function ClientLanding() {
             <Button
               size="lg"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-5 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50"
-              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+              onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
               Start My Free Analysis Now
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -921,7 +922,7 @@ export default function ClientLanding() {
             <Button
               size="lg"
               className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-6 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50 w-full sm:w-auto"
-              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+              onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
               <Camera className="w-5 h-5 mr-2" />
               Start My Free Skin Analysis

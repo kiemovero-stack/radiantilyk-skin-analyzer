@@ -23,6 +23,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { fbPixel } from "@/lib/fbPixel";
+import { paths } from "@/lib/clientPaths";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -374,7 +375,7 @@ export default function ClientAnalyze() {
           setPollingId(null);
           fbPixel.completeAnalysis();
           fbPixel.lead({ content_name: "skin_analysis" });
-          navigate(`/client/report/${data.id}`);
+          navigate(paths.report(data.id));
         } else if (data.status === "failed") {
           clearInterval(interval);
           setIsAnalyzing(false);
