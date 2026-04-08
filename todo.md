@@ -500,5 +500,5 @@
 - [x] New approach: unified index.html with client-side domain detection (window.location.hostname)
 - [x] Dynamic import in built JS: __IS_CLIENT_SITE__ ? client-main : main — both bundles available
 - [x] 128 tests passing
-- [ ] Verify client site works on skinanalyz-yxdmlvyu.manus.space after publish
-- [ ] Verify staff site still works on rkaaiskin.com after publish
+- [x] Verify client site works on skinanalyz-yxdmlvyu.manus.space after publish ✅ RadiantilyK client landing page confirmed
+- [x] Verify staff site still works on rkaaiskin.com after publish ✅ SkinAI staff dashboard confirmed
