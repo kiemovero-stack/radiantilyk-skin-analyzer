@@ -484,4 +484,10 @@
 - [x] Cookie-based dev mode for testing (/__client entry point sets client_mode cookie)
 - [x] Test end-to-end flow — landing, intake, report all working
 - [x] 128 tests passing
-- [ ] Save checkpoint
+- [x] Save checkpoint (version 49a438c5)
+
+## FIX: Standalone Client Site Not Working in Production
+- [ ] Diagnose why skinanalyz-yxdmlvyu.manus.space shows staff dashboard instead of client app
+- [ ] Fix production build to include client-index.html entry point
+- [ ] Fix domain detection logic for production environment
+- [ ] Verify client site works on skinanalyz-yxdmlvyu.manus.space after fix

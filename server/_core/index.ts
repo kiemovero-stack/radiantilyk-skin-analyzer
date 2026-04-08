@@ -65,6 +65,17 @@ async function startServer() {
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   );
+  // Debug endpoint to check hostname detection
+  app.get("/api/debug-host", (req, res) => {
+    res.json({
+      hostname: req.hostname,
+      host: req.headers.host,
+      xForwardedHost: req.headers["x-forwarded-host"],
+      xOriginalHost: req.headers["x-original-host"],
+      xForwardedFor: req.headers["x-forwarded-for"],
+      allHeaders: req.headers,
+    });
+  });
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Direct multipart upload route (bypasses tRPC body size limits)
