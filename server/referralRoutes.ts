@@ -64,7 +64,7 @@ export const SEASONAL_PROMOTIONS: SeasonalPromotion[] = [
     description:
       "Refresh your skin this spring with our most powerful resurfacing treatment. Book a CO2 Laser session and receive a complimentary MOV Cellular Repair Kit ($89 value) to accelerate your recovery.",
     ctaText: "Book Your Spring Renewal",
-    ctaUrl: "https://radiantilyk.janeapp.com",
+    ctaUrl: "https://rkaemr.click/portal",
     badgeText: "Limited Time",
     gradient: "from-emerald-500/20 via-teal-500/10 to-cyan-500/20",
     accentColor: "emerald",
@@ -80,7 +80,7 @@ export const SEASONAL_PROMOTIONS: SeasonalPromotion[] = [
     description:
       "Get photo-ready skin for summer. Our IPL + HydraFacial combo package targets sun damage, uneven tone, and dehydration in one powerful series.",
     ctaText: "Claim Your Summer Glow",
-    ctaUrl: "https://radiantilyk.janeapp.com",
+    ctaUrl: "https://rkaemr.click/portal",
     badgeText: "Save $200",
     gradient: "from-amber-500/20 via-orange-500/10 to-yellow-500/20",
     accentColor: "amber",
@@ -96,7 +96,7 @@ export const SEASONAL_PROMOTIONS: SeasonalPromotion[] = [
     description:
       "Fall is the perfect time for skin renewal. Start your RF Microneedling series now and get your 4th session free. Rebuild collagen and smooth texture before the holidays.",
     ctaText: "Start Your Series",
-    ctaUrl: "https://radiantilyk.janeapp.com",
+    ctaUrl: "https://rkaemr.click/portal",
     badgeText: "Buy 3 Get 1 Free",
     gradient: "from-orange-500/20 via-red-500/10 to-amber-500/20",
     accentColor: "orange",

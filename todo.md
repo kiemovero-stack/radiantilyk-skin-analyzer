@@ -571,3 +571,18 @@
 - [x] Referral mention already in follow-up emails (scar treatment block includes package pricing)
 - [x] Backend referral API already exists: create, lookup, redeem, stats endpoints
 - [x] 128 tests passing, production build successful
+
+## FIX: Booking Links Going to JaneApp Instead of RKAemr.click
+- [x] Found JaneApp URLs in referralRoutes.ts seasonal promotions (3 instances)
+- [x] Replaced all JaneApp URLs with rkaemr.click/portal
+- [x] Verified zero JaneApp URLs remain in entire codebase
+- [x] All client-facing pages already use rkaemr.click/portal (ClientReport, ClientLanding, ScarTreatment)
+
+## ENHANCE: Client-Facing Scar Treatment Section in Reports
+- [x] Added treatmentExplanations, totalTimeline, sessionSpacing, firstResultsTimeline to ScarTreatment type
+- [x] Updated both staff and client AI prompts with new schema fields
+- [x] Enhanced ClientReport scar card: "Your Treatment Timeline" bar (sessions, first results, full results)
+- [x] Enhanced ClientReport scar card: "What You'll Get" section with treatment-by-treatment explanations
+- [x] Added per-card disclaimer: "Results vary. Treatments can reduce scarring but complete removal is not guaranteed."
+- [x] Backward compatible: falls back to simple includes list for existing reports without new fields
+- [x] 128 tests passing, production build successful

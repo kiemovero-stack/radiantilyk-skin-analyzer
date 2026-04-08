@@ -71,6 +71,14 @@ export interface ScarTreatment {
   includes: string[];
   reason: string;
   savings: string;
+  /** What each included treatment does — explained in layman's terms */
+  treatmentExplanations: { name: string; whatItDoes: string }[];
+  /** Total timeline from first session to final results, e.g. "4–6 months" */
+  totalTimeline: string;
+  /** Spacing between sessions, e.g. "4–6 weeks apart" */
+  sessionSpacing: string;
+  /** When to expect first visible improvement, e.g. "2–4 weeks after first session" */
+  firstResultsTimeline: string;
 }
 
 export interface PredictiveInsight {

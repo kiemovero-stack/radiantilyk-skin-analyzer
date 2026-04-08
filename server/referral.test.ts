@@ -50,7 +50,7 @@ describe("Seasonal Promotions", () => {
 
   it("all CTA URLs point to booking system", () => {
     for (const promo of SEASONAL_PROMOTIONS) {
-      expect(promo.ctaUrl).toContain("janeapp.com");
+      expect(promo.ctaUrl).toContain("rkaemr.click");
     }
   });
 });

@@ -415,7 +415,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
         description: "Scar treatment package recommendations. ONLY include if scarring is detected. Recommend appropriate packages from the Scar Treatment Packages section of the catalog. Match scar type to the correct package tier (Starter/Basic for mild, Comprehensive for moderate, Premium for severe). Return empty array if no scarring detected.",
         items: {
           type: "object",
-          required: ["scarType", "packageName", "price", "sessions", "includes", "reason", "savings"],
+          required: ["scarType", "packageName", "price", "sessions", "includes", "reason", "savings", "treatmentExplanations", "totalTimeline", "sessionSpacing", "firstResultsTimeline"],
           additionalProperties: false,
           properties: {
             scarType: { type: "string", description: "Type of scar: 'Acne Scar (Ice Pick)', 'Acne Scar (Boxcar)', 'Acne Scar (Rolling)', 'Hypertrophic', 'Keloid', 'Surgical/Traumatic', 'Burn Scar', 'Stretch Mark (Rubrae)', 'Stretch Mark (Albae)', 'PIH'" },
@@ -424,7 +424,22 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
             sessions: { type: "number", description: "Total number of sessions in the package" },
             includes: { type: "array", items: { type: "string" }, description: "List of treatments included in the package" },
             reason: { type: "string", description: "Clinical reasoning for why this package is recommended for this patient's specific scarring" },
-            savings: { type: "string", description: "How much the patient saves vs individual pricing" }
+            savings: { type: "string", description: "How much the patient saves vs individual pricing" },
+            treatmentExplanations: {
+              type: "array",
+              description: "For EACH treatment in 'includes', provide a clinical explanation of the mechanism of action.",
+              items: {
+                type: "object",
+                required: ["name", "whatItDoes"],
+                properties: {
+                  name: { type: "string", description: "Treatment name (must match one of the 'includes' items)" },
+                  whatItDoes: { type: "string", description: "Clinical explanation of how this treatment addresses the scar tissue. Example: 'Subcision uses a hypodermic needle to release fibrotic strands tethering the scar to underlying tissue, allowing dermal remodeling and surface elevation.'" }
+                }
+              }
+            },
+            totalTimeline: { type: "string", description: "Total treatment duration from first to last session plus healing. Example: '4-6 months for complete protocol'" },
+            sessionSpacing: { type: "string", description: "Interval between sessions. Example: '4-6 weeks between sessions'" },
+            firstResultsTimeline: { type: "string", description: "Expected timeline for initial visible improvement. Example: 'Visible improvement within 2-4 weeks post first session'" }
           }
         }
       },

@@ -511,7 +511,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
         description: "Scar treatment package recommendations. ONLY include if you can see scarring in the photos. Recommend the right package from the Scar Treatment Packages in the catalog. Use Starter/Basic for mild, Comprehensive for moderate, Premium for severe. Return empty array if no scarring is visible.",
         items: {
           type: "object",
-          required: ["scarType", "packageName", "price", "sessions", "includes", "reason", "savings"],
+          required: ["scarType", "packageName", "price", "sessions", "includes", "reason", "savings", "treatmentExplanations", "totalTimeline", "sessionSpacing", "firstResultsTimeline"],
           additionalProperties: false,
           properties: {
             scarType: { type: "string", description: "Type of scar in simple terms: 'Acne Scars', 'Raised Scars', 'Keloid Scars', 'Surgical Scars', 'Burn Scars', 'Stretch Marks (New)', 'Stretch Marks (Old)', 'Dark Marks (PIH)'" },
@@ -520,7 +520,22 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
             sessions: { type: "number", description: "Total number of sessions in the package" },
             includes: { type: "array", items: { type: "string" }, description: "List of treatments included, explained simply" },
             reason: { type: "string", description: "Simple, friendly explanation of why this package is right for their specific scarring. Reference what you see in their photos." },
-            savings: { type: "string", description: "How much they save compared to buying each treatment individually" }
+            savings: { type: "string", description: "How much they save compared to buying each treatment individually" },
+            treatmentExplanations: {
+              type: "array",
+              description: "For EACH treatment in 'includes', explain what it does in simple layman's terms so the client understands exactly what they're getting.",
+              items: {
+                type: "object",
+                required: ["name", "whatItDoes"],
+                properties: {
+                  name: { type: "string", description: "Treatment name (must match one of the 'includes' items)" },
+                  whatItDoes: { type: "string", description: "Simple 1-2 sentence explanation of what this treatment does and how it helps their scars. Use everyday language, no medical jargon. Example: 'A tiny needle releases the scar tissue trapped under your skin, allowing the surface to lift and smooth out.'" }
+                }
+              }
+            },
+            totalTimeline: { type: "string", description: "Total time from first session to seeing final results. Example: '4-6 months for full results'" },
+            sessionSpacing: { type: "string", description: "How far apart sessions are spaced. Example: '4-6 weeks between each session'" },
+            firstResultsTimeline: { type: "string", description: "When the client can expect to see the first visible improvement. Example: 'You may notice smoother skin within 2-3 weeks after your first session'" }
           }
         }
       },
