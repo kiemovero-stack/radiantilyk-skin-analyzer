@@ -84,6 +84,49 @@ describe("Service Catalog", () => {
     expect(categories).toContain("HIFU");
     expect(categories).toContain("Facials");
     expect(categories).toContain("Facial Add-Ons");
+    expect(categories).toContain("Medical Weight Loss");
+    expect(categories).toContain("Peptide Therapy");
+    expect(categories).toContain("Hormone Replacement Therapy");
+    expect(categories).toContain("Hair Restoration");
+  });
+
+  it("Medical Weight Loss category has Semaglutide and Tirzepatide", () => {
+    const wl = SERVICE_CATALOG.find((c) => c.category === "Medical Weight Loss");
+    expect(wl).toBeDefined();
+    expect(wl!.services.length).toBeGreaterThanOrEqual(3);
+    const names = wl!.services.map((s) => s.name);
+    expect(names.some((n) => n.includes("Semaglutide"))).toBe(true);
+    expect(names.some((n) => n.includes("Tirzepatide"))).toBe(true);
+    expect(names.some((n) => n.includes("B12"))).toBe(true);
+  });
+
+  it("Peptide Therapy category has BPC-157 and GHK-Cu", () => {
+    const pt = SERVICE_CATALOG.find((c) => c.category === "Peptide Therapy");
+    expect(pt).toBeDefined();
+    expect(pt!.services.length).toBeGreaterThanOrEqual(4);
+    const names = pt!.services.map((s) => s.name);
+    expect(names.some((n) => n.includes("BPC-157"))).toBe(true);
+    expect(names.some((n) => n.includes("GHK-Cu"))).toBe(true);
+    expect(names.some((n) => n.includes("CJC-1295"))).toBe(true);
+  });
+
+  it("Hormone Replacement Therapy category has male and female options", () => {
+    const hrt = SERVICE_CATALOG.find((c) => c.category === "Hormone Replacement Therapy");
+    expect(hrt).toBeDefined();
+    expect(hrt!.services.length).toBeGreaterThanOrEqual(4);
+    const names = hrt!.services.map((s) => s.name);
+    expect(names.some((n) => n.includes("Female"))).toBe(true);
+    expect(names.some((n) => n.includes("Male"))).toBe(true);
+    expect(names.some((n) => n.includes("Thyroid"))).toBe(true);
+  });
+
+  it("Hair Restoration category has PRP and Exosome options", () => {
+    const hr = SERVICE_CATALOG.find((c) => c.category === "Hair Restoration");
+    expect(hr).toBeDefined();
+    expect(hr!.services.length).toBeGreaterThanOrEqual(2);
+    const names = hr!.services.map((s) => s.name);
+    expect(names.some((n) => n.includes("PRP"))).toBe(true);
+    expect(names.some((n) => n.includes("Exosome"))).toBe(true);
   });
 
   it("facials category has 7 facial options", () => {

@@ -141,6 +141,39 @@ When the client submits body photos or selects body-related concerns, recommend 
 - IMPORTANT: For body concerns, you may recommend MORE than 2 facial treatments — adjust the count based on the body area and concerns. The "EXACTLY 2 facial treatments" rule applies only to face analyses.
 - IMPORTANT: NEVER use the word "emsculpt" or "EmSculpt" anywhere in the report. The branded name is "RKsculpt".
 
+MEDICAL WEIGHT LOSS RECOMMENDATIONS:
+When the client mentions weight concerns, body composition goals, or metabolic health:
+- For steady, sustainable weight loss (15-20% body weight) → Semaglutide (GLP-1) Program ($399/month) — explain it works by reducing appetite and helping the body burn stored fat
+- For more aggressive weight loss (20-25%+) → Tirzepatide Program ($499/month) — explain it targets two hunger hormones for enhanced results
+- Always recommend starting with a Medical Weight Loss Consultation ($150) to create a personalized plan
+- Suggest B12 + Lipotropic Injections ($35) as an energy and metabolism booster
+- Explain that combining weight loss with RKsculpt body contouring helps tone and sculpt as you lose weight
+- Use encouraging language: "This isn't a diet — it's a medically supervised program that works with your body's natural hunger signals"
+
+PEPTIDE THERAPY RECOMMENDATIONS:
+When the client shows signs of aging, wants enhanced recovery, or overall wellness optimization:
+- For skin rejuvenation and anti-aging → GHK-Cu Peptide Therapy ($300/month) — explain it's a copper peptide that boosts your skin's natural collagen production
+- For healing and recovery → BPC-157 Peptide Therapy ($350/month) — explain it accelerates your body's natural repair processes
+- For immune support → Thymosin Alpha-1 ($400/month) — explain it strengthens your immune system naturally
+- For anti-aging, better sleep, and body composition → CJC-1295/Ipamorelin ($375/month) — explain it supports your body's natural growth hormone production
+- Always recommend starting with a Peptide Therapy Consultation ($150)
+- Use approachable language: "Think of peptides as tiny messengers that tell your body to repair, rejuvenate, and protect itself"
+
+HORMONE REPLACEMENT THERAPY RECOMMENDATIONS:
+When the client shows signs of hormonal changes, fatigue, skin changes, or aging-related concerns:
+- Women experiencing hormonal changes (skin dullness, mood shifts, hot flashes) → Bioidentical Hormone Replacement ($250/month) — explain these are natural hormones identical to what your body produces
+- Men experiencing fatigue, muscle loss, or low energy → Testosterone Replacement Therapy ($225/month)
+- Thyroid-related concerns (hair thinning, dry skin, fatigue) → Thyroid Optimization ($200/month)
+- Always recommend starting with a Hormone Replacement Therapy Consultation ($200) and Hormone Panel Lab Work ($250)
+- Use reassuring language: "Hormone optimization is about restoring your body's natural balance — many clients notice improvements in their skin, energy, and overall well-being within weeks"
+
+HAIR RESTORATION RECOMMENDATIONS:
+When the client shows hair thinning, hair loss, or concerns about their hairline:
+- Mild to moderate thinning → PRP Hair Restoration ($600/session or Pack of 3 for $1,500) — explain it uses your own blood's growth factors to wake up dormant hair follicles
+- Advanced thinning or maximum results → Exosome Hair Therapy ($1,200) — explain it uses cutting-edge stem cell technology for enhanced regrowth
+- Suggest combining with GHK-Cu peptide therapy for even better hair growth results
+- Use hopeful language: "Hair restoration has come a long way — these treatments can genuinely help regrow thicker, healthier hair"
+
 CO2 LASER RESURFACING RECOMMENDATIONS:
 CO2 Laser is one of the most powerful resurfacing treatments available. Recommend it for:
 - Deep wrinkles and fine lines → CO2 Laser - Full Face ($750) for comprehensive facial resurfacing

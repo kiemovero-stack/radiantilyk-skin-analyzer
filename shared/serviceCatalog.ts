@@ -187,6 +187,43 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
       { name: "Laser Elite Membership", price: "$199/month", category: "Memberships" },
     ],
   },
+  {
+    category: "Medical Weight Loss",
+    services: [
+      { name: "Semaglutide (GLP-1) — Monthly Program", price: "$399/month", category: "Medical Weight Loss", description: "FDA-approved GLP-1 receptor agonist for medical weight management. Includes weekly injections, monthly check-ins, and nutritional guidance. Average 15-20% body weight loss over 12 months." },
+      { name: "Tirzepatide — Monthly Program", price: "$499/month", category: "Medical Weight Loss", description: "Dual GIP/GLP-1 receptor agonist for enhanced weight loss. Includes weekly injections, monthly provider visits, and metabolic monitoring. Average 20-25% body weight loss over 12 months." },
+      { name: "Medical Weight Loss Consultation", price: "$150", category: "Medical Weight Loss", description: "Comprehensive initial consultation including BMI assessment, metabolic panel review, medical history evaluation, and personalized weight loss plan." },
+      { name: "B12 + Lipotropic Injection", price: "$35", category: "Medical Weight Loss", description: "Energy-boosting B12 with fat-burning lipotropic compounds (MIC) to support metabolism and weight loss." },
+    ],
+  },
+  {
+    category: "Peptide Therapy",
+    services: [
+      { name: "BPC-157 Peptide Therapy", price: "$350/month", category: "Peptide Therapy", description: "Body Protection Compound peptide for tissue repair, gut healing, and accelerated recovery. Subcutaneous injection protocol with monthly provider monitoring." },
+      { name: "GHK-Cu Peptide Therapy", price: "$300/month", category: "Peptide Therapy", description: "Copper peptide therapy for skin rejuvenation, collagen synthesis, wound healing, and anti-aging. Promotes hair growth and reduces fine lines." },
+      { name: "Thymosin Alpha-1 Peptide Therapy", price: "$400/month", category: "Peptide Therapy", description: "Immune-modulating peptide that enhances immune function, reduces inflammation, and supports overall wellness and longevity." },
+      { name: "CJC-1295/Ipamorelin Peptide Therapy", price: "$375/month", category: "Peptide Therapy", description: "Growth hormone releasing peptide combination for anti-aging, improved sleep, increased lean muscle mass, fat loss, and enhanced recovery." },
+      { name: "Peptide Therapy Consultation", price: "$150", category: "Peptide Therapy", description: "Initial consultation with comprehensive lab review, health assessment, and personalized peptide protocol design." },
+    ],
+  },
+  {
+    category: "Hormone Replacement Therapy",
+    services: [
+      { name: "Bioidentical Hormone Replacement — Female", price: "$250/month", category: "Hormone Replacement Therapy", description: "Customized bioidentical hormone therapy for women including estrogen, progesterone, and testosterone optimization. Monthly monitoring with lab work." },
+      { name: "Testosterone Replacement Therapy — Male", price: "$225/month", category: "Hormone Replacement Therapy", description: "Testosterone optimization for men including weekly injections, quarterly lab monitoring, and ongoing provider management." },
+      { name: "Thyroid Optimization", price: "$200/month", category: "Hormone Replacement Therapy", description: "Comprehensive thyroid hormone management including T3/T4 optimization, regular lab monitoring, and medication management." },
+      { name: "Hormone Replacement Therapy Consultation", price: "$200", category: "Hormone Replacement Therapy", description: "In-depth initial consultation with comprehensive hormone panel, symptom assessment, and personalized treatment plan." },
+      { name: "Hormone Panel Lab Work", price: "$250", category: "Hormone Replacement Therapy", description: "Comprehensive hormone panel including testosterone, estrogen, progesterone, DHEA, cortisol, thyroid (TSH, T3, T4), and metabolic markers." },
+    ],
+  },
+  {
+    category: "Hair Restoration",
+    services: [
+      { name: "PRP Hair Restoration — Single Session", price: "$600", category: "Hair Restoration", description: "Platelet-Rich Plasma therapy for hair regrowth. Concentrated growth factors injected into the scalp to stimulate dormant hair follicles." },
+      { name: "PRP Hair Restoration — Pack of 3", price: "$1,500", category: "Hair Restoration", description: "Three-session PRP hair restoration series spaced 4-6 weeks apart for optimal results. Recommended for moderate hair thinning." },
+      { name: "Exosome Hair Therapy", price: "$1,200", category: "Hair Restoration", description: "Advanced exosome therapy with growth factors and stem cell-derived exosomes for enhanced hair regrowth and follicle regeneration." },
+    ],
+  },
 ];
 
 /**

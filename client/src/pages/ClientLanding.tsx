@@ -137,6 +137,72 @@ const TESTIMONIALS = [
   },
 ];
 
+const SERVICE_CATEGORIES = [
+  {
+    title: "AI Skin Analysis",
+    description: "Advanced AI diagnostics that detect conditions others miss — personalized to your skin",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/ai-skin-analysis_6d5eb451.jpg",
+    gradient: "from-purple-500 to-indigo-600",
+    tag: "FREE",
+  },
+  {
+    title: "Injectables & Fillers",
+    description: "Botox, Daxxify, Restylane, Juvederm, Sculptra & Radiesse — expert injectors",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/injectables_9aa6dfa0.jpg",
+    gradient: "from-pink-500 to-rose-600",
+    tag: "POPULAR",
+  },
+  {
+    title: "Signature Facials",
+    description: "From Dermaplaning to 24K Gold Recovery — 7 luxury facials tailored to your skin",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/facials_5471aaad.jpg",
+    gradient: "from-amber-400 to-orange-500",
+    tag: "MEMBERSHIPS",
+  },
+  {
+    title: "Laser Treatments",
+    description: "CO2 Resurfacing, IPL, PICO/ND:YAG, RF Microneedling — advanced skin renewal",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
+    gradient: "from-blue-500 to-cyan-600",
+    tag: "RESULTS",
+  },
+  {
+    title: "Body Contouring",
+    description: "RKsculpt muscle toning, lipolytic injections, RF skin tightening & HIFU",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/body-contouring_075505de.jpg",
+    gradient: "from-emerald-500 to-teal-600",
+    tag: "SCULPT",
+  },
+  {
+    title: "Medical Weight Loss",
+    description: "Semaglutide (GLP-1) & Tirzepatide programs — medically supervised, real results",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/weight-loss_9129de16.jpg",
+    gradient: "from-green-500 to-emerald-600",
+    tag: "NEW",
+  },
+  {
+    title: "Peptide Therapy",
+    description: "BPC-157, GHK-Cu, Thymosin Alpha-1 & CJC/Ipamorelin — repair, rejuvenate, protect",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/peptide-therapy_3e308073.jpg",
+    gradient: "from-violet-500 to-purple-600",
+    tag: "NEW",
+  },
+  {
+    title: "Hormone Therapy",
+    description: "Bioidentical HRT, testosterone optimization & thyroid management — restore balance",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hormone-therapy_2f7b43ac.jpg",
+    gradient: "from-rose-500 to-pink-600",
+    tag: "NEW",
+  },
+  {
+    title: "Hair Restoration",
+    description: "PRP & Exosome therapy — regrow thicker, healthier hair with cutting-edge science",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hair-restoration_49e5a4dc.webp",
+    gradient: "from-sky-500 to-blue-600",
+    tag: "NEW",
+  },
+];
+
 const LOCATIONS = [
   {
     name: "San Jose",
@@ -438,6 +504,95 @@ export default function ClientLanding() {
                 </p>
               </motion.div>
             ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Our Services — Visual Category Cards */}
+      <section className="py-16 md:py-20 bg-gradient-to-b from-white to-purple-50/30">
+        <div className="container px-4">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="text-center mb-10"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium mb-4">
+              <Sparkles className="w-3 h-3" />
+              Comprehensive Care
+            </div>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+              Our Services
+            </h2>
+            <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
+              From AI skin analysis to weight loss, peptides, and hormones — everything you need under one roof.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 max-w-6xl mx-auto"
+          >
+            {SERVICE_CATEGORIES.map((cat, i) => (
+              <motion.div
+                key={i}
+                variants={staggerItem}
+                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer"
+                onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+              >
+                {/* Image */}
+                <div className="relative h-44 md:h-48 overflow-hidden">
+                  <img
+                    src={cat.image}
+                    alt={cat.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${cat.gradient} opacity-40 group-hover:opacity-50 transition-opacity`} />
+                  {/* Tag */}
+                  <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-white bg-gradient-to-r ${cat.gradient} shadow-lg`}>
+                    {cat.tag}
+                  </span>
+                </div>
+                {/* Content */}
+                <div className="p-4 md:p-5">
+                  <h3 className="font-bold text-base md:text-lg mb-1.5 group-hover:text-purple-600 transition-colors">
+                    {cat.title}
+                  </h3>
+                  <p className="text-xs md:text-sm text-gray-500 leading-relaxed">
+                    {cat.description}
+                  </p>
+                  <div className="mt-3 flex items-center gap-1 text-purple-500 text-xs font-semibold group-hover:gap-2 transition-all">
+                    Learn More <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* CTA after services */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="text-center mt-10"
+          >
+            <Button
+              size="lg"
+              className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-5 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50"
+              onClick={() => { fbPixel.startAnalysis(); navigate("/client/start"); }}
+            >
+              Start My Free Analysis
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <p className="mt-3 text-xs text-gray-400">
+              Our AI will recommend the best services for your unique skin
+            </p>
           </motion.div>
         </div>
       </section>

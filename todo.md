@@ -445,3 +445,13 @@
 - [x] Update AI prompts to recommend AT LEAST 3 facials (was EXACTLY 2)
 - [x] Add treatment series/stacking recommendations to procedures
 - [x] Update tests for new recommendation counts (123 tests passing)
+
+## Add Service Categories: Weight Loss, Peptides, Hormones (Ageless AI Competitor Match)
+- [x] Add Weight Loss services to service catalog (GLP-1 Semaglutide, Tirzepatide, B12 injections)
+- [x] Add Peptide Therapy services to service catalog (BPC-157, GHK-Cu, Thymosin Alpha-1, CJC/Ipamorelin)
+- [x] Add Hormone Replacement Therapy services to service catalog (Female HRT, Male TRT, Thyroid, Adrenal)
+- [x] Add Hair Restoration services to service catalog (PRP, Exosome therapy)
+- [x] Find and upload category images for all 9 service categories (CDN hosted)
+- [x] Add visual service category cards with images to client landing page (3-column grid)
+- [x] Update AI prompts to recommend weight loss, peptides, hormones, and hair restoration when appropriate
+- [x] Update tests for new service categories (127 tests passing)
