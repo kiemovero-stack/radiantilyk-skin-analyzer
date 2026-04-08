@@ -116,7 +116,7 @@ function buildScarTreatmentBlock(scarTreatments: ScarTreatmentInfo[] | undefined
  * and mentions the 25% off offer to encourage booking.
  * Now includes scar treatment packages when scarring was detected.
  */
-async function send24HourFollowUp(config: FollowUpConfig) {
+export async function send24HourFollowUp(config: FollowUpConfig) {
   const { patientEmail, patientName, skinHealthScore, topConcerns, topTreatment, scarTreatments } = config;
   const firstName = patientName.split(" ")[0] || patientName;
 
@@ -214,7 +214,7 @@ async function send24HourFollowUp(config: FollowUpConfig) {
  * guides them step-by-step to book a consultation, creates urgency.
  * Now includes scar treatment packages with urgent messaging.
  */
-async function send72HourFollowUp(config: FollowUpConfig) {
+export async function send72HourFollowUp(config: FollowUpConfig) {
   const { patientEmail, patientName, skinHealthScore, topConcerns, topTreatment, scarTreatments } = config;
   const firstName = patientName.split(" ")[0] || patientName;
 

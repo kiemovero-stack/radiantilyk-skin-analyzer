@@ -12,6 +12,7 @@ import CopyProtection from "./components/CopyProtection";
 import ClientLanding from "./pages/ClientLanding";
 import ClientAnalyze from "./pages/ClientAnalyze";
 import ClientReport from "./pages/ClientReport";
+import ScarTreatment from "./pages/ScarTreatment";
 
 function ClientRouter() {
   return (
@@ -19,6 +20,7 @@ function ClientRouter() {
       <Route path="/" component={ClientLanding} />
       <Route path="/start" component={ClientAnalyze} />
       <Route path="/report/:id" component={ClientReport} />
+      <Route path="/scar-treatment" component={ScarTreatment} />
       {/* Backward compat: old /client paths redirect to new paths */}
       <Route path="/client">
         {() => {

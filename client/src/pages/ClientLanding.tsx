@@ -164,6 +164,15 @@ const SERVICE_CATEGORIES = [
     price: "From $100",
   },
   {
+    title: "Scar Treatment",
+    description: "Acne scars, keloids, surgical scars, stretch marks & more — multi-step protocols to reduce scarring",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
+    gradient: "from-purple-500 to-violet-600",
+    tag: "PACKAGES",
+    price: "From $650",
+    link: "/scar-treatment",
+  },
+  {
     title: "Laser Treatments",
     description: "CO2 Resurfacing, IPL, PICO/ND:YAG, RF Microneedling — advanced skin renewal",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
@@ -560,7 +569,7 @@ export default function ClientLanding() {
                 key={i}
                 variants={staggerItem}
                 className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer"
-                onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
+                onClick={() => { if (cat.link) { navigate(cat.link); } else { fbPixel.startAnalysis(); navigate(paths.start); } }}
               >
                 {/* Image */}
                 <div className="relative h-44 md:h-48 overflow-hidden">

@@ -23,7 +23,7 @@ import { buildClientSystemPrompt, CLIENT_ANALYSIS_OUTPUT_SCHEMA } from "./client
 import type { SkinAnalysisReport } from "../shared/types";
 import { generateReportPdf } from "./pdfReport";
 import { sendClientReportEmail } from "./clientEmailService";
-import { scheduleFollowUpEmails } from "./followUpService";
+import { scheduleFollowUpEmails, send24HourFollowUp, send72HourFollowUp } from "./followUpService";
 import { generateTreatmentSimulations } from "./simulationService";
 import { sendStaffNotificationEmail } from "./staffNotificationService";
 
@@ -522,6 +522,40 @@ export function registerClientRoutes(app: Express) {
       });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to check simulations" });
+    }
+  });
+
+  // ── Test endpoint: Trigger follow-up email immediately ────────────
+  // Only available in development mode
+  app.post("/api/test-followup-email", async (req: Request, res: Response) => {
+    try {
+      const { analysisId, patientEmail, patientName, skinHealthScore, topConcerns, topTreatment, scarTreatments, emailType } = req.body;
+
+      if (!patientEmail || !patientName) {
+        res.status(400).json({ error: "Missing required fields: patientEmail, patientName" });
+        return;
+      }
+
+      const config = {
+        analysisId: analysisId || 0,
+        patientEmail,
+        patientName,
+        skinHealthScore: skinHealthScore || 50,
+        topConcerns: topConcerns || [],
+        topTreatment: topTreatment || "a personalized treatment",
+        scarTreatments: scarTreatments || undefined,
+      };
+
+      if (emailType === "72hr") {
+        await send72HourFollowUp(config);
+        res.json({ success: true, message: "72hr follow-up email sent", to: patientEmail });
+      } else {
+        await send24HourFollowUp(config);
+        res.json({ success: true, message: "24hr follow-up email sent", to: patientEmail });
+      }
+    } catch (error: any) {
+      console.error("[TestEmail] Error:", error?.message);
+      res.status(500).json({ error: "Failed to send test email", details: error?.message });
     }
   });
 }

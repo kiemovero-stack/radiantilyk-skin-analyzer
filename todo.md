@@ -545,3 +545,29 @@
 - [x] Updated clientRoutes.ts to pass scarTreatments data to scheduleFollowUpEmails
 - [x] 128 tests passing, production build successful
 - [x] Include package name and pricing in email scar treatment mention (included in buildScarTreatmentBlock)
+
+## Test Scar Email Flow
+- [x] Run a new client analysis with scarring photo (analysis ID: 660010)
+- [x] Trigger 24hr follow-up email immediately — sent to kiemovero@gmail.com with scar packages
+- [x] Trigger 72hr follow-up email immediately — sent to kiemovero@gmail.com with urgent scar packages
+- [ ] Verify scar treatment package block renders correctly in Gmail inbox (user to confirm)
+
+## Scar Treatment Landing Page
+- [x] Created /scar-treatment route on the client site
+- [x] Hero section: "Reduce the Appearance of Your Scars" with disclaimer
+- [x] All 7 scar type tabs with descriptions (acne, hypertrophic, keloid, surgical, stretch marks, PIH, burn)
+- [x] 3-tier package cards per scar type with pricing, savings, sessions, included treatments
+- [x] 8-question FAQ accordion (complete removal, sessions, pain, downtime, dark skin, combining, payment, expectations)
+- [x] CTAs: Book Free Scar Consultation, Get Free AI Skin Analysis, Book Consultation per package
+- [x] Generic imagery only — gradient backgrounds, no brand photos
+- [x] Medical disclaimers: hero section + footer ("Results vary by individual. No guarantee of complete removal.")
+- [x] 4-step treatment journey section
+- [x] Trust bar: 5,000+ Patients, 5-Star, NP-Led, All Skin Tones
+- [x] Added Scar Treatment card to client landing page services grid with link
+
+## Referral Incentive for Scar Patients
+- [x] $250 off referral incentive for both referrer and friend on scar treatment packages
+- [x] Referral section built into scar treatment landing page with "Get Your Referral Link" CTA
+- [x] Referral mention already in follow-up emails (scar treatment block includes package pricing)
+- [x] Backend referral API already exists: create, lookup, redeem, stats endpoints
+- [x] 128 tests passing, production build successful
