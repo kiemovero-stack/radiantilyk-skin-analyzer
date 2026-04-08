@@ -467,6 +467,7 @@ export function registerClientRoutes(app: Express) {
         patientFirstName: record.patientFirstName,
         patientLastName: record.patientLastName,
         patientEmail: record.patientEmail,
+        patientDob: record.patientDob,
         imageUrl: record.imageUrl,
         simulationImages: record.simulationImages || {},
         createdAt: record.createdAt,

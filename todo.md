@@ -502,3 +502,10 @@
 - [x] 128 tests passing
 - [x] Verify client site works on skinanalyz-yxdmlvyu.manus.space after publish ✅ RadiantilyK client landing page confirmed
 - [x] Verify staff site still works on rkaaiskin.com after publish ✅ SkinAI staff dashboard confirmed
+
+## Move Report Pages to Client Site
+- [x] Added patient info card (name, email, DOB, timestamp) to ClientReport page
+- [x] Added patientDob to client report API response
+- [x] Report pages accessible on skinanalyz domain at /report/:id with full patient info
+- [x] Verified report renders correctly with patient info card, skin health score, all sections
+- [x] 128 tests passing

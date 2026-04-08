@@ -39,6 +39,8 @@ import {
   Mail,
   MessageSquare,
   Check,
+  User,
+  Calendar,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "wouter";
@@ -598,6 +600,7 @@ interface ReportData {
   patientFirstName: string;
   patientLastName: string;
   patientEmail: string;
+  patientDob: string | null;
   imageUrl: string;
   simulationImages: Record<string, string>;
   createdAt: string;
@@ -748,6 +751,50 @@ export default function ClientReport() {
               We've analyzed your photos and put together a personalized plan to help you achieve your skin goals. Let's dive in!
             </p>
           </motion.div>
+
+          {/* Patient Info Card */}
+          {data.patientFirstName && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="mb-8 p-5 rounded-2xl border border-pink-100 bg-white shadow-sm"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                  <User className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-lg">{data.patientFirstName} {data.patientLastName}</h2>
+                  <p className="text-xs text-gray-400">Patient Report</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>{data.patientEmail}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>DOB: {data.patientDob ? new Date(data.patientDob + "T00:00:00").toLocaleDateString() : "N/A"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>
+                    {new Date(data.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    {new Date(data.createdAt).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* 48-Hour Countdown Timer */}
           <CountdownBanner createdAt={data.createdAt} />
