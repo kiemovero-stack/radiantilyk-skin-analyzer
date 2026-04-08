@@ -492,5 +492,9 @@
 - [x] Fix: Set index:false on express.static so ALL HTML serving goes through domain-aware catch-all
 - [x] Fix: Add trust proxy to Express for correct hostname detection behind Cloudflare
 - [x] Fix: Check X-Forwarded-Host header in addition to req.hostname
-- [ ] Verify client site works on skinanalyz-yxdmlvyu.manus.space after fix
-- [ ] Verify staff site still works on rkaaiskin.com after fix
+- [x] Diagnosed production: Manus uses Cloudflare Workers → Google Cloud Run, passes x-original-host header
+- [x] Updated getPublicHost() to read x-original-host first, then x-forwarded-host, then req.hostname
+- [x] Rebuilt production bundle (dist/index.js) with the fix
+- [x] Verified locally: x-original-host: skinanalyz → client-main.tsx, x-original-host: rkaaiskin.com → main.tsx
+- [ ] Verify client site works on skinanalyz-yxdmlvyu.manus.space after publish
+- [ ] Verify staff site still works on rkaaiskin.com after publish

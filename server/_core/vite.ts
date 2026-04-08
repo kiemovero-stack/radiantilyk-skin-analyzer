@@ -16,17 +16,31 @@ const STAFF_DOMAINS = new Set([
   "rkaaiskin.manus.space",
 ]);
 
+/**
+ * Extract the public-facing hostname from the request.
+ *
+ * In the Manus deployment stack (Cloudflare Workers → Google Cloud Run),
+ * the original public hostname is passed via `x-original-host`.
+ * We also check `x-forwarded-host` as a fallback, then `req.hostname`
+ * (which reads `Host` header when `trust proxy` is set).
+ */
+function getPublicHost(req: Request): string {
+  const xOriginalHost = req.headers["x-original-host"];
+  const xForwardedHost = req.headers["x-forwarded-host"];
+
+  const raw =
+    (typeof xOriginalHost === "string" ? xOriginalHost : "") ||
+    (typeof xForwardedHost === "string" ? xForwardedHost : "") ||
+    req.hostname ||
+    req.headers.host ||
+    "";
+
+  return raw.split(":")[0].toLowerCase();
+}
+
 /** Determine if a request should be served the client site */
 function isClientDomain(req: Request): boolean {
-  // Check multiple header sources for the hostname — Manus deployment proxy
-  // may forward requests with different Host header values
-  const xfh = req.headers["x-forwarded-host"];
-  const xForwardedHost = Array.isArray(xfh) ? xfh[0] : xfh || "";
-  const host = (xForwardedHost || req.hostname || req.headers.host || "")
-    .split(":")[0]
-    .toLowerCase();
-
-  console.log(`[domain-detect] host="${host}" xfh="${xForwardedHost}" req.hostname="${req.hostname}" headers.host="${req.headers.host}"`);
+  const host = getPublicHost(req);
 
   // Explicit staff domains → staff app
   if (STAFF_DOMAINS.has(host)) return false;
@@ -41,7 +55,7 @@ function isClientDomain(req: Request): boolean {
     return false; // default to staff in dev
   }
 
-  // Any other domain (e.g., skinanalyz-*.manus.space) → client site
+  // Any other domain (e.g., skinanalyz-*.manus.space, Cloud Run internal) → client site
   return true;
 }
 
