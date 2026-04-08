@@ -55,6 +55,18 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
     ],
   },
   {
+    category: "Ultherapy",
+    services: [
+      { name: "Ultherapy - Brow Lift", price: "$750", category: "Ultherapy" },
+      { name: "Ultherapy - Lower Face (Jawline/Chin)", price: "$1,200", category: "Ultherapy" },
+      { name: "Ultherapy - Full Face", price: "$1,800", category: "Ultherapy" },
+      { name: "Ultherapy - Neck", price: "$1,200", category: "Ultherapy" },
+      { name: "Ultherapy - Full Face & Neck", price: "$2,500", category: "Ultherapy" },
+      { name: "Ultherapy - Decolletage (Chest)", price: "$900", category: "Ultherapy" },
+      { name: "Ultherapy - Full Face, Neck & Chest", price: "$3,200", category: "Ultherapy" },
+    ],
+  },
+  {
     category: "RKsculpt",
     services: [
       { name: "RKsculpt - Single Session", price: "$400", category: "RKsculpt" },

@@ -455,3 +455,24 @@
 - [x] Add visual service category cards with images to client landing page (3-column grid)
 - [x] Update AI prompts to recommend weight loss, peptides, hormones, and hair restoration when appropriate
 - [x] Update tests for new service categories (127 tests passing)
+
+## Fix: Ultherapy Not Being Recommended
+- [ ] Check if Ultherapy/HIFU is in the service catalog
+- [ ] Add explicit Ultherapy recommendation rules to AI prompts (skin laxity, lifting, tightening)
+- [ ] Ensure AI recommends Ultherapy for appropriate concerns (sagging, jowls, neck laxity, brow lifting)
+
+## Test Analysis: Verify New Category Recommendations
+- [ ] Run a test analysis to verify AI recommends weight loss/peptides/hormones when concerns match
+- [ ] Verify Ultherapy is recommended for skin laxity concerns
+
+## Add Pricing to Service Category Cards
+- [x] Add starting price or price range to each service category card on client landing page
+
+## HIFU vs Ultherapy — Proper Clinical Distinction
+- [x] Research clinical differences between HIFU and Ultherapy
+- [x] Add Ultherapy to service catalog with competitive San Jose pricing (Brow $750, Lower Face $1,200, Full Face $1,800, Neck $1,200, Full Face & Neck $2,500, Decolletage $900, Full Face/Neck/Chest $3,200)
+- [x] Update AI prompts to distinguish HIFU vs Ultherapy with correct indications for each
+- [x] Frame distinction clinically (visualization, depth, precision) — NO FDA/non-FDA language, NO "non-surgical facelift"
+- [x] Recommend each for the right skin concerns based on clinical evidence
+- [x] Add pricing to all 10 service category cards on landing page
+- [x] Add dedicated HIFU & Ultherapy service card with unique image
