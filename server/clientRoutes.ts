@@ -236,6 +236,15 @@ async function runClientAnalysisInBackground(
           skinHealthScore: report.skinHealthScore,
           topConcerns: report.conditions.slice(0, 3).map((c) => c.name),
           topTreatment: report.skinProcedures[0]?.name || "a personalized treatment",
+          scarTreatments: report.scarTreatments && report.scarTreatments.length > 0
+            ? report.scarTreatments.map((s: any) => ({
+                scarType: s.scarType,
+                packageName: s.packageName,
+                price: s.price,
+                sessions: s.sessions,
+                includes: s.includes,
+              }))
+            : undefined,
         });
 
         console.log(`[ClientAnalysis] Follow-up emails scheduled for ${analysis.patientEmail}`);

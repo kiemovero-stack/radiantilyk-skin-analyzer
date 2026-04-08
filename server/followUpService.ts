@@ -7,6 +7,9 @@
  * - 24-hour email: Warm check-in, recap results, mention 25% off offer
  * - 72-hour email: Urgent tone, guide to book consultation, emphasize offer expiring
  * 
+ * Both emails now include scar treatment package recommendations when
+ * scarring was detected during the analysis.
+ * 
  * In production, these timers survive as long as the server process runs.
  * For a more robust solution, a job queue (e.g., BullMQ) could be used.
  */
@@ -30,6 +33,14 @@ function getTransporter() {
   });
 }
 
+interface ScarTreatmentInfo {
+  scarType: string;
+  packageName: string;
+  price: string;
+  sessions: number;
+  includes: string[];
+}
+
 interface FollowUpConfig {
   analysisId: number;
   patientEmail: string;
@@ -37,23 +48,83 @@ interface FollowUpConfig {
   skinHealthScore: number;
   topConcerns: string[];
   topTreatment: string;
+  scarTreatments?: ScarTreatmentInfo[];
 }
 
 // Track scheduled follow-ups to prevent duplicates
 const scheduledFollowUps = new Set<string>();
 
 /**
+ * Build the scar treatment HTML block for emails.
+ * Returns empty string if no scar treatments were recommended.
+ */
+function buildScarTreatmentBlock(scarTreatments: ScarTreatmentInfo[] | undefined, urgent: boolean): string {
+  if (!scarTreatments || scarTreatments.length === 0) return "";
+
+  const borderColor = urgent ? "#dc2626" : "#a855f7";
+  const headerBg = urgent
+    ? "linear-gradient(135deg, #fef2f2, #fdf2f8)"
+    : "linear-gradient(135deg, #fdf2f8, #f5f3ff)";
+  const headerColor = urgent ? "#dc2626" : "#7c3aed";
+
+  const packagesHtml = scarTreatments.map((scar) => {
+    const includesList = scar.includes
+      .map((item) => `<li style="margin-bottom: 2px; font-size: 12px; color: #6b7280;">${item}</li>`)
+      .join("");
+
+    return `
+      <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div>
+            <span style="display: inline-block; background: #f3e8ff; color: #7c3aed; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px;">${scar.scarType}</span>
+            <h4 style="color: #1a1a2e; font-size: 15px; font-weight: 700; margin: 4px 0 0 0;">${scar.packageName}</h4>
+          </div>
+          <span style="color: ${headerColor}; font-size: 18px; font-weight: 800;">${scar.price}</span>
+        </div>
+        <p style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0;">${scar.sessions} sessions included</p>
+        <ul style="margin: 0; padding-left: 16px; list-style-type: disc;">
+          ${includesList}
+        </ul>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div style="background: ${headerBg}; border: 2px solid ${borderColor}; border-radius: 12px; padding: 20px; margin: 0 0 20px;">
+      <p style="color: ${headerColor}; font-size: 16px; font-weight: 700; margin: 0 0 8px; text-align: center;">
+        ${urgent ? "⚡ Scar Treatment Packages — Act Now" : "✨ Personalized Scar Treatment Packages"}
+      </p>
+      <p style="color: #4b5563; font-size: 13px; text-align: center; margin: 0 0 16px;">
+        ${urgent
+          ? "We detected scarring during your analysis. These packages are specifically designed for your scar type — and your 25% off applies to these too!"
+          : "We noticed some scarring during your analysis and put together treatment packages specifically designed for your scar type. Each package bundles multiple treatments together so you save money and get the best results."
+        }
+      </p>
+      ${packagesHtml}
+      <div style="text-align: center; margin-top: 12px;">
+        <a href="${CHECKIN_URL}" style="display: inline-block; background: linear-gradient(135deg, #e8b4b8, #a855f7); color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 13px;">
+          Book a Scar Consultation
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Send the 24-hour follow-up email.
  * Warm, friendly check-in. Recaps their results, answers common questions,
  * and mentions the 25% off offer to encourage booking.
+ * Now includes scar treatment packages when scarring was detected.
  */
 async function send24HourFollowUp(config: FollowUpConfig) {
-  const { patientEmail, patientName, skinHealthScore, topConcerns, topTreatment } = config;
+  const { patientEmail, patientName, skinHealthScore, topConcerns, topTreatment, scarTreatments } = config;
   const firstName = patientName.split(" ")[0] || patientName;
 
   const concernsList = topConcerns.length > 0
     ? topConcerns.map((c) => `<li style="margin-bottom: 4px;">${c}</li>`).join("")
     : "<li>General skin health improvement</li>";
+
+  const scarBlock = buildScarTreatmentBlock(scarTreatments, false);
 
   try {
     const transporter = getTransporter();
@@ -91,6 +162,8 @@ async function send24HourFollowUp(config: FollowUpConfig) {
             <p style="color: #4b5563; font-size: 14px; line-height: 1.7; margin: 0 0 20px;">
               Based on your analysis, we recommended <strong>${topTreatment}</strong> as a great starting point. Many of our clients see noticeable improvement after just one session!
             </p>
+
+            ${scarBlock}
 
             <p style="color: #4b5563; font-size: 14px; line-height: 1.7; margin: 0 0 20px;">
               <strong>Common questions we get:</strong>
@@ -139,10 +212,13 @@ async function send24HourFollowUp(config: FollowUpConfig) {
  * Send the 72-hour follow-up email.
  * More urgent tone. Emphasizes that the 25% offer is expiring soon,
  * guides them step-by-step to book a consultation, creates urgency.
+ * Now includes scar treatment packages with urgent messaging.
  */
 async function send72HourFollowUp(config: FollowUpConfig) {
-  const { patientEmail, patientName, skinHealthScore, topConcerns, topTreatment } = config;
+  const { patientEmail, patientName, skinHealthScore, topConcerns, topTreatment, scarTreatments } = config;
   const firstName = patientName.split(" ")[0] || patientName;
+
+  const scarBlock = buildScarTreatmentBlock(scarTreatments, true);
 
   try {
     const transporter = getTransporter();
@@ -169,6 +245,8 @@ async function send72HourFollowUp(config: FollowUpConfig) {
             <p style="color: #4b5563; font-size: 14px; line-height: 1.7; margin: 0 0 20px;">
               Your AI analysis showed a skin health score of <strong style="color: #dc2626; font-size: 18px;">${skinHealthScore}/100</strong>. With the right treatments — starting with <strong>${topTreatment}</strong> — we've seen clients improve by <strong>15-25 points</strong> in just a few months. That's a real, visible transformation.
             </p>
+
+            ${scarBlock}
 
             <!-- Urgent Offer Box -->
             <div style="background: linear-gradient(135deg, #fef2f2, #fdf2f8); border: 2px solid #dc2626; border-radius: 12px; padding: 24px; margin: 0 0 24px; text-align: center;">
@@ -230,6 +308,8 @@ async function send72HourFollowUp(config: FollowUpConfig) {
  * 
  * - 24hr: Warm check-in, recap results, mention 25% off offer
  * - 72hr: Urgent, guide to book consultation, emphasize offer expiring
+ * 
+ * Both emails now include scar treatment packages when scarring was detected.
  */
 export function scheduleFollowUpEmails(config: FollowUpConfig) {
   const key = `${config.analysisId}`;
@@ -261,5 +341,8 @@ export function scheduleFollowUpEmails(config: FollowUpConfig) {
     scheduledFollowUps.delete(key);
   }, SEVENTY_TWO_HOURS);
 
-  console.log(`[FollowUp] Scheduled 24hr and 72hr emails for analysis ${config.analysisId} (${config.patientEmail})`);
+  const scarInfo = config.scarTreatments && config.scarTreatments.length > 0
+    ? ` (with ${config.scarTreatments.length} scar treatment package(s))`
+    : "";
+  console.log(`[FollowUp] Scheduled 24hr and 72hr emails for analysis ${config.analysisId} (${config.patientEmail})${scarInfo}`);
 }

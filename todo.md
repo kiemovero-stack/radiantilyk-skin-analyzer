@@ -521,3 +521,27 @@
 - [x] Added Scar Treatment Packages section to ClientReport.tsx with Book Consultation CTA
 - [x] Backward compatible — existing reports without scarTreatments render normally
 - [x] 128 tests passing, production build successful
+
+## Test Scar Detection & Verify Packages
+- [x] Run a test analysis with a scarring image on the client portal (ID: 660010)
+- [x] AI correctly detected severe boxcar & rolling acne scars
+- [x] Recommended Acne Scar Comprehensive package at $4,800 (3 sessions)
+- [x] Included subcision, TCA CROSS, RF microneedling in package
+- [x] Skin procedures also show pricing: Perfect Derma Peel $350, RF Skin Tightening $150, Sculptra $800
+
+## Add Treatment Pricing to Sections 4 & 5
+- [x] Pricing already displayed on facial treatment recommendations (Section 4): $145, $185, $200 badges
+- [x] Pricing already displayed on skin procedure recommendations (Section 5): $4,800, $350, $150, $800 badges
+- [x] Staff Report.tsx already has price badges on all treatment cards
+- [x] ClientReport.tsx already has price badges on all treatment cards
+- [x] Skincare products also show pricing: $38-$48 badges
+- [x] Scar Treatment Packages section shows $4,800 with savings note and Book CTA
+
+## Update Follow-Up Emails with Scar Treatment Mentions
+- [x] Added ScarTreatmentInfo interface to FollowUpConfig
+- [x] Built buildScarTreatmentBlock() helper for rendering scar packages in emails
+- [x] Updated 24hr email: includes personalized scar treatment packages with pricing, sessions, and included treatments
+- [x] Updated 72hr email: includes urgent scar treatment packages with "Act Now" messaging
+- [x] Updated clientRoutes.ts to pass scarTreatments data to scheduleFollowUpEmails
+- [x] 128 tests passing, production build successful
+- [x] Include package name and pricing in email scar treatment mention (included in buildScarTreatmentBlock)
