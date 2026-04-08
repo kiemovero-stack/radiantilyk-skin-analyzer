@@ -6,10 +6,59 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+    <!-- Default title (overridden by client-side script for client domain) -->
     <title>AI Skin Analyzer</title>
-    <!-- Prevent search engines from indexing/caching -->
-    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
-    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet" />
+
+    <!-- Client-side domain detection: set correct meta tags before render -->
+    <script>
+      (function() {
+        var host = window.location.hostname.toLowerCase();
+        var staffDomains = ['rkaaiskin.com', 'www.rkaaiskin.com', 'rkaaiskin.manus.space'];
+        var isStaff = staffDomains.indexOf(host) !== -1;
+
+        // For localhost / dev: check for /__client path or cookie
+        if (!isStaff && (host === 'localhost' || host === '127.0.0.1' || host.indexOf('manus.computer') !== -1)) {
+          var hasClientCookie = document.cookie.indexOf('client_mode=1') !== -1;
+          var isClientPath = window.location.pathname.indexOf('/__client') === 0;
+          if (isClientPath) {
+            document.cookie = 'client_mode=1;path=/';
+            var clean = window.location.pathname.replace('/__client', '') || '/';
+            window.location.replace(clean);
+            return;
+          }
+          isStaff = !hasClientCookie;
+        }
+
+        window.__IS_CLIENT_SITE__ = !isStaff;
+
+        if (!isStaff) {
+          // Client domain: update meta tags for SEO
+          document.title = 'RadiantilyK Aesthetic — AI Skin Analysis';
+          var meta;
+          meta = document.createElement('meta');
+          meta.name = 'description';
+          meta.content = 'Get your free AI-powered skin analysis from RadiantilyK Aesthetic. Personalized treatment recommendations for facials, injectables, laser treatments, and more. Serving San Jose & San Mateo.';
+          document.head.appendChild(meta);
+          meta = document.createElement('meta');
+          meta.name = 'keywords';
+          meta.content = 'skin analysis, AI skin analyzer, facials, injectables, Botox, fillers, laser treatment, microneedling, San Jose, San Mateo, RadiantilyK';
+          document.head.appendChild(meta);
+          // Mark the HTML element
+          document.documentElement.setAttribute('data-client-mode', 'true');
+        } else {
+          // Staff domain: prevent search engines from indexing
+          var meta = document.createElement('meta');
+          meta.name = 'robots';
+          meta.content = 'noindex, nofollow, noarchive, nosnippet, noimageindex';
+          document.head.appendChild(meta);
+          meta = document.createElement('meta');
+          meta.name = 'googlebot';
+          meta.content = 'noindex, nofollow, noarchive, nosnippet';
+          document.head.appendChild(meta);
+        }
+      })();
+    </script>
 
     <!-- Facebook Pixel Code -->
     <script>
@@ -36,7 +85,21 @@
 
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+
+    <!--
+      Dynamic entry point: loads main.tsx (staff) or client-main.tsx (client)
+      based on the domain detection done above.
+      In dev mode, Vite serves these as raw .tsx files.
+      In production, Vite builds both entry points and the correct one is loaded.
+    -->
+    <script type="module">
+      if (window.__IS_CLIENT_SITE__) {
+        import('/src/client-main.tsx');
+      } else {
+        import('/src/main.tsx');
+      }
+    </script>
+
     <script
       defer
       src="%VITE_ANALYTICS_ENDPOINT%/umami"

@@ -496,5 +496,9 @@
 - [x] Updated getPublicHost() to read x-original-host first, then x-forwarded-host, then req.hostname
 - [x] Rebuilt production bundle (dist/index.js) with the fix
 - [x] Verified locally: x-original-host: skinanalyz → client-main.tsx, x-original-host: rkaaiskin.com → main.tsx
+- [x] Discovered Manus CF Worker serves index.html for ALL non-API routes, bypassing Express catch-all
+- [x] New approach: unified index.html with client-side domain detection (window.location.hostname)
+- [x] Dynamic import in built JS: __IS_CLIENT_SITE__ ? client-main : main — both bundles available
+- [x] 128 tests passing
 - [ ] Verify client site works on skinanalyz-yxdmlvyu.manus.space after publish
 - [ ] Verify staff site still works on rkaaiskin.com after publish
