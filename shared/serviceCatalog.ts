@@ -55,6 +55,18 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
     ],
   },
   {
+    category: "Ultherapy",
+    services: [
+      { name: "Ultherapy - Brow Lift", price: "$750", category: "Ultherapy", description: "Micro-focused ultrasound with visualization (MFU-V) targeting the brow area for precise lifting and tightening" },
+      { name: "Ultherapy - Lower Face", price: "$1,200", category: "Ultherapy", description: "Precision ultrasound lifting for jowls, jawline definition, and lower face tightening with real-time tissue visualization" },
+      { name: "Ultherapy - Full Face", price: "$1,800", category: "Ultherapy", description: "Comprehensive micro-focused ultrasound treatment for full face lifting — forehead, cheeks, jawline, and chin" },
+      { name: "Ultherapy - Neck", price: "$1,200", category: "Ultherapy", description: "Targeted ultrasound lifting for neck laxity, turkey neck, and platysmal bands with real-time visualization" },
+      { name: "Ultherapy - Full Face & Neck", price: "$2,500", category: "Ultherapy", description: "Complete micro-focused ultrasound treatment for face and neck — the gold standard in precision ultrasound lifting" },
+      { name: "Ultherapy - Decolletage", price: "$900", category: "Ultherapy", description: "Ultrasound lifting for chest wrinkles, crepey skin, and sun damage on the decolletage" },
+      { name: "Ultherapy - Full Face, Neck & Chest", price: "$3,200", category: "Ultherapy", description: "The ultimate precision lifting package — full face, neck, and chest with micro-focused ultrasound and real-time visualization" },
+    ],
+  },
+  {
     category: "RKsculpt",
     services: [
       { name: "RKsculpt - Single Session", price: "$400", category: "RKsculpt" },
@@ -219,9 +231,8 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
   {
     category: "Hair Restoration",
     services: [
-      { name: "PRP Hair Restoration — Single Session", price: "$600", category: "Hair Restoration", description: "Platelet-Rich Plasma therapy for hair regrowth. Concentrated growth factors injected into the scalp to stimulate dormant hair follicles." },
-      { name: "PRP Hair Restoration — Pack of 3", price: "$1,500", category: "Hair Restoration", description: "Three-session PRP hair restoration series spaced 4-6 weeks apart for optimal results. Recommended for moderate hair thinning." },
-      { name: "Exosome Hair Therapy", price: "$1,200", category: "Hair Restoration", description: "Advanced exosome therapy with growth factors and stem cell-derived exosomes for enhanced hair regrowth and follicle regeneration." },
+      { name: "Exosome Hair Therapy — Single Session", price: "$1,200", category: "Hair Restoration", description: "Advanced exosome therapy with growth factors and stem cell-derived exosomes for enhanced hair regrowth and follicle regeneration." },
+      { name: "Exosome Hair Therapy — Pack of 3", price: "$3,000", category: "Hair Restoration", description: "Three-session exosome hair restoration series spaced 4-6 weeks apart for optimal results. Recommended for moderate to advanced hair thinning." },
     ],
   },
 ];

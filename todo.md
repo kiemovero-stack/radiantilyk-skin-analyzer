@@ -455,3 +455,19 @@
 - [x] Add visual service category cards with images to client landing page (3-column grid)
 - [x] Update AI prompts to recommend weight loss, peptides, hormones, and hair restoration when appropriate
 - [x] Update tests for new service categories (127 tests passing)
+
+## Post-Rollback Tasks (6b9b9bba)
+- [ ] Run test analysis to verify AI recommends weight loss/peptides/hormones when concerns match
+- [ ] Verify Ultherapy/HIFU recommendations for skin laxity concerns
+- [ ] Add Ultherapy to service catalog with competitive San Jose pricing
+- [ ] Update AI prompts to distinguish HIFU vs Ultherapy (NO FDA language, NO "non-surgical facelift")
+- [ ] Add pricing to all service category cards on landing page
+- [ ] Create litigation-tight intake questionnaire for Peptide Therapy (California compliant)
+- [ ] Create litigation-tight intake questionnaire for Hormone Replacement Therapy (California compliant)
+- [ ] Add questionnaire delivery system (PDF download + in-app completion)
+
+## Remove PRP Hair Restoration
+- [x] Remove PRP from service catalog (user does not offer PRP or PRF)
+- [x] Remove PRP from AI prompts (skinPrompt.ts and clientPrompt.ts) — added "DO NOT recommend PRP or PRF" rule
+- [x] Update Hair Restoration category to only include Exosome therapy (Single $1,200, Pack of 3 $3,000)
+- [x] Update Hair Restoration card on landing page (removed PRP, updated pricing to From $1,200)

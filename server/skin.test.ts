@@ -120,12 +120,12 @@ describe("Service Catalog", () => {
     expect(names.some((n) => n.includes("Thyroid"))).toBe(true);
   });
 
-  it("Hair Restoration category has PRP and Exosome options", () => {
+  it("Hair Restoration category has Exosome options only (no PRP)", () => {
     const hr = SERVICE_CATALOG.find((c) => c.category === "Hair Restoration");
     expect(hr).toBeDefined();
     expect(hr!.services.length).toBeGreaterThanOrEqual(2);
     const names = hr!.services.map((s) => s.name);
-    expect(names.some((n) => n.includes("PRP"))).toBe(true);
+    expect(names.some((n) => n.includes("PRP"))).toBe(false);
     expect(names.some((n) => n.includes("Exosome"))).toBe(true);
   });
 

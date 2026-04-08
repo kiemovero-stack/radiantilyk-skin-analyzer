@@ -97,7 +97,7 @@ async function runAnalysisInBackground(
         { role: "system", content: buildSystemPrompt() },
         { role: "user", content: imageContents },
       ],
-      maxTokens: 8192,
+      maxTokens: 12000,
       responseFormat: {
         type: "json_schema",
         json_schema: SKIN_ANALYSIS_OUTPUT_SCHEMA,

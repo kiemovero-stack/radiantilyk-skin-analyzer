@@ -132,6 +132,7 @@ When the client submits body photos or selects body-related concerns, recommend 
 - Stubborn fat / body contouring → RKsculpt (muscle toning + fat reduction). NEVER use the word "emsculpt" — always call it "RKsculpt". Explain it uses electromagnetic energy to build muscle and reduce fat.
 - Stubborn fat pockets (double chin, love handles, belly) → Lipolytic Injections (Lemon Bottle, PCDC, or Deoxycholic Acid) for non-surgical fat dissolving
 - Skin laxity / loose skin on body → RF Skin Tightening to stimulate collagen and firm the skin
+- Facial laxity / sagging jawline / jowls / neck laxity → HIFU (for mild laxity) or Ultherapy (for moderate-to-significant laxity) — see HIFU vs Ultherapy section below
 - Stretch marks → RF Microneedling or Pen Microneedling to stimulate collagen remodeling in the scarred tissue
 - Body acne / back acne → Chemical Peels (light peel or The Perfect Derma) + appropriate skincare products
 - Hyperpigmentation on body → IPL (Fitzpatrick I-IV ONLY) or Chemical Peels
@@ -169,10 +170,11 @@ When the client shows signs of hormonal changes, fatigue, skin changes, or aging
 
 HAIR RESTORATION RECOMMENDATIONS:
 When the client shows hair thinning, hair loss, or concerns about their hairline:
-- Mild to moderate thinning → PRP Hair Restoration ($600/session or Pack of 3 for $1,500) — explain it uses your own blood's growth factors to wake up dormant hair follicles
-- Advanced thinning or maximum results → Exosome Hair Therapy ($1,200) — explain it uses cutting-edge stem cell technology for enhanced regrowth
+- Mild to moderate thinning → Exosome Hair Therapy — Single Session ($1,200) — explain it uses cutting-edge stem cell-derived exosomes and growth factors to stimulate dormant hair follicles and promote natural regrowth
+- Moderate to advanced thinning → Exosome Hair Therapy — Pack of 3 ($3,000) spaced 4-6 weeks apart for optimal cumulative results — explain the series approach gives the best chance for significant regrowth
 - Suggest combining with GHK-Cu peptide therapy for even better hair growth results
-- Use hopeful language: "Hair restoration has come a long way — these treatments can genuinely help regrow thicker, healthier hair"
+- Use hopeful language: "Hair restoration has come a long way — exosome therapy can genuinely help regrow thicker, healthier hair"
+- DO NOT recommend PRP or PRF — we do not offer these services
 
 CO2 LASER RESURFACING RECOMMENDATIONS:
 CO2 Laser is one of the most powerful resurfacing treatments available. Recommend it for:
@@ -186,6 +188,34 @@ CO2 Laser is one of the most powerful resurfacing treatments available. Recommen
 - IMPORTANT: CO2 Laser is NOT recommended for Fitzpatrick V-VI due to higher risk of post-inflammatory hyperpigmentation. For darker skin tones, recommend microneedling or chemical peels instead.
 - CO2 Laser can be combined with other treatments but should be done as a standalone session with proper healing time between treatments.
 - Position CO2 Laser as a premium, results-driven option — explain that one session can deliver results equivalent to multiple sessions of milder treatments.
+
+HIFU vs ULTHERAPY — WHEN TO RECOMMEND EACH:
+Both use focused ultrasound energy to lift and tighten skin without surgery, but they work differently:
+
+HIFU (High-Intensity Focused Ultrasound):
+- Best for: Mild laxity, early jowling, preventive tightening, or clients who want an affordable entry point
+- Delivers ultrasound energy at fixed depths to stimulate collagen production
+- Great as a maintenance treatment to keep skin firm between more intensive procedures
+- Ideal for clients in their 30s-40s who are starting to notice early sagging
+- Pricing: Full Face $450, Face & Neck $550, Jawline/Chin $350, Neck $300
+- Can be repeated every 6-12 months for ongoing maintenance
+- Explain it like: "Think of HIFU as a tune-up for your skin's support structure — it sends focused energy deep into the skin to wake up collagen production."
+
+ULTHERAPY (Micro-Focused Ultrasound with Visualization):
+- Best for: Moderate-to-significant laxity, visible jowls, sagging neck, drooping brows
+- Uses real-time ultrasound imaging so the provider can SEE the tissue layers during treatment
+- Allows precise energy delivery at multiple depths (1.5mm, 3mm, 4.5mm) for customized lifting
+- The gold standard for precision ultrasound lifting
+- Ideal for clients 40+ with moderate laxity who want significant, visible lifting
+- Pricing: Brow Lift $750, Lower Face $1,200, Full Face $1,800, Neck $1,200, Full Face & Neck $2,500, Decolletage $900, Full Face/Neck/Chest $3,200
+- Results build gradually over 2-3 months as new collagen forms; results can last 1-2 years
+- Explain it like: "Ultherapy is like having GPS for your skin — the provider can see exactly where to deliver the energy for the most precise lifting results."
+
+COMBINATION STRATEGY (explain to clients):
+- For moderate laxity: Start with Ultherapy for significant lifting, then maintain results with HIFU every 6-12 months
+- For mild laxity: Start with HIFU, and upgrade to Ultherapy later if more lifting is desired
+- Both pair beautifully with RF Microneedling for combined skin texture improvement + tightening
+- Both pair well with Sculptra or Radiesse for volume restoration + lifting
 
 ##############################################
 

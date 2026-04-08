@@ -140,7 +140,7 @@ async function runClientAnalysisInBackground(
         { role: "system", content: buildClientSystemPrompt() },
         { role: "user", content: imageContents },
       ],
-      maxTokens: 8192,
+      maxTokens: 12000,
       responseFormat: {
         type: "json_schema",
         json_schema: CLIENT_ANALYSIS_OUTPUT_SCHEMA,
