@@ -100,6 +100,30 @@ CRITICAL RULES:
    - Recommend Hormone Panel Lab Work ($250) for baseline assessment
    - Hormone optimization enhances results of aesthetic treatments
 
+   SCAR TREATMENT RECOMMENDATIONS:
+   When the patient shows ANY type of scarring (acne scars, surgical scars, burn scars, keloids, hypertrophic scars, stretch marks, or post-inflammatory hyperpigmentation), you MUST recommend an appropriate scar treatment package from the catalog.
+   
+   SCAR TYPE CLASSIFICATION:
+   - Ice Pick Scars: narrow, deep, V-shaped depressions (< 2mm wide) → Recommend Acne Scar packages
+   - Boxcar Scars: wider depressions with defined vertical edges (1.5-4mm) → Recommend Acne Scar packages
+   - Rolling Scars: broad, undulating depressions (> 4mm, tethered bands) → Recommend Acne Scar packages
+   - Hypertrophic Scars: raised, firm, within wound boundaries → Recommend Hypertrophic Scar packages
+   - Keloid Scars: raised, extending beyond wound boundaries, high recurrence → Recommend Keloid packages
+   - Surgical/Traumatic Scars: linear or irregular from surgery/injury → Recommend Surgical Scar packages
+   - Burn Scars: contracture, textural changes, dyspigmentation → Recommend Burn Scar packages
+   - Stretch Marks (Striae Rubrae — red/new): → Recommend Stretch Mark packages
+   - Stretch Marks (Striae Albae — white/old): → Recommend Stretch Mark Comprehensive
+   - Post-Inflammatory Hyperpigmentation (PIH): flat dark marks → Recommend PIH packages
+   
+   PACKAGE SELECTION RULES:
+   - Mild scarring → Recommend Starter/Basic package
+   - Moderate scarring → Recommend Comprehensive package
+   - Severe scarring → Recommend Premium package (when available)
+   - For Fitzpatrick V-VI: NEVER recommend PIH Comprehensive (contains IPL). Use PIH Basic only.
+   - For keloids: ALWAYS warn about recurrence risk and the need for maintenance
+   - Multiple scar types can coexist — recommend packages for EACH type detected
+   - If no scarring is detected, return an empty scarTreatments array
+
    HAIR RESTORATION RECOMMENDATIONS:
    When the patient shows hair thinning, hair loss, or receding hairline:
    - Mild to moderate thinning → Exosome Hair Therapy — Single Session ($1,200)
@@ -216,6 +240,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       "predictiveInsights",
       "skinTrajectory",
       "cellularAnalysis",
+      "scarTreatments",
       "roadmap",
       "summary",
       "disclaimer"
@@ -384,6 +409,24 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       cellularAnalysis: {
         type: "string",
         description: "Overall cellular-level analysis of skin health, collagen status, and barrier function"
+      },
+      scarTreatments: {
+        type: "array",
+        description: "Scar treatment package recommendations. ONLY include if scarring is detected. Recommend appropriate packages from the Scar Treatment Packages section of the catalog. Match scar type to the correct package tier (Starter/Basic for mild, Comprehensive for moderate, Premium for severe). Return empty array if no scarring detected.",
+        items: {
+          type: "object",
+          required: ["scarType", "packageName", "price", "sessions", "includes", "reason", "savings"],
+          additionalProperties: false,
+          properties: {
+            scarType: { type: "string", description: "Type of scar: 'Acne Scar (Ice Pick)', 'Acne Scar (Boxcar)', 'Acne Scar (Rolling)', 'Hypertrophic', 'Keloid', 'Surgical/Traumatic', 'Burn Scar', 'Stretch Mark (Rubrae)', 'Stretch Mark (Albae)', 'PIH'" },
+            packageName: { type: "string", description: "Exact package name from the catalog" },
+            price: { type: "string", description: "Package price from the catalog" },
+            sessions: { type: "number", description: "Total number of sessions in the package" },
+            includes: { type: "array", items: { type: "string" }, description: "List of treatments included in the package" },
+            reason: { type: "string", description: "Clinical reasoning for why this package is recommended for this patient's specific scarring" },
+            savings: { type: "string", description: "How much the patient saves vs individual pricing" }
+          }
+        }
       },
       roadmap: {
         type: "array",

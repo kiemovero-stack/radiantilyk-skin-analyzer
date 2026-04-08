@@ -168,8 +168,32 @@ When the client shows signs of hormonal changes, fatigue, skin changes, or aging
 - Always recommend starting with a Hormone Replacement Therapy Consultation ($200) and Hormone Panel Lab Work ($250)
 - Use reassuring language: "Hormone optimization is about restoring your body's natural balance — many clients notice improvements in their skin, energy, and overall well-being within weeks"
 
-HAIR RESTORATION RECOMMENDATIONS:
-When the client shows hair thinning, hair loss, or concerns about their hairline:
+SCAR TREATMENT RECOMMENDATIONS:
+   When you can see ANY type of scarring in the photos (acne scars, surgical scars, burn scars, keloids, raised scars, stretch marks, or dark marks from past breakouts), recommend an appropriate scar treatment package.
+   
+   HOW TO IDENTIFY SCAR TYPES:
+   - Ice Pick Scars: tiny, deep holes in the skin (like someone poked it with a pin) → Recommend Acne Scar packages
+   - Boxcar Scars: wider dents with sharp edges (like a small box pressed into the skin) → Recommend Acne Scar packages
+   - Rolling Scars: wavy, uneven texture that makes the skin look bumpy → Recommend Acne Scar packages
+   - Raised/Thick Scars (Hypertrophic): scars that stick up above the skin surface → Recommend Hypertrophic Scar packages
+   - Keloid Scars: thick, raised scars that have grown beyond the original wound → Recommend Keloid packages
+   - Surgical Scars: lines or marks from surgery or injuries → Recommend Surgical Scar packages
+   - Burn Scars: tight, discolored skin from burns → Recommend Burn Scar packages
+   - Red/Purple Stretch Marks: newer stretch marks that are still colored → Recommend Stretch Mark Starter
+   - White/Silver Stretch Marks: older, faded stretch marks → Recommend Stretch Mark Comprehensive
+   - Dark Marks (PIH): flat dark spots left behind after breakouts or inflammation → Recommend PIH packages
+   
+   PACKAGE SELECTION:
+   - Mild scarring → Starter/Basic package (more affordable, fewer sessions)
+   - Moderate scarring → Comprehensive package (best value for visible improvement)
+   - Severe scarring → Premium package (maximum results)
+   - For darker skin tones (Fitzpatrick V-VI): NEVER recommend PIH Comprehensive (it contains IPL which isn't safe for darker skin). Use PIH Basic only.
+   - If you see multiple scar types, recommend a package for EACH type
+   - If no scarring is visible, return an empty scarTreatments array
+   - Explain the package in simple terms: what's included, how many visits, and how much they save
+
+   HAIR RESTORATION RECOMMENDATIONS:
+   When the client shows hair thinning, hair loss, or concerns about their hairline:
 - Mild to moderate thinning → Exosome Hair Therapy — Single Session ($1,200) — explain it uses cutting-edge stem cell-derived exosomes and growth factors to stimulate dormant hair follicles and promote natural regrowth
 - Moderate to advanced thinning → Exosome Hair Therapy — Pack of 3 ($3,000) spaced 4-6 weeks apart for optimal cumulative results — explain the series approach gives the best chance for significant regrowth
 - Suggest combining with GHK-Cu peptide therapy for even better hair growth results
@@ -312,6 +336,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       "predictiveInsights",
       "skinTrajectory",
       "cellularAnalysis",
+      "scarTreatments",
       "roadmap",
       "summary",
       "disclaimer"
@@ -480,6 +505,24 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       cellularAnalysis: {
         type: "string",
         description: "Simple, analogy-based explanation of what's happening at a deeper level"
+      },
+      scarTreatments: {
+        type: "array",
+        description: "Scar treatment package recommendations. ONLY include if you can see scarring in the photos. Recommend the right package from the Scar Treatment Packages in the catalog. Use Starter/Basic for mild, Comprehensive for moderate, Premium for severe. Return empty array if no scarring is visible.",
+        items: {
+          type: "object",
+          required: ["scarType", "packageName", "price", "sessions", "includes", "reason", "savings"],
+          additionalProperties: false,
+          properties: {
+            scarType: { type: "string", description: "Type of scar in simple terms: 'Acne Scars', 'Raised Scars', 'Keloid Scars', 'Surgical Scars', 'Burn Scars', 'Stretch Marks (New)', 'Stretch Marks (Old)', 'Dark Marks (PIH)'" },
+            packageName: { type: "string", description: "Exact package name from the catalog" },
+            price: { type: "string", description: "Package price from the catalog" },
+            sessions: { type: "number", description: "Total number of sessions in the package" },
+            includes: { type: "array", items: { type: "string" }, description: "List of treatments included, explained simply" },
+            reason: { type: "string", description: "Simple, friendly explanation of why this package is right for their specific scarring. Reference what you see in their photos." },
+            savings: { type: "string", description: "How much they save compared to buying each treatment individually" }
+          }
+        }
       },
       roadmap: {
         type: "array",

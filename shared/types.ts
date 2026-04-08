@@ -63,6 +63,16 @@ export interface SkincareProduct {
   targetConditions: string[];
 }
 
+export interface ScarTreatment {
+  scarType: string;
+  packageName: string;
+  price: string;
+  sessions: number;
+  includes: string[];
+  reason: string;
+  savings: string;
+}
+
 export interface PredictiveInsight {
   title: string;
   description: string;
@@ -101,6 +111,9 @@ export interface SkinAnalysisReport {
 
   // Section 6: Skincare Products
   skincareProducts: SkincareProduct[];
+
+  // Section 6.5: Scar Treatment Packages
+  scarTreatments: ScarTreatment[];
 
   // Section 7: Next-Level Insights
   predictiveInsights: PredictiveInsight[];

@@ -8,7 +8,7 @@
 import { Button } from "@/components/ui/button";
 import { ReportWatermark } from "@/components/CopyProtection";
 import { cn } from "@/lib/utils";
-import type { SkinAnalysisReport, Severity } from "@shared/types";
+import type { SkinAnalysisReport, Severity, ScarTreatment } from "@shared/types";
 import { PRODUCT_CATALOG, BUNDLE_DEALS, findMatchingBundlesByName } from "@shared/productCatalog";
 import type { BundleDeal } from "@shared/productCatalog";
 import { ShoppingBag, Gift, Tag } from "lucide-react";
@@ -1403,6 +1403,77 @@ export default function ClientReport() {
               </a>
             </div>
           </motion.section>
+
+          {/* Section: Scar Treatment Packages */}
+          {report.scarTreatments && report.scarTreatments.length > 0 && (
+            <motion.section
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              className="mb-8 p-6 md:p-8 rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/30 to-pink-50/30 shadow-sm"
+            >
+              <SectionHeader
+                icon={Shield}
+                title="Scar Treatment Packages"
+                subtitle="Bundled treatments designed for your specific scarring"
+              />
+              <p className="text-sm text-gray-500 mb-4">
+                We've put together personalized treatment packages to address the scarring we detected.
+                Each package bundles multiple treatments together so you save money and get the best results.
+              </p>
+              <div className="space-y-4">
+                {report.scarTreatments.map((scar: ScarTreatment, i: number) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl bg-white border border-gray-100 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 mb-1">
+                          {scar.scarType}
+                        </span>
+                        <h4 className="font-semibold text-sm text-gray-800">{scar.packageName}</h4>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-bold text-purple-600">{scar.price}</span>
+                        {scar.savings && (
+                          <p className="text-xs text-emerald-600 font-medium">Save {scar.savings}</p>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3 leading-relaxed">{scar.reason}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <CalendarCheck className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="text-xs font-medium text-gray-500">{scar.sessions} sessions</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {scar.includes.map((item: string, j: number) => (
+                        <span
+                          key={j}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-gray-50 text-gray-600 border border-gray-100"
+                        >
+                          <Check className="w-3 h-3 text-emerald-500" />
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <a
+                  href={CHECKIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-md"
+                >
+                  <CalendarCheck className="w-4 h-4" />
+                  Book a Scar Consultation
+                </a>
+              </div>
+            </motion.section>
+          )}
 
           {/* Section: Insights */}
           <motion.section

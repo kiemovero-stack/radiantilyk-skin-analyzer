@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import type { SkinAnalysisReport, Severity } from "@shared/types";
+import type { SkinAnalysisReport, Severity, ScarTreatment } from "@shared/types";
 import { PRODUCT_CATALOG } from "@shared/productCatalog";
 import {
   Sparkles,
@@ -846,6 +846,65 @@ export default function Report() {
               })}
             </div>
           </motion.section>
+
+          {/* Section 6.5: Scar Treatment Packages */}
+          {report.scarTreatments && report.scarTreatments.length > 0 && (
+            <motion.section
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              className="mb-10 p-6 md:p-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent"
+            >
+              <SectionHeader
+                icon={Shield}
+                number=""
+                title="Scar Treatment Packages"
+              />
+              <p className="text-sm text-muted-foreground mb-4">
+                Personalized scar treatment packages based on detected scarring.
+                Each package bundles multiple treatments at a discounted rate.
+              </p>
+              <div className="space-y-4">
+                {report.scarTreatments.map((scar: ScarTreatment, i: number) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border border-border bg-card hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary mb-1">
+                          {scar.scarType}
+                        </span>
+                        <h4 className="font-semibold text-sm">{scar.packageName}</h4>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-bold text-primary">{scar.price}</span>
+                        {scar.savings && (
+                          <p className="text-xs text-emerald-600 font-medium">Save {scar.savings}</p>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">{scar.reason}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-medium text-muted-foreground">{scar.sessions} sessions</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {scar.includes.map((item: string, j: number) => (
+                        <span
+                          key={j}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
+                        >
+                          <Check className="w-3 h-3 text-emerald-500" />
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+          )}
 
           {/* Section 7: Next-Level Insights */}
           <motion.section

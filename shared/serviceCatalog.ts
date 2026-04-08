@@ -235,6 +235,26 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
       { name: "Exosome Hair Therapy — Pack of 3", price: "$3,000", category: "Hair Restoration", description: "Three-session exosome hair restoration series spaced 4-6 weeks apart for optimal results. Recommended for moderate to advanced hair thinning." },
     ],
   },
+  {
+    category: "Scar Treatment Packages",
+    services: [
+      { name: "Acne Scar Starter — 3x Microneedling + PRP", price: "$1,650", category: "Scar Treatment Packages", description: "3 sessions of microneedling with PRP for mild acne scarring (ice pick, boxcar, rolling). Sessions spaced 4-6 weeks apart. Save $300 vs individual pricing." },
+      { name: "Acne Scar Comprehensive — Subcision + TCA CROSS + RF Microneedling", price: "$4,800", category: "Scar Treatment Packages", description: "8-session package: 2x subcision, 3x TCA CROSS, 3x RF microneedling for moderate-to-severe acne scarring. Multi-step protocol targeting tethering, depth, and texture. Save $1,100." },
+      { name: "Acne Scar Premium — Subcision + TCA CROSS + Filler + CO2 Laser", price: "$6,500", category: "Scar Treatment Packages", description: "9-session premium package: 2x subcision, 3x TCA CROSS, 1 syringe HA filler, 3x fractional CO2 laser for severe acne scarring. The gold-standard multi-step scar protocol. Save $1,600." },
+      { name: "Hypertrophic Scar Basic — 3x Steroid Injection + Silicone", price: "$650", category: "Scar Treatment Packages", description: "3 sessions of intralesional triamcinolone (TAC) injection plus 3-month silicone sheeting supply for raised hypertrophic scars. Sessions every 4 weeks." },
+      { name: "Hypertrophic Scar Advanced — 5-FU/TAC + PDL + Silicone", price: "$2,400", category: "Scar Treatment Packages", description: "7-session package: 4x 5-FU/TAC combo injections + 3x pulsed dye laser + 3-month silicone supply for resistant hypertrophic scars. Save $500." },
+      { name: "Keloid Control — 6x 5-FU/TAC Combo + Silicone", price: "$1,800", category: "Scar Treatment Packages", description: "6 sessions of 5-FU + triamcinolone combination injections plus 6-month silicone supply for keloid scars. Injections every 4 weeks. Save $240." },
+      { name: "Keloid Comprehensive — 5-FU/TAC + PDL + Silicone", price: "$3,000", category: "Scar Treatment Packages", description: "9-session package: 6x 5-FU/TAC combo + 3x pulsed dye laser + 6-month silicone supply for moderate-to-large keloids. Save $590." },
+      { name: "Surgical Scar Basic — 3x PDL + Silicone", price: "$1,350", category: "Scar Treatment Packages", description: "3 sessions of pulsed dye laser plus 3-month silicone supply for red/pink surgical or traumatic scars. Sessions every 4-6 weeks. Save $120." },
+      { name: "Surgical Scar Comprehensive — Subcision + Filler + RF Microneedling", price: "$3,800", category: "Scar Treatment Packages", description: "6-session package: 2x subcision + 1 syringe HA filler + 3x RF microneedling for depressed or wide surgical scars. Save $700." },
+      { name: "Stretch Mark Starter — 3x Microneedling + PRP (Body)", price: "$1,800", category: "Scar Treatment Packages", description: "3 sessions of microneedling with PRP for stretch marks on abdomen, thighs, or arms. Body-area pricing. Sessions spaced 4-6 weeks apart. Save $150." },
+      { name: "Stretch Mark Comprehensive — RF Microneedling + Erbium Laser", price: "$4,500", category: "Scar Treatment Packages", description: "6-session package: 3x RF microneedling + 3x fractional erbium laser for moderate-to-severe stretch marks. Save $600." },
+      { name: "PIH Basic — 4x Chemical Peels + Home Care Kit", price: "$1,100", category: "Scar Treatment Packages", description: "4 sessions of medium-depth chemical peels plus a home care kit (hydroquinone, tretinoin, vitamin C, SPF) for post-inflammatory hyperpigmentation. Save $100." },
+      { name: "PIH Comprehensive — Chemical Peels + IPL + Home Care", price: "$2,200", category: "Scar Treatment Packages", description: "7-session package: 4x chemical peels + 3x IPL + home care kit for stubborn hyperpigmentation (Fitzpatrick I-IV only). Save $350." },
+      { name: "Burn Scar Basic — 4x PDL + Silicone", price: "$1,900", category: "Scar Treatment Packages", description: "4 sessions of pulsed dye laser plus 6-month silicone supply for burn scars with redness and raised texture. Save $240." },
+      { name: "Burn Scar Comprehensive — PDL + CO2 Laser + Silicone", price: "$4,800", category: "Scar Treatment Packages", description: "7-session package: 4x PDL + 3x fractional CO2 laser + 6-month silicone supply for moderate burn scars. Save $840." },
+    ],
+  },
 ];
 
 /**

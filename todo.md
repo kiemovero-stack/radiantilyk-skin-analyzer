@@ -509,3 +509,15 @@
 - [x] Report pages accessible on skinanalyz domain at /report/:id with full patient info
 - [x] Verified report renders correctly with patient info card, skin health score, all sections
 - [x] 128 tests passing
+
+## Integrate Scar Treatments & Pricing into Skin Analysis Report
+- [x] Added ScarTreatment type to shared types (scarType, packageName, price, sessions, includes, reason, savings)
+- [x] Added scarTreatments field to SkinAnalysisReport interface
+- [x] Added 16 scar treatment packages to service catalog (acne scars, hypertrophic, keloid, surgical, stretch marks, PIH, burn scars)
+- [x] Updated staff AI prompt with scar type classification and package selection rules
+- [x] Updated client AI prompt with friendly scar identification and package recommendations
+- [x] Added scarTreatments to both staff and client output schemas
+- [x] Added Scar Treatment Packages section to staff Report.tsx (conditional, only shows if scars detected)
+- [x] Added Scar Treatment Packages section to ClientReport.tsx with Book Consultation CTA
+- [x] Backward compatible — existing reports without scarTreatments render normally
+- [x] 128 tests passing, production build successful
