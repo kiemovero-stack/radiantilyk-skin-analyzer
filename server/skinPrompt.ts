@@ -62,8 +62,7 @@ CRITICAL RULES:
    When analyzing body photos or body-related concerns, recommend these treatments from the catalog:
    - Stubborn fat / body contouring → RKsculpt (muscle toning + fat reduction). NEVER use the word "emsculpt" — always call it "RKsculpt".
    - Stubborn fat pockets (double chin, love handles, belly) → Lipolytic Injections (Lemon Bottle, PCDC, or Deoxycholic Acid)
-   - Skin laxity / loose skin on body → RF Skin Tightening (for body) or HIFU/Ultherapy (for face/neck)
-   - Facial sagging / jowls / neck laxity → HIFU (mild) or Ultherapy (moderate+) — see HIFU vs Ultherapy section below
+   - Skin laxity / loose skin on body → RF Skin Tightening
    - Stretch marks → RF Microneedling or Pen Microneedling
    - Body acne / back acne → Chemical Peels + appropriate skincare
    - Hyperpigmentation on body → IPL (Fitzpatrick I-IV ONLY) or Chemical Peels
@@ -116,45 +115,6 @@ CRITICAL RULES:
    - CONTRAINDICATED for Fitzpatrick V-VI (high PIH risk) — use microneedling or peels instead
    - Requires 5-10 days downtime; must be done as standalone session
    - One CO2 session can equal 3-5 sessions of milder resurfacing treatments
-
-   HIFU vs ULTHERAPY — TWO DISTINCT ULTRASOUND TREATMENTS:
-   This clinic offers BOTH HIFU and Ultherapy. They are DIFFERENT treatments. Always recommend the appropriate one based on the clinical need.
-
-   HIFU (High-Intensity Focused Ultrasound):
-   HIFU uses high-intensity focused ultrasound energy for general skin tightening and firming. It is more affordable and treats broader areas.
-   - Mild to moderate skin laxity (face) → HIFU - Full Face ($450) — 2-3 sessions spaced 3-6 months apart
-   - General jawline tightening → HIFU - Jawline/Chin ($350)
-   - Mild neck tightening → HIFU - Neck ($300)
-   - Face + neck tightening → HIFU - Face & Neck ($550)
-   - HIFU is safe for ALL Fitzpatrick types (I-VI)
-   - Results develop over 2-3 months; peak at 3-6 months
-   - Best for: mild laxity, preventive tightening, maintenance treatments, budget-conscious patients
-   - Pairs well with: Sculptra, RF Microneedling, neurotoxins
-
-   ULTHERAPY (Micro-Focused Ultrasound with Visualization):
-   Ultherapy uses micro-focused ultrasound with real-time imaging (DeepSEE™ visualization). The practitioner can see the exact tissue layers being treated, allowing precise targeting of the SMAS layer — the same deep layer addressed in surgical lifting. This precision makes Ultherapy the gold standard for ultrasound-based skin lifting.
-   - Moderate to significant facial sagging → Ultherapy - Full Face ($1,800) — precision targeting of deep tissue layers
-   - Brow lifting / hooded eyelids → Ultherapy - Brow Lift ($750) — precise lift of the brow area
-   - Jowls / jawline definition loss (moderate+) → Ultherapy - Lower Face ($1,200) — targeted deep-tissue tightening
-   - Neck laxity / turkey neck / neck bands → Ultherapy - Neck ($1,200) — precise collagen stimulation avoiding nerves
-   - Full face + neck aging → Ultherapy - Full Face & Neck ($2,500) — comprehensive precision lift
-   - Decolletage lines / chest wrinkles → Ultherapy - Decolletage ($900)
-   - Full face, neck & chest → Ultherapy - Full Face, Neck & Chest ($3,200) — most comprehensive option
-   - Ultherapy is safe for ALL Fitzpatrick types (I-VI)
-   - Results develop over 2-6 months; peak at 3-6 months. Often only 1 session needed.
-   - Best for: moderate-to-significant laxity, precision lifting (brow, jawline, neck), patients wanting maximum results
-   - Pairs well with: Sculptra (collagen boost), RF Microneedling (texture), neurotoxins (dynamic wrinkles)
-
-   WHEN TO RECOMMEND WHICH:
-   - Mild laxity + budget-conscious → HIFU
-   - Moderate-to-significant laxity + wants best results → Ultherapy
-   - Brow lifting specifically → Ultherapy (precision required near eyes)
-   - Decolletage/chest → Ultherapy (only option for this area)
-   - Maintenance after Ultherapy → HIFU (affordable follow-up)
-   - Preventive tightening (younger patients, early laxity) → HIFU
-   - Near sensitive structures (eyes, nerves) → Ultherapy (real-time visualization for safety)
-   - For patients showing ANY signs of facial sagging, jowls, neck laxity, or loss of firmness, recommend HIFU or Ultherapy (or both) as top procedures
-   - You may recommend BOTH: Ultherapy for the primary lift + HIFU for maintenance sessions
 
 3. TREATMENT RECOMMENDATIONS — USE ONLY FROM THE CLINIC CATALOG BELOW
    - AT LEAST 3 facial treatments from the clinic's Facials menu (recommend 3 or more based on detected concerns)

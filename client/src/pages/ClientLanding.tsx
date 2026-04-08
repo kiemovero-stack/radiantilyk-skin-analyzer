@@ -144,7 +144,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/ai-skin-analysis_6d5eb451.jpg",
     gradient: "from-purple-500 to-indigo-600",
     tag: "FREE",
-    price: "Complimentary",
   },
   {
     title: "Injectables & Fillers",
@@ -152,7 +151,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/injectables_9aa6dfa0.jpg",
     gradient: "from-pink-500 to-rose-600",
     tag: "POPULAR",
-    price: "From $10/unit",
   },
   {
     title: "Signature Facials",
@@ -160,7 +158,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/facials_5471aaad.jpg",
     gradient: "from-amber-400 to-orange-500",
     tag: "MEMBERSHIPS",
-    price: "From $120",
   },
   {
     title: "Laser Treatments",
@@ -168,23 +165,13 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
     gradient: "from-blue-500 to-cyan-600",
     tag: "RESULTS",
-    price: "From $200",
-  },
-  {
-    title: "HIFU & Ultherapy",
-    description: "HIFU skin tightening & Ultherapy precision lifting — ultrasound-powered rejuvenation",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hifu-ultherapy_dce669a2.webp",
-    gradient: "from-indigo-500 to-blue-600",
-    tag: "LIFTING",
-    price: "From $300",
   },
   {
     title: "Body Contouring",
-    description: "RKsculpt muscle toning, lipolytic injections & RF skin tightening",
+    description: "RKsculpt muscle toning, lipolytic injections, RF skin tightening & HIFU",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/body-contouring_075505de.jpg",
     gradient: "from-emerald-500 to-teal-600",
     tag: "SCULPT",
-    price: "From $150",
   },
   {
     title: "Medical Weight Loss",
@@ -192,7 +179,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/weight-loss_9129de16.jpg",
     gradient: "from-green-500 to-emerald-600",
     tag: "NEW",
-    price: "From $350/mo",
   },
   {
     title: "Peptide Therapy",
@@ -200,7 +186,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/peptide-therapy_3e308073.jpg",
     gradient: "from-violet-500 to-purple-600",
     tag: "NEW",
-    price: "From $200/mo",
   },
   {
     title: "Hormone Therapy",
@@ -208,7 +193,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hormone-therapy_2f7b43ac.jpg",
     gradient: "from-rose-500 to-pink-600",
     tag: "NEW",
-    price: "From $250/mo",
   },
   {
     title: "Hair Restoration",
@@ -216,7 +200,6 @@ const SERVICE_CATEGORIES = [
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hair-restoration_49e5a4dc.webp",
     gradient: "from-sky-500 to-blue-600",
     tag: "NEW",
-    price: "From $500",
   },
 ];
 
@@ -577,14 +560,9 @@ export default function ClientLanding() {
                 </div>
                 {/* Content */}
                 <div className="p-4 md:p-5">
-                  <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <h3 className="font-bold text-base md:text-lg group-hover:text-purple-600 transition-colors">
-                      {cat.title}
-                    </h3>
-                    <span className="shrink-0 text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-                      {cat.price}
-                    </span>
-                  </div>
+                  <h3 className="font-bold text-base md:text-lg mb-1.5 group-hover:text-purple-600 transition-colors">
+                    {cat.title}
+                  </h3>
                   <p className="text-xs md:text-sm text-gray-500 leading-relaxed">
                     {cat.description}
                   </p>
