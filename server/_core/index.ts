@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -37,6 +38,33 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // CORS — allow the standalone client site to call our API
+  const allowedOrigins = [
+    process.env.CLIENT_SITE_URL,          // e.g. https://rkaskinai.manus.space
+    "https://rkaaiskin.com",
+    "https://www.rkaaiskin.com",
+    "https://rkaaiskin.manus.space",
+  ].filter(Boolean) as string[];
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        if (
+          allowedOrigins.some((allowed) => origin === allowed) ||
+          origin.includes(".manus.computer") // dev server previews
+        ) {
+          return callback(null, true);
+        }
+        callback(null, false);
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Direct multipart upload route (bypasses tRPC body size limits)
