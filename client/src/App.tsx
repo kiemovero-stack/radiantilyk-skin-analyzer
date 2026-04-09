@@ -16,6 +16,7 @@ import ClientReport from "./pages/ClientReport";
 import ScarConsultation from "./pages/ScarConsultation";
 import ScarTreatment from "./pages/ScarTreatment";
 import LeadDashboard from "./pages/LeadDashboard";
+import StaffManagement from "./pages/StaffManagement";
 
 function Router() {
   return (
@@ -33,6 +34,8 @@ function Router() {
       <Route path="/scar-treatment" component={ScarTreatment} />
       {/* Staff-facing dashboard (no auth gate for now) */}
       <Route path="/leads" component={LeadDashboard} />
+      {/* Admin-only staff management */}
+      <Route path="/staff" component={StaffManagement} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

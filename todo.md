@@ -648,3 +648,15 @@
 - [x] Remove all test/demo client data (5 test rows deleted, 39 real analyses remain)
 - [x] Add Donnie Nelson (djsooshi@gmail.com) to staff portal (staff role)
 - [x] Add Arpana Purani (skinology2014@gmail.com) to staff portal (staff role)
+
+## Staff Management Page
+- [x] Create GET /api/staff endpoint to list all staff and admin users
+- [x] Create POST /api/staff/invite endpoint to invite new staff by email
+- [x] Create PATCH /api/staff/:id/role endpoint to change user role
+- [x] Create DELETE /api/staff/:id endpoint to remove staff member
+- [x] Build StaffManagement.tsx page with staff list, invite form, role change, and remove buttons
+- [x] Add "Staff" link to Navbar (admin only)
+- [x] Add /staff route to App.tsx
+- [x] Only admin can access staff management (not staff role)
+- [x] Option to delete pending invitations (trash icon on pending cards)
+- [x] Write tests and verify build (138 tests pass, build succeeds)

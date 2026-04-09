@@ -18,6 +18,7 @@ export default function Navbar() {
       ? [
           { href: "/history", label: "History" },
           { href: "/leads", label: "Leads" },
+          ...(user?.role === "admin" ? [{ href: "/staff", label: "Staff" }] : []),
         ]
       : []),
   ];
