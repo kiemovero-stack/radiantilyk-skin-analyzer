@@ -49,6 +49,33 @@ interface FollowUpConfig {
   topConcerns: string[];
   topTreatment: string;
   scarTreatments?: ScarTreatmentInfo[];
+  referralCode?: string;
+}
+
+/**
+ * Build the referral block for follow-up emails.
+ * Includes the referral code and $250 scar treatment discount.
+ */
+function buildReferralBlock(referralCode: string, firstName: string, scarTreatments?: ScarTreatmentInfo[]): string {
+  const hasScarTreatments = scarTreatments && scarTreatments.length > 0;
+  const discountText = hasScarTreatments
+    ? "Share your referral code with a friend — you both get <strong>$250 off</strong> any scar treatment package!"
+    : "Share your referral code with a friend — you both get <strong>15% off</strong> your next treatment!";
+
+  return `
+    <div style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 2px solid #10b981; border-radius: 12px; padding: 20px; margin: 0 0 20px; text-align: center;">
+      <p style="color: #059669; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Referral Reward</p>
+      <p style="color: #1a1a2e; font-size: 14px; margin: 0 0 12px;">
+        ${discountText}
+      </p>
+      <div style="background: #ffffff; border: 2px dashed #10b981; border-radius: 8px; padding: 12px 20px; display: inline-block; margin: 0 0 12px;">
+        <span style="color: #059669; font-size: 24px; font-weight: 800; letter-spacing: 2px;">${referralCode}</span>
+      </div>
+      <p style="color: #6b7280; font-size: 12px; margin: 0;">
+        ${firstName}, just share this code with friends and family. When they mention it at their consultation, you both save!
+      </p>
+    </div>
+  `;
 }
 
 // Track scheduled follow-ups to prevent duplicates
@@ -124,7 +151,8 @@ export async function send24HourFollowUp(config: FollowUpConfig) {
     ? topConcerns.map((c) => `<li style="margin-bottom: 4px;">${c}</li>`).join("")
     : "<li>General skin health improvement</li>";
 
-  const scarBlock = buildScarTreatmentBlock(scarTreatments, false);
+    const scarBlock = buildScarTreatmentBlock(scarTreatments, false);
+    const referralBlock = config.referralCode ? buildReferralBlock(config.referralCode, firstName, config.scarTreatments) : "";
 
   try {
     const transporter = getTransporter();
@@ -182,6 +210,8 @@ export async function send24HourFollowUp(config: FollowUpConfig) {
               </p>
             </div>
 
+            ${referralBlock}
+
             <div style="text-align: center; margin: 24px 0;">
               <a href="${CHECKIN_URL}" style="display: inline-block; background: linear-gradient(135deg, #e8b4b8, #a855f7); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
                 Book Your Free Consultation
@@ -219,6 +249,7 @@ export async function send72HourFollowUp(config: FollowUpConfig) {
   const firstName = patientName.split(" ")[0] || patientName;
 
   const scarBlock = buildScarTreatmentBlock(scarTreatments, true);
+  const referralBlock = config.referralCode ? buildReferralBlock(config.referralCode, firstName, config.scarTreatments) : "";
 
   try {
     const transporter = getTransporter();
@@ -273,6 +304,8 @@ export async function send72HourFollowUp(config: FollowUpConfig) {
                 Book Now — Claim Your 25% Off
               </a>
             </div>
+
+            ${referralBlock}
 
             <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 0 0 20px;">
               <p style="color: #4b5563; font-size: 13px; line-height: 1.6; margin: 0;">

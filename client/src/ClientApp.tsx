@@ -13,6 +13,7 @@ import ClientLanding from "./pages/ClientLanding";
 import ClientAnalyze from "./pages/ClientAnalyze";
 import ClientReport from "./pages/ClientReport";
 import ScarTreatment from "./pages/ScarTreatment";
+import ScarConsultation from "./pages/ScarConsultation";
 
 function ClientRouter() {
   return (
@@ -21,6 +22,7 @@ function ClientRouter() {
       <Route path="/start" component={ClientAnalyze} />
       <Route path="/report/:id" component={ClientReport} />
       <Route path="/scar-treatment" component={ScarTreatment} />
+      <Route path="/scar-consultation" component={ScarConsultation} />
       {/* Backward compat: old /client paths redirect to new paths */}
       <Route path="/client">
         {() => {

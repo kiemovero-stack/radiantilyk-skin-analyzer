@@ -354,7 +354,7 @@ export default function ScarTreatment() {
 
   const handleCTA = () => {
     fbPixel.bookAppointment();
-    window.open(CHECKIN_URL, "_blank");
+    navigate("/scar-consultation");
   };
 
   const handleAnalysis = () => {

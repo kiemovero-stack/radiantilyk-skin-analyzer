@@ -586,3 +586,24 @@
 - [x] Added per-card disclaimer: "Results vary. Treatments can reduce scarring but complete removal is not guaranteed."
 - [x] Backward compatible: falls back to simple includes list for existing reports without new fields
 - [x] 128 tests passing, production build successful
+
+## Test Enhanced Scar Treatment Cards
+- [x] Ran new client analysis with scar photo (ID: 660013, score: 62)
+- [x] Enhanced scar treatment card shows YOUR TREATMENT TIMELINE: 3 sessions, 4-6 weeks apart, first results 4-6 weeks, full results 6-9 months
+- [x] Enhanced scar treatment card shows WHAT YOU'LL GET: Subcision, TCA CROSS, RF Microneedling with layman explanations
+- [x] Disclaimer appears: "Results vary. Treatments can reduce scarring but complete removal is not guaranteed."
+- [x] Book a Scar Consultation CTA links to rkaemr.click/portal correctly
+
+## Scar Consultation Intake Form (/scar-consultation)
+- [x] Create /scar-consultation route on client site
+- [x] Intake form fields: scar type (dropdown), scar location (body area), duration (how long), previous treatments
+- [x] Additional fields: name, email, phone, preferred contact method
+- [x] Form submission stores data and sends notification email to staff
+- [x] Confirmation page after submission with next steps
+- [x] Link from scar treatment page to consultation form
+
+## Connect Referral System to Scar Treatment Page
+- [x] Auto-generate unique referral code after client completes analysis (all analyses, with scar-specific $250 incentive)
+- [x] Email the referral link with $250 discount to the client (via follow-up emails)
+- [x] Include referral link in the follow-up emails when scars are detected (buildReferralBlock in 24hr + 72hr emails)
+- [x] Referral code displayed on client report page with $250 scar referral incentive card

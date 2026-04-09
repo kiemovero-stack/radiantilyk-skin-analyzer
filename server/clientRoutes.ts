@@ -14,7 +14,7 @@
 import type { Express, Request, Response } from "express";
 import multer from "multer";
 import { getDb } from "./db";
-import { skinAnalyses } from "../drizzle/schema";
+import { skinAnalyses, referralCodes } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
@@ -228,6 +228,27 @@ async function runClientAnalysisInBackground(
 
         console.log(`[ClientAnalysis] Report email sent to ${analysis.patientEmail}`);
 
+        // Auto-generate referral code for this analysis
+        let referralCode: string | undefined;
+        try {
+          const refResp = await fetch(`http://localhost:${process.env.PORT || 3000}/api/referral/create`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              referrerName: `${analysis.patientFirstName} ${analysis.patientLastName}`,
+              referrerEmail: analysis.patientEmail,
+              analysisId,
+            }),
+          });
+          if (refResp.ok) {
+            const refData = await refResp.json() as { code: string };
+            referralCode = refData.code;
+            console.log(`[ClientAnalysis] Auto-generated referral code ${referralCode} for analysis ${analysisId}`);
+          }
+        } catch (refErr: any) {
+          console.error(`[ClientAnalysis] Failed to auto-generate referral code:`, refErr?.message);
+        }
+
         // Schedule follow-up emails at 24hr and 72hr
         scheduleFollowUpEmails({
           analysisId,
@@ -245,6 +266,7 @@ async function runClientAnalysisInBackground(
                 includes: s.includes,
               }))
             : undefined,
+          referralCode,
         });
 
         console.log(`[ClientAnalysis] Follow-up emails scheduled for ${analysis.patientEmail}`);
@@ -467,6 +489,22 @@ export function registerClientRoutes(app: Express) {
       }
 
       const record = results[0];
+
+      // Look up referral code for this analysis
+      let referralCode: string | null = null;
+      try {
+        const refResults = await db
+          .select({ code: referralCodes.code })
+          .from(referralCodes)
+          .where(eq(referralCodes.analysisId, id))
+          .limit(1);
+        if (refResults.length > 0) {
+          referralCode = refResults[0].code;
+        }
+      } catch {
+        // Non-critical — referral code lookup failure shouldn't break report
+      }
+
       res.json({
         id: record.id,
         status: record.status,
@@ -480,6 +518,7 @@ export function registerClientRoutes(app: Express) {
         imageUrl: record.imageUrl,
         simulationImages: record.simulationImages || {},
         createdAt: record.createdAt,
+        referralCode,
       });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to get report" });
@@ -556,6 +595,99 @@ export function registerClientRoutes(app: Express) {
     } catch (error: any) {
       console.error("[TestEmail] Error:", error?.message);
       res.status(500).json({ error: "Failed to send test email", details: error?.message });
+    }
+  });
+
+  // ── Scar Consultation Intake Form ────────────────────────────────
+  app.post("/api/client/scar-consultation", async (req: Request, res: Response) => {
+    try {
+      const {
+        firstName, lastName, email, phone, dob,
+        scarType, bodyAreas, duration,
+        previousTreatments, contactMethod, additionalNotes, skinTone,
+      } = req.body;
+
+      if (!firstName || !lastName || !email || !scarType || !bodyAreas?.length || !duration) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      console.log(`[ScarConsultation] New request from ${firstName} ${lastName} (${email})`);
+      console.log(`[ScarConsultation] Scar type: ${scarType}, Areas: ${bodyAreas.join(", ")}, Duration: ${duration}`);
+
+      // Send notification email to staff
+      try {
+        const nodemailer = await import("nodemailer");
+        const transporter = nodemailer.default.createTransport({
+          service: "gmail",
+          auth: {
+            user: "kV@rkaglow.com",
+            pass: process.env.GMAIL_APP_PASSWORD,
+          },
+        });
+
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 20px; border-radius: 12px 12px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 20px;">New Scar Consultation Request</h1>
+            </div>
+            <div style="padding: 24px; background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+              <h2 style="color: #1f2937; margin-top: 0;">Patient Information</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 8px 0; color: #6b7280; width: 140px;">Name:</td><td style="padding: 8px 0; font-weight: 600;">${firstName} ${lastName}</td></tr>
+                <tr><td style="padding: 8px 0; color: #6b7280;">Email:</td><td style="padding: 8px 0;"><a href="mailto:${email}">${email}</a></td></tr>
+                ${phone ? `<tr><td style="padding: 8px 0; color: #6b7280;">Phone:</td><td style="padding: 8px 0;"><a href="tel:${phone}">${phone}</a></td></tr>` : ""}
+                ${dob ? `<tr><td style="padding: 8px 0; color: #6b7280;">DOB:</td><td style="padding: 8px 0;">${dob}</td></tr>` : ""}
+                ${skinTone ? `<tr><td style="padding: 8px 0; color: #6b7280;">Skin Tone:</td><td style="padding: 8px 0;">${skinTone}</td></tr>` : ""}
+                <tr><td style="padding: 8px 0; color: #6b7280;">Preferred Contact:</td><td style="padding: 8px 0;">${contactMethod}</td></tr>
+              </table>
+
+              <h2 style="color: #1f2937; margin-top: 24px;">Scar Details</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 8px 0; color: #6b7280; width: 140px;">Scar Type:</td><td style="padding: 8px 0; font-weight: 600;">${scarType}</td></tr>
+                <tr><td style="padding: 8px 0; color: #6b7280;">Location(s):</td><td style="padding: 8px 0;">${bodyAreas.join(", ")}</td></tr>
+                <tr><td style="padding: 8px 0; color: #6b7280;">Duration:</td><td style="padding: 8px 0;">${duration}</td></tr>
+                ${previousTreatments?.length ? `<tr><td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Previous Treatments:</td><td style="padding: 8px 0;">${previousTreatments.join(", ")}</td></tr>` : ""}
+              </table>
+
+              ${additionalNotes ? `
+                <h2 style="color: #1f2937; margin-top: 24px;">Additional Notes</h2>
+                <p style="color: #374151; background: #f9fafb; padding: 12px; border-radius: 8px;">${additionalNotes}</p>
+              ` : ""}
+
+              <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                <a href="https://rkaemr.click/portal" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Open Booking Portal</a>
+              </div>
+            </div>
+          </div>
+        `;
+
+        await transporter.sendMail({
+          from: '"RadiantilyK Skin Analysis" <kV@rkaglow.com>',
+          to: "kiemovero@gmail.com",
+          subject: `New Scar Consultation: ${firstName} ${lastName} — ${scarType}`,
+          html: emailHtml,
+        });
+
+        console.log(`[ScarConsultation] Notification email sent to staff`);
+      } catch (emailErr: any) {
+        console.error("[ScarConsultation] Failed to send notification email:", emailErr?.message);
+        // Don't fail the request if email fails
+      }
+
+      // Notify owner via built-in notification
+      try {
+        await notifyOwner({
+          title: "New Scar Consultation Request",
+          content: `${firstName} ${lastName} (${email}) submitted a scar consultation request.\nScar Type: ${scarType}\nLocation: ${bodyAreas.join(", ")}\nDuration: ${duration}`,
+        });
+      } catch {
+        // Non-critical
+      }
+
+      res.json({ success: true, message: "Consultation request submitted" });
+    } catch (error: any) {
+      console.error("[ScarConsultation] Error:", error?.message);
+      res.status(500).json({ error: "Failed to submit consultation request" });
     }
   });
 }

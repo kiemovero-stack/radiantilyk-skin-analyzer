@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { SkinAnalysisReport, Severity, ScarTreatment } from "@shared/types";
 import { PRODUCT_CATALOG, BUNDLE_DEALS, findMatchingBundlesByName } from "@shared/productCatalog";
 import type { BundleDeal } from "@shared/productCatalog";
-import { ShoppingBag, Gift, Tag, Info } from "lucide-react";
+import { ShoppingBag, Gift, Tag } from "lucide-react";
 import {
   Sparkles,
   Activity,
@@ -41,6 +41,7 @@ import {
   Check,
   User,
   Calendar,
+  Info,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "wouter";
@@ -604,6 +605,7 @@ interface ReportData {
   imageUrl: string;
   simulationImages: Record<string, string>;
   createdAt: string;
+  referralCode?: string | null;
 }
 
 export default function ClientReport() {
@@ -1523,6 +1525,30 @@ export default function ClientReport() {
                   Book a Scar Consultation
                 </a>
               </div>
+
+              {/* $250 Scar Referral Incentive */}
+              {data.referralCode && (
+                <div className="mt-6 p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200">
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                        <Gift className="w-4 h-4 text-white" />
+                      </div>
+                      <h4 className="text-base font-bold text-gray-800">Refer a Friend for Scar Treatment — Save $250 Each</h4>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Know someone who could benefit from scar treatment? Share your referral code and you <strong>both</strong> get <span className="text-emerald-600 font-bold">$250 off</span> any scar treatment package.
+                    </p>
+                    <div className="inline-flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-emerald-200 shadow-sm">
+                      <span className="text-xs uppercase tracking-wider text-gray-400 font-medium">Your Code:</span>
+                      <span className="text-lg font-mono font-bold text-emerald-600 tracking-wider">{data.referralCode}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      Share this code with friends and family. When they book a scar consultation and mention your code, you both save!
+                    </p>
+                  </div>
+                </div>
+              )}
             </motion.section>
           )}
 
