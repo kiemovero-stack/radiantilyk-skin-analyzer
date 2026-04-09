@@ -41,9 +41,13 @@ function getPublicHost(req: Request): string {
 /** Determine if a request should be served the client site */
 function isClientDomain(req: Request): boolean {
   const host = getPublicHost(req);
+  console.log(`[DomainRouter] host=${host} xOriginalHost=${req.headers["x-original-host"]} xForwardedHost=${req.headers["x-forwarded-host"]} reqHostname=${req.hostname} hostHeader=${req.headers.host}`);
 
   // Explicit staff domains → staff app
-  if (STAFF_DOMAINS.has(host)) return false;
+  if (STAFF_DOMAINS.has(host)) {
+    console.log(`[DomainRouter] → STAFF (matched STAFF_DOMAINS)`);
+    return false;
+  }
 
   // localhost / dev server → check for /__client path or cookie
   if (host === "localhost" || host === "127.0.0.1" || host.includes("manus.computer")) {

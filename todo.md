@@ -660,3 +660,7 @@
 - [x] Only admin can access staff management (not staff role)
 - [x] Option to delete pending invitations (trash icon on pending cards)
 - [x] Write tests and verify build (138 tests pass, build succeeds)
+
+## Domain Routing - rkaskinai.com
+- [x] Add rkaskinai.com and www.rkaskinai.com to client-facing domain list (auto-routed: any domain not in STAFF_DOMAINS serves client app)
+- [ ] Fix rkaskinai.com serving staff dashboard instead of client site
