@@ -76,6 +76,9 @@ export function registerLeadScoringRoutes(app: Express) {
           },
           hasSimulation: !!(record.simulationImages && Object.keys(record.simulationImages as object).length > 0),
           hasAgingImages: !!(record.agingImages && Object.keys(record.agingImages as object).length > 0),
+          contactedAt: record.contactedAt ? record.contactedAt.toISOString() : null,
+          contactNotes: record.contactNotes,
+          contactMethod: record.contactMethod,
         };
       });
 
@@ -172,6 +175,80 @@ export function registerLeadScoringRoutes(app: Express) {
     } catch (error: any) {
       console.error("[LeadScoring] Error fetching lead detail:", error?.message);
       res.status(500).json({ error: "Failed to fetch lead details" });
+    }
+  });
+
+  /**
+   * PATCH /api/leads/:id/contact
+   * Mark a lead as contacted with optional notes and method.
+   */
+  app.patch("/api/leads/:id/contact", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid ID" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const { notes, method } = req.body || {};
+
+      await db
+        .update(skinAnalyses)
+        .set({
+          contactedAt: new Date(),
+          contactNotes: notes || null,
+          contactMethod: method || null,
+        })
+        .where(eq(skinAnalyses.id, id));
+
+      console.log(`[LeadScoring] Marked lead ${id} as contacted (method: ${method || "none"})`);
+
+      res.json({ success: true, contactedAt: new Date().toISOString() });
+    } catch (error: any) {
+      console.error("[LeadScoring] Error marking contact:", error?.message);
+      res.status(500).json({ error: "Failed to mark as contacted" });
+    }
+  });
+
+  /**
+   * PATCH /api/leads/:id/contact/undo
+   * Undo the contacted status for a lead.
+   */
+  app.patch("/api/leads/:id/contact/undo", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid ID" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      await db
+        .update(skinAnalyses)
+        .set({
+          contactedAt: null,
+          contactNotes: null,
+          contactMethod: null,
+        })
+        .where(eq(skinAnalyses.id, id));
+
+      console.log(`[LeadScoring] Undid contact status for lead ${id}`);
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("[LeadScoring] Error undoing contact:", error?.message);
+      res.status(500).json({ error: "Failed to undo contact status" });
     }
   });
 

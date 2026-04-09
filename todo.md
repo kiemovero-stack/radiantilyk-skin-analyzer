@@ -625,3 +625,13 @@
 - [ ] Add quick actions: call, email, mark as contacted, add notes
 - [x] Add /leads route to App.tsx router
 - [x] Write tests for lead scoring logic (9 tests in leadScoring.test.ts)
+
+## Lead Dashboard Quick Actions
+- [x] Add contactedAt, contactNotes, contactMethod columns to skinAnalyses schema
+- [x] Create PATCH /api/leads/:id/contact endpoint to mark as contacted with optional notes
+- [x] Add one-click Call button on each lead card (opens contact modal)
+- [x] Add one-click Email button (mailto: with pre-filled subject/body, then opens contact modal)
+- [x] Add "Mark as Contacted" button with timestamp and optional notes modal
+- [x] Show contacted status badge on lead cards (green Contacted badge, green border)
+- [x] Add filter for contacted/not-contacted leads (Any Status / Not Contacted / Contacted)
+- [x] Write tests for contact endpoint and UI state (137 tests pass)

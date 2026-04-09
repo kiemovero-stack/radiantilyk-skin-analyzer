@@ -44,6 +44,12 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   leadScore: int("leadScore"),
   /** JSON object with individual scoring signals */
   leadScoreDetails: json("leadScoreDetails"),
+  /** Timestamp when staff marked this lead as contacted */
+  contactedAt: timestamp("contactedAt"),
+  /** Staff notes about the contact attempt */
+  contactNotes: text("contactNotes"),
+  /** Contact method used: call, email, text */
+  contactMethod: varchar("contactMethod", { length: 32 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
