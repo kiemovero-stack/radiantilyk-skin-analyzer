@@ -29,6 +29,13 @@
       "when": 1775453354101,
       "tag": "0003_boring_weapon_omega",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1775698215077,
+      "tag": "0004_sharp_killer_shrike",
+      "breakpoints": true
     }
   ]
 }

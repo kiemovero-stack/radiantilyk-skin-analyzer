@@ -604,6 +604,7 @@ interface ReportData {
   patientDob: string | null;
   imageUrl: string;
   simulationImages: Record<string, string>;
+  agingImages: Record<string, string>;
   createdAt: string;
   referralCode?: string | null;
 }
@@ -616,6 +617,7 @@ export default function ClientReport() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [simulationsLoading, setSimulationsLoading] = useState(false);
+  const [agingLoading, setAgingLoading] = useState(false);
 
   useEffect(() => {
     if (reportId <= 0) {
@@ -663,6 +665,37 @@ export default function ClientReport() {
       } catch { /* ignore polling errors */ }
       if (attempts >= maxAttempts) {
         setSimulationsLoading(false);
+        clearInterval(interval);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [data?.status, reportId]);
+
+  // Poll for aging simulation images if they're not ready yet
+  useEffect(() => {
+    if (!data || data.status !== "completed") return;
+    const hasAging = data.agingImages && Object.keys(data.agingImages).length > 0;
+    if (hasAging) return;
+
+    setAgingLoading(true);
+    let attempts = 0;
+    const maxAttempts = 40; // Poll for up to ~6.5 minutes (40 x 10s)
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await fetch(`/api/client/aging/${reportId}`);
+        if (!res.ok) return;
+        const result = await res.json();
+        if (result.ready && result.agingImages) {
+          setData((prev) => prev ? { ...prev, agingImages: result.agingImages } : prev);
+          setAgingLoading(false);
+          clearInterval(interval);
+        }
+      } catch { /* ignore polling errors */ }
+      if (attempts >= maxAttempts) {
+        setAgingLoading(false);
         clearInterval(interval);
       }
     }, 10000);
@@ -1058,6 +1091,114 @@ export default function ClientReport() {
               </motion.section>
             );
           })()}
+
+          {/* Section: Future Aging Self — See Yourself in 20 Years */}
+          <motion.section
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mb-8 p-6 md:p-8 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/50 to-orange-50/30 shadow-sm"
+          >
+            <SectionHeader
+              icon={Telescope}
+              title="Your Future Self"
+              subtitle="See what you could look like in 20 years — with and without treatment"
+            />
+            {data.agingImages && Object.keys(data.agingImages).length > 0 ? (
+              <div className="space-y-6">
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Our AI has projected what you may look like <strong>20 years from now</strong>. Compare the difference that consistent aesthetic care can make over time. This isn't about stopping aging — it's about aging <em>gracefully</em> and on your own terms.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Without Treatment */}
+                  {(data.agingImages as Record<string, string>).withoutTreatment && (
+                    <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                      <div className="bg-gray-100 px-4 py-2 flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-500" />
+                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Without Treatment</span>
+                      </div>
+                      <div className="relative aspect-square">
+                        <img
+                          src={(data.agingImages as Record<string, string>).withoutTreatment}
+                          alt="Projected appearance in 20 years without treatment"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-black/60 text-white text-[10px] font-bold">
+                          +20 YEARS
+                        </div>
+                      </div>
+                      <div className="p-3 bg-gray-50">
+                        <p className="text-xs text-gray-500">Natural aging without professional treatments or advanced skincare</p>
+                      </div>
+                    </div>
+                  )}
+                  {/* With Treatment */}
+                  {(data.agingImages as Record<string, string>).withTreatment && (
+                    <div className="rounded-xl overflow-hidden border border-purple-200 shadow-sm ring-2 ring-purple-100">
+                      <div className="bg-gradient-to-r from-pink-100 to-purple-100 px-4 py-2 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
+                        <span className="text-xs font-bold text-purple-700 uppercase tracking-wide">With Treatment</span>
+                      </div>
+                      <div className="relative aspect-square">
+                        <img
+                          src={(data.agingImages as Record<string, string>).withTreatment}
+                          alt="Projected appearance in 20 years with consistent treatment"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white text-[10px] font-bold">
+                          +20 YEARS WITH CARE
+                        </div>
+                      </div>
+                      <div className="p-3 bg-purple-50">
+                        <p className="text-xs text-purple-600">Aging gracefully with consistent professional treatments and advanced skincare</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Interactive slider if both images are available */}
+                {(data.agingImages as Record<string, string>).withoutTreatment && (data.agingImages as Record<string, string>).withTreatment && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      Drag to compare — Without vs. With Treatment
+                    </p>
+                    <BeforeAfterSlider
+                      beforeUrl={(data.agingImages as Record<string, string>).withoutTreatment}
+                      afterUrl={(data.agingImages as Record<string, string>).withTreatment}
+                      label="20-Year Aging Comparison: Without Treatment vs. With Treatment"
+                    />
+                  </div>
+                )}
+                {/* CTA */}
+                <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center">
+                  <p className="text-sm font-bold mb-1">Start Your Journey Today</p>
+                  <p className="text-xs opacity-90 mb-3">The best time to invest in your skin was yesterday. The second best time is now.</p>
+                  <a
+                    href={withUtm(CHECKIN_URL, "aging-self-cta")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white text-purple-700 font-bold text-sm hover:bg-purple-50 transition-colors"
+                  >
+                    <CalendarCheck className="w-4 h-4" />
+                    Book Your Consultation
+                  </a>
+                </div>
+              </div>
+            ) : agingLoading ? (
+              <div className="flex items-center gap-3 p-5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
+                <Loader2 className="w-5 h-5 animate-spin text-amber-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-700">Generating Your Future Self</p>
+                  <p className="text-xs text-amber-500 mt-0.5">Our AI is creating a personalized aging simulation showing you in 20 years — with and without treatment. This takes a couple of minutes...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">
+                <p className="text-sm text-gray-500">Your future self simulation will appear here once generated.</p>
+              </div>
+            )}
+          </motion.section>
 
           {/* Section: Procedures with Treatment Details */}
           <motion.section

@@ -607,3 +607,21 @@
 - [x] Email the referral link with $250 discount to the client (via follow-up emails)
 - [x] Include referral link in the follow-up emails when scars are detected (buildReferralBlock in 24hr + 72hr emails)
 - [x] Referral code displayed on client report page with $250 scar referral incentive card
+
+## Future Aging Self Simulation
+- [x] Create server endpoint to generate "20 years from now" aging simulation image using AI (agingSimulationService.ts)
+- [x] Generate two images: aged WITHOUT treatment, aged WITH treatment (showing the difference)
+- [x] Add Future Aging Self section to ClientReport.tsx with before/after slider
+- [ ] Add "See Your Future Self" CTA on client landing page (future enhancement)
+- [x] Fire-and-forget async generation (like treatment simulations) with polling on report page
+- [x] Write tests for aging simulation endpoint (covered by build + tsc)
+
+## Lead Scoring Dashboard (Staff-Facing)
+- [x] Design lead scoring algorithm (7 signals: skin urgency, conditions, scar intent, contact info, engagement depth, referral activity, consultation submission)
+- [x] Add leadScore column to skinAnalyses table
+- [x] Create server endpoints: GET /api/leads, GET /api/leads/:id, GET /api/leads/stats/summary
+- [x] Build /leads staff dashboard page with lead cards, stats, filters, search
+- [x] Add 1-5 star visual rating and color-coded priority indicators (hot/warm/cool)
+- [ ] Add quick actions: call, email, mark as contacted, add notes
+- [x] Add /leads route to App.tsx router
+- [x] Write tests for lead scoring logic (9 tests in leadScoring.test.ts)

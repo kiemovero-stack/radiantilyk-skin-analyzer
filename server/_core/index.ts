@@ -8,6 +8,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerUploadRoute } from "../uploadRoute";
 import { registerClientRoutes } from "../clientRoutes";
 import { registerReferralRoutes } from "../referralRoutes";
+import { registerLeadScoringRoutes } from "../leadScoringRoutes";
 import { registerQuestionnaireRoutes } from "../questionnaireRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -86,6 +87,8 @@ async function startServer() {
   registerClientRoutes(app);
   // Referral program & seasonal promotion routes
   registerReferralRoutes(app);
+  // Lead scoring dashboard routes
+  registerLeadScoringRoutes(app);
   // Questionnaire & consent form PDF routes
   registerQuestionnaireRoutes(app);
   // tRPC API

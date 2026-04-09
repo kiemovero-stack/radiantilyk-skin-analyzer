@@ -38,6 +38,12 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   errorMessage: text("errorMessage"),
   /** JSON map of treatment name → simulation image URL */
   simulationImages: json("simulationImages"),
+  /** JSON object with aging simulation URLs: { withoutTreatment, withTreatment } */
+  agingImages: json("agingImages"),
+  /** Lead score 1-5 based on engagement signals */
+  leadScore: int("leadScore"),
+  /** JSON object with individual scoring signals */
+  leadScoreDetails: json("leadScoreDetails"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

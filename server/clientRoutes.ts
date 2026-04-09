@@ -25,6 +25,7 @@ import { generateReportPdf } from "./pdfReport";
 import { sendClientReportEmail } from "./clientEmailService";
 import { scheduleFollowUpEmails, send24HourFollowUp, send72HourFollowUp } from "./followUpService";
 import { generateTreatmentSimulations } from "./simulationService";
+import { generateAgingSimulations } from "./agingSimulationService";
 import { sendStaffNotificationEmail } from "./staffNotificationService";
 
 // Multer for public uploads
@@ -84,6 +85,55 @@ async function generateSimulationsInBackground(
   } catch (err: any) {
     console.error(`[Simulation] Background generation failed for record ${analysisId}:`, err?.message);
     // Non-fatal — report is still available without simulation
+  }
+}
+
+/**
+ * Generate Future Aging Self images in the background AFTER the analysis is completed.
+ * Creates two images: aged WITHOUT treatment and aged WITH treatment.
+ * Non-blocking — the client sees their report immediately.
+ */
+async function generateAgingInBackground(
+  analysisId: number,
+  frontImageUrl: string,
+  fitzpatrickType: number,
+  skinHealthScore: number,
+  conditions: string[],
+  treatments: string[],
+  patientDob?: string
+) {
+  try {
+    console.log(`[AgingSim] Starting aging simulation for record ${analysisId}`);
+
+    const result = await generateAgingSimulations(
+      analysisId,
+      frontImageUrl,
+      fitzpatrickType,
+      skinHealthScore,
+      conditions,
+      treatments,
+      patientDob
+    );
+
+    if (result.success) {
+      const agingData: Record<string, string> = {};
+      if (result.withoutTreatmentUrl) agingData.withoutTreatment = result.withoutTreatmentUrl;
+      if (result.withTreatmentUrl) agingData.withTreatment = result.withTreatmentUrl;
+
+      const db = await getDb();
+      if (db && Object.keys(agingData).length > 0) {
+        await db
+          .update(skinAnalyses)
+          .set({ agingImages: agingData })
+          .where(eq(skinAnalyses.id, analysisId));
+
+        console.log(`[AgingSim] Aging images saved for record ${analysisId}`);
+      }
+    } else {
+      console.log(`[AgingSim] No aging images generated for record ${analysisId}: ${result.error}`);
+    }
+  } catch (err: any) {
+    console.error(`[AgingSim] Background generation failed for record ${analysisId}:`, err?.message);
   }
 }
 
@@ -191,6 +241,30 @@ async function runClientAnalysisInBackground(
       ).catch((err) => {
         console.error(`[Simulation] Unhandled background error:`, err);
       });
+
+      // 🔮 Fire-and-forget: Generate Future Aging Self images in background
+      // Fetch patientDob from DB since it's not in scope here
+      (async () => {
+        try {
+          const dbForDob = await getDb();
+          let dob: string | undefined;
+          if (dbForDob) {
+            const rows = await dbForDob.select({ patientDob: skinAnalyses.patientDob }).from(skinAnalyses).where(eq(skinAnalyses.id, analysisId)).limit(1);
+            dob = rows[0]?.patientDob || undefined;
+          }
+          await generateAgingInBackground(
+            analysisId,
+            frontImageUrl,
+            report.fitzpatrickType || 3,
+            report.skinHealthScore,
+            report.conditions.map((c: any) => c.name),
+            report.skinProcedures.map((p: any) => p.name),
+            dob
+          );
+        } catch (err) {
+          console.error(`[AgingSim] Unhandled background error:`, err);
+        }
+      })();
     }
 
     // Send the initial report email to the client (also non-blocking)
@@ -517,6 +591,7 @@ export function registerClientRoutes(app: Express) {
         patientDob: record.patientDob,
         imageUrl: record.imageUrl,
         simulationImages: record.simulationImages || {},
+        agingImages: record.agingImages || {},
         createdAt: record.createdAt,
         referralCode,
       });
@@ -564,8 +639,46 @@ export function registerClientRoutes(app: Express) {
     }
   });
 
-  // ── Test endpoint: Trigger follow-up email immediately ────────────
-  // Only available in development mode
+  // ── Poll Aging Images─────────────────────────────────────────────────────────
+  // The report page polls this endpoint to check if aging simulation images are ready
+  app.get("/api/client/aging/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid ID" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const results = await db
+        .select({ agingImages: skinAnalyses.agingImages })
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, id))
+        .limit(1);
+
+      if (results.length === 0) {
+        res.status(404).json({ error: "Not found" });
+        return;
+      }
+
+      const agingImgs = results[0].agingImages as Record<string, string> | null;
+      const hasImages = agingImgs && typeof agingImgs === "object" && Object.keys(agingImgs).length > 0;
+
+      res.json({
+        ready: hasImages,
+        agingImages: agingImgs || {},
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to check aging images" });
+    }
+  });
+
+  // ── Test endpoint: Trigger follow-up email immediately ────────────────  // Only available in development mode
   app.post("/api/test-followup-email", async (req: Request, res: Response) => {
     try {
       const { analysisId, patientEmail, patientName, skinHealthScore, topConcerns, topTreatment, scarTreatments, emailType } = req.body;

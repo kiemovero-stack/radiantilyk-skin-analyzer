@@ -13,6 +13,9 @@ import Compare from "./pages/Compare";
 import ClientLanding from "./pages/ClientLanding";
 import ClientAnalyze from "./pages/ClientAnalyze";
 import ClientReport from "./pages/ClientReport";
+import ScarConsultation from "./pages/ScarConsultation";
+import ScarTreatment from "./pages/ScarTreatment";
+import LeadDashboard from "./pages/LeadDashboard";
 
 function Router() {
   return (
@@ -26,6 +29,10 @@ function Router() {
       <Route path="/client" component={ClientLanding} />
       <Route path="/client/start" component={ClientAnalyze} />
       <Route path="/client/report/:id" component={ClientReport} />
+      <Route path="/scar-consultation" component={ScarConsultation} />
+      <Route path="/scar-treatment" component={ScarTreatment} />
+      {/* Staff-facing dashboard (no auth gate for now) */}
+      <Route path="/leads" component={LeadDashboard} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
