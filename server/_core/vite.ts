@@ -8,7 +8,7 @@ import viteConfig from "../../vite.config";
 
 /**
  * Domains that serve the STAFF dashboard.
- * All other domains serve the standalone CLIENT site.
+ * Only these exact domains serve the staff app.
  */
 const STAFF_DOMAINS = new Set([
   "rkaaiskin.com",
@@ -17,31 +17,56 @@ const STAFF_DOMAINS = new Set([
 ]);
 
 /**
+ * Domains that explicitly serve the CLIENT site.
+ * If a domain matches here, it always serves the client app.
+ */
+const CLIENT_DOMAINS = new Set([
+  "rkaskinai.com",
+  "www.rkaskinai.com",
+  "skinanalyz-yxdmlvyu.manus.space",
+]);
+
+/**
  * Extract the public-facing hostname from the request.
  *
  * In the Manus deployment stack (Cloudflare Workers → Google Cloud Run),
- * the original public hostname is passed via `x-original-host`.
- * We also check `x-forwarded-host` as a fallback, then `req.hostname`
- * (which reads `Host` header when `trust proxy` is set).
+ * the original public hostname may be passed via various headers.
+ * We check all common proxy headers to find the real public hostname.
  */
 function getPublicHost(req: Request): string {
-  const xOriginalHost = req.headers["x-original-host"];
-  const xForwardedHost = req.headers["x-forwarded-host"];
+  // Check all common proxy headers in priority order
+  const headerCandidates = [
+    req.headers["x-original-host"],
+    req.headers["x-forwarded-host"],
+    req.headers["x-real-host"],
+    req.headers["cf-connecting-host"],  // Cloudflare
+  ];
 
-  const raw =
-    (typeof xOriginalHost === "string" ? xOriginalHost : "") ||
-    (typeof xForwardedHost === "string" ? xForwardedHost : "") ||
-    req.hostname ||
-    req.headers.host ||
-    "";
+  for (const h of headerCandidates) {
+    if (typeof h === "string" && h.length > 0) {
+      return h.split(":")[0].toLowerCase();
+    }
+  }
 
-  return raw.split(":")[0].toLowerCase();
+  // Fallback to Express hostname (reads Host header when trust proxy is set)
+  const hostname = req.hostname || "";
+  if (hostname) return hostname.split(":")[0].toLowerCase();
+
+  // Last resort: raw Host header
+  const hostHeader = req.headers.host || "";
+  return hostHeader.split(":")[0].toLowerCase();
 }
 
 /** Determine if a request should be served the client site */
 function isClientDomain(req: Request): boolean {
   const host = getPublicHost(req);
-  console.log(`[DomainRouter] host=${host} xOriginalHost=${req.headers["x-original-host"]} xForwardedHost=${req.headers["x-forwarded-host"]} reqHostname=${req.hostname} hostHeader=${req.headers.host}`);
+  console.log(`[DomainRouter] host="${host}" url="${req.originalUrl}" headers: x-original-host="${req.headers["x-original-host"]}" x-forwarded-host="${req.headers["x-forwarded-host"]}" hostname="${req.hostname}" host-header="${req.headers.host}"`);
+
+  // Explicit client domains → always client app
+  if (CLIENT_DOMAINS.has(host)) {
+    console.log(`[DomainRouter] → CLIENT (matched CLIENT_DOMAINS)`);
+    return true;
+  }
 
   // Explicit staff domains → staff app
   if (STAFF_DOMAINS.has(host)) {
@@ -59,7 +84,15 @@ function isClientDomain(req: Request): boolean {
     return false; // default to staff in dev
   }
 
-  // Any other domain (e.g., skinanalyz-*.manus.space, Cloud Run internal) → client site
+  // Check if the hostname contains "skinai" or "client" keywords → client
+  if (host.includes("skinai") || host.includes("skinanalyz")) {
+    console.log(`[DomainRouter] → CLIENT (hostname contains skinai/skinanalyz)`);
+    return true;
+  }
+
+  // Any other unknown domain → default to client site
+  // (Cloud Run internal domains, other custom domains, etc.)
+  console.log(`[DomainRouter] → CLIENT (fallback for unknown domain)`);
   return true;
 }
 
@@ -164,6 +197,7 @@ export function serveStatic(app: Express) {
 
     // Fall back to main index.html if client-index.html doesn't exist
     if (useClientSite && !fs.existsSync(htmlPath)) {
+      console.warn(`[DomainRouter] client-index.html not found at ${htmlPath}, falling back to index.html`);
       res.sendFile(path.resolve(distPath, "index.html"));
       return;
     }
@@ -175,6 +209,7 @@ export function serveStatic(app: Express) {
         '<html lang="en" data-client-mode="true">'
       );
     }
+    console.log(`[DomainRouter] Serving ${htmlFile} for host="${getPublicHost(req)}"`);
     res.status(200).set({ "Content-Type": "text/html" }).end(html);
   });
 }

@@ -663,4 +663,4 @@
 
 ## Domain Routing - rkaskinai.com
 - [x] Add rkaskinai.com and www.rkaskinai.com to client-facing domain list (auto-routed: any domain not in STAFF_DOMAINS serves client app)
-- [ ] Fix rkaskinai.com serving staff dashboard instead of client site
+- [x] Fix rkaskinai.com serving staff dashboard instead of client site (added explicit CLIENT_DOMAINS set)
