@@ -642,3 +642,9 @@
 - [x] Add patientPhone column to skinAnalyses database table
 - [x] Display phone number on lead dashboard cards with clickable tel: link (green, searchable)
 - [x] Phone number included in lead scoring (hasPhone signal) and API responses
+
+## Data Cleanup & Staff Additions
+- [x] Remove all client analyses with email Kiemovero@gmail.com (28 rows deleted)
+- [x] Remove all test/demo client data (5 test rows deleted, 39 real analyses remain)
+- [x] Add Donnie Nelson (djsooshi@gmail.com) to staff portal (staff role)
+- [x] Add Arpana Purani (skinology2014@gmail.com) to staff portal (staff role)

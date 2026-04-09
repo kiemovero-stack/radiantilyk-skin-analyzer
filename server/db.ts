@@ -30,6 +30,35 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 
   try {
+    // Check if there's a pre-created user with matching email but placeholder openId
+    // This handles staff accounts created before their first OAuth login
+    if (user.email) {
+      const existingByEmail = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, user.email))
+        .limit(1);
+
+      if (existingByEmail.length > 0) {
+        const existing = existingByEmail[0];
+        // If the existing record has a placeholder openId (starts with 'staff_'),
+        // update it with the real openId from OAuth and preserve the role
+        if (existing.openId.startsWith('staff_') && existing.openId !== user.openId) {
+          console.log(`[Database] Merging pre-created staff account for ${user.email} with real openId`);
+          await db
+            .update(users)
+            .set({
+              openId: user.openId,
+              name: user.name || existing.name,
+              loginMethod: user.loginMethod || existing.loginMethod,
+              lastSignedIn: new Date(),
+            })
+            .where(eq(users.id, existing.id));
+          return;
+        }
+      }
+    }
+
     const values: InsertUser = {
       openId: user.openId,
     };
