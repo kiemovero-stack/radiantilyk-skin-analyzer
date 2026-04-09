@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   User,
   Mail,
+  Phone,
   Calendar,
   CheckCircle2,
   Heart,
@@ -327,6 +328,7 @@ export default function ClientAnalyze() {
   // Patient info
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [dobMonth, setDobMonth] = useState("");
   const [dobDay, setDobDay] = useState("");
   const [dobYear, setDobYear] = useState("");
@@ -512,6 +514,7 @@ export default function ClientAnalyze() {
           patientFirstName: firstName,
           patientLastName: lastName,
           patientEmail: email.trim(),
+          patientPhone: phone.trim(),
           patientDob: dob,
           concerns: concernLabels,
           imageUrls: uploadResult.uploadedImages.map((img: { url: string; angle: string }) => ({
@@ -621,6 +624,27 @@ export default function ClientAnalyze() {
                     />
                     <p className="text-xs text-muted-foreground mt-1">
                       We'll send your personalized report to this email.
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor="phone"
+                      className="flex items-center gap-2 mb-2"
+                    >
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(408) 555-1234"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="h-12 text-base"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Optional — for text/call follow-up about your results.
                     </p>
                   </div>
 

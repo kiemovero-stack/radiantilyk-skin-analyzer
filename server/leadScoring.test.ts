@@ -10,6 +10,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: true,
         scarTreatmentCount: 3,
         hasEmail: true,
+        hasPhone: true,
         hasDob: true,
         imageCount: 3,
         hasReferralCode: true,
@@ -20,7 +21,7 @@ describe("Lead Scoring Service", () => {
       expect(score.priority).toBe("hot");
       expect(score.stars).toBeGreaterThanOrEqual(4);
       expect(score.totalPoints).toBeGreaterThan(0);
-      expect(score.maxPoints).toBe(100);
+      expect(score.maxPoints).toBe(105);
       expect(score.signals).toHaveLength(7);
       expect(score.summary).toContain("scar");
     });
@@ -32,6 +33,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: false,
         scarTreatmentCount: 0,
         hasEmail: true,
+        hasPhone: false,
         hasDob: false,
         imageCount: 1,
         hasReferralCode: false,
@@ -50,6 +52,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: false,
         scarTreatmentCount: 0,
         hasEmail: true,
+        hasPhone: true,
         hasDob: true,
         imageCount: 2,
         hasReferralCode: true,
@@ -68,6 +71,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: false,
         scarTreatmentCount: 0,
         hasEmail: false,
+        hasPhone: false,
         hasDob: false,
         imageCount: 0,
         hasReferralCode: false,
@@ -86,6 +90,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: true,
         scarTreatmentCount: 3,
         hasEmail: true,
+        hasPhone: false,
         hasDob: false,
         imageCount: 1,
         hasReferralCode: false,
@@ -104,6 +109,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: false,
         scarTreatmentCount: 0,
         hasEmail: true,
+        hasPhone: false,
         hasDob: true,
         imageCount: 1,
         hasReferralCode: false,
@@ -115,6 +121,26 @@ describe("Lead Scoring Service", () => {
       expect(consultSignal?.points).toBe(15);
     });
 
+    it("gives phone points when phone is provided", () => {
+      const score = calculateLeadScore({
+        skinHealthScore: 50,
+        conditionCount: 2,
+        hasScarDetection: false,
+        scarTreatmentCount: 0,
+        hasEmail: true,
+        hasPhone: true,
+        hasDob: true,
+        imageCount: 1,
+        hasReferralCode: false,
+        hasConsultationSubmission: false,
+        procedureCount: 3,
+      });
+
+      const contactSignal = score.signals.find((s) => s.name === "Contact Info Provided");
+      expect(contactSignal?.points).toBe(15);
+      expect(contactSignal?.description).toContain("Phone");
+    });
+
     it("includes calculatedAt timestamp", () => {
       const score = calculateLeadScore({
         skinHealthScore: 50,
@@ -122,6 +148,7 @@ describe("Lead Scoring Service", () => {
         hasScarDetection: false,
         scarTreatmentCount: 0,
         hasEmail: false,
+        hasPhone: false,
         hasDob: false,
         imageCount: 0,
         hasReferralCode: false,
@@ -144,6 +171,7 @@ describe("Lead Scoring Service", () => {
           scarTreatments: [{ scarType: "Atrophic" }],
         },
         patientEmail: "test@example.com",
+        patientPhone: "4085551234",
         patientDob: "1990-01-15",
         imageUrl: "https://example.com/photo.jpg",
       });
@@ -153,6 +181,7 @@ describe("Lead Scoring Service", () => {
       expect(input.hasScarDetection).toBe(true);
       expect(input.scarTreatmentCount).toBe(1);
       expect(input.hasEmail).toBe(true);
+      expect(input.hasPhone).toBe(true);
       expect(input.hasDob).toBe(true);
       expect(input.imageCount).toBe(1);
       expect(input.procedureCount).toBe(2);
@@ -163,6 +192,7 @@ describe("Lead Scoring Service", () => {
         skinHealthScore: null,
         report: {},
         patientEmail: "",
+        patientPhone: "",
         patientDob: "",
         imageUrl: "",
       });
@@ -171,6 +201,7 @@ describe("Lead Scoring Service", () => {
       expect(input.conditionCount).toBe(0);
       expect(input.hasScarDetection).toBe(false);
       expect(input.hasEmail).toBe(false);
+      expect(input.hasPhone).toBe(false);
       expect(input.hasDob).toBe(false);
       expect(input.imageCount).toBe(0);
     });

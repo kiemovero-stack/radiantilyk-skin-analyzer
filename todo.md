@@ -635,3 +635,10 @@
 - [x] Show contacted status badge on lead cards (green Contacted badge, green border)
 - [x] Add filter for contacted/not-contacted leads (Any Status / Not Contacted / Contacted)
 - [x] Write tests for contact endpoint and UI state (137 tests pass)
+
+## Bug Fixes - Staff Dashboard & Client Phone Number
+- [x] Fix staff dashboard: added 'Leads' link to staff Navbar (visible when logged in)
+- [x] Add phone number field to client-facing patient intake form (optional, with tel: type)
+- [x] Add patientPhone column to skinAnalyses database table
+- [x] Display phone number on lead dashboard cards with clickable tel: link (green, searchable)
+- [x] Phone number included in lead scoring (hasPhone signal) and API responses

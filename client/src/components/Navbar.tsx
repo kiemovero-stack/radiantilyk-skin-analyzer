@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { cn } from "@/lib/utils";
-import { Sparkles, Menu, X, History, LogOut } from "lucide-react";
+import { Sparkles, Menu, X, History, LogOut, BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 
@@ -14,7 +14,12 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/analyze", label: "Analyze" },
-    ...(isAuthenticated ? [{ href: "/history", label: "History" }] : []),
+    ...(isAuthenticated
+      ? [
+          { href: "/history", label: "History" },
+          { href: "/leads", label: "Leads" },
+        ]
+      : []),
   ];
 
   return (

@@ -29,6 +29,7 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   patientFirstName: varchar("patientFirstName", { length: 128 }).notNull().default(""),
   patientLastName: varchar("patientLastName", { length: 128 }).notNull().default(""),
   patientEmail: varchar("patientEmail", { length: 320 }).notNull().default(""),
+  patientPhone: varchar("patientPhone", { length: 32 }).notNull().default(""),
   patientDob: varchar("patientDob", { length: 16 }).notNull().default(""),
   imageUrl: text("imageUrl").notNull(),
   report: json("report").notNull(),

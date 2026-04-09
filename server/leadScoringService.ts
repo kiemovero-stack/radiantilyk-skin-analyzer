@@ -50,6 +50,8 @@ interface ScoringInput {
   scarTreatmentCount: number;
   /** Whether a valid email was provided */
   hasEmail: boolean;
+  /** Whether a phone number was provided */
+  hasPhone: boolean;
   /** Whether DOB was provided */
   hasDob: boolean;
   /** Number of images uploaded */
@@ -109,13 +111,13 @@ export function calculateLeadScore(input: ScoringInput): LeadScoreDetails {
       : "No scars detected",
   });
 
-  // 4. Contact Information (0-10 points)
-  const contactPoints = (input.hasEmail ? 7 : 0) + (input.hasDob ? 3 : 0);
+  // 4. Contact Information (0-15 points)
+  const contactPoints = (input.hasEmail ? 5 : 0) + (input.hasPhone ? 5 : 0) + (input.hasDob ? 5 : 0);
   signals.push({
     name: "Contact Info Provided",
     points: contactPoints,
-    maxPoints: 10,
-    description: `${input.hasEmail ? "Email ✓" : "No email"} ${input.hasDob ? "DOB ✓" : ""}`.trim(),
+    maxPoints: 15,
+    description: `${input.hasEmail ? "Email ✓" : "No email"} ${input.hasPhone ? "Phone ✓" : "No phone"} ${input.hasDob ? "DOB ✓" : ""}`.trim(),
   });
 
   // 5. Engagement Depth (0-10 points)
@@ -194,6 +196,7 @@ export function buildScoringInput(record: {
   skinHealthScore: number | null;
   report: any;
   patientEmail: string;
+  patientPhone?: string;
   patientDob: string;
   imageUrl: string;
 }): ScoringInput {
@@ -208,6 +211,7 @@ export function buildScoringInput(record: {
     hasScarDetection: scarTreatments.length > 0,
     scarTreatmentCount: scarTreatments.length,
     hasEmail: !!record.patientEmail && record.patientEmail.includes("@"),
+    hasPhone: !!record.patientPhone && record.patientPhone.length >= 7,
     hasDob: !!record.patientDob && record.patientDob.length > 0,
     imageCount: record.imageUrl ? 1 : 0, // We store only the first URL, but could be multiple
     hasReferralCode: false, // Will be enriched by the caller

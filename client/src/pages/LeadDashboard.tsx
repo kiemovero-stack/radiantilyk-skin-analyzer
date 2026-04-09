@@ -56,6 +56,7 @@ interface Lead {
   patientFirstName: string;
   patientLastName: string;
   patientEmail: string;
+  patientPhone: string;
   patientDob: string | null;
   skinHealthScore: number | null;
   skinType: string;
@@ -262,8 +263,9 @@ function LeadCard({
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!lead.patientEmail) return;
-    // We don't have phone numbers, so we'll open the modal to mark as contacted via call
+    if (lead.patientPhone) {
+      window.open(`tel:${lead.patientPhone}`, "_self");
+    }
     setShowModal("call");
   };
 
@@ -352,11 +354,20 @@ function LeadCard({
                 )}
                 <StarRating stars={score.stars} />
               </div>
-              <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+              <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Mail className="w-3 h-3" />
                   {lead.patientEmail}
                 </span>
+                {lead.patientPhone && (
+                  <a
+                    href={`tel:${lead.patientPhone}`}
+                    className="flex items-center gap-1 text-green-600 hover:text-green-700 hover:underline"
+                  >
+                    <Phone className="w-3 h-3" />
+                    {lead.patientPhone}
+                  </a>
+                )}
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {createdDate} {createdTime}
@@ -615,7 +626,8 @@ export default function LeadDashboard() {
     filteredLeads = filteredLeads.filter(
       (l) =>
         `${l.patientFirstName} ${l.patientLastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        l.patientEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        l.patientEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (l.patientPhone && l.patientPhone.includes(searchTerm))
     );
   }
 

@@ -47,6 +47,7 @@ export function registerLeadScoringRoutes(app: Express) {
           skinHealthScore: record.skinHealthScore,
           report: record.report,
           patientEmail: record.patientEmail,
+          patientPhone: record.patientPhone,
           patientDob: record.patientDob,
           imageUrl: record.imageUrl,
         });
@@ -62,6 +63,7 @@ export function registerLeadScoringRoutes(app: Express) {
           patientFirstName: record.patientFirstName,
           patientLastName: record.patientLastName,
           patientEmail: record.patientEmail,
+          patientPhone: record.patientPhone,
           patientDob: record.patientDob,
           skinHealthScore: record.skinHealthScore,
           skinType: record.skinType,
