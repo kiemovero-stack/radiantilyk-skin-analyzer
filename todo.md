@@ -721,3 +721,17 @@
 - [x] Investigate why future aging simulation is no longer displaying on client report
 - [x] Fix root cause and restore simulation functionality (was never added to staff-side Report.tsx)
 - [x] Add future aging simulation section to staff-side Report page (currently only on client report)
+
+## Bug Fix: Nikola Velkov Not Showing in Leads
+- [ ] Investigate why Nikola Velkov is not appearing in the leads page
+- [ ] Fix root cause and restore lead visibility
+
+## Bug Fix: Skin Scores Too High + Missing Accurate Condition Detection
+- [x] Scores are inflated too high — rewrote deduction table with 2x heavier deductions (28 conditions)
+- [x] Client concerns not accurately captured — added MANDATORY concern validation with concern-to-condition and concern-to-treatment mapping
+- [x] Ensure client-selected concerns are MANDATORY to address in conditions and treatments (Absolute Rule #2)
+- [x] Make scoring more conservative — added age-based baseline deductions, capped positive add-backs at +8 max, updated score distribution guidance
+- [x] Add jowls, volume loss, and structural aging as explicit conditions (nasolabial folds, marionette lines, midface descent, submental fullness, dullness added to deduction table)
+- [x] Updated staff prompt (skinPrompt.ts) with same heavier scoring and mandatory concern validation
+- [x] Set ALL photos to high detail on both client and staff analysis (side views were previously low)
+- [x] Added scoring reminder to both client and staff user messages

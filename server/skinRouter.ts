@@ -72,7 +72,7 @@ async function runAnalysisInBackground(
     const angleLabels = imageAngles.join(", ");
     imageContents.push({
       type: "text",
-      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${angleLabels}) comprehensively. Provide a complete skin analysis report following the exact output structure. Be thorough, specific, and avoid generic language. Every treatment recommendation must come from the clinic's service catalog with exact pricing. Remember: at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products.`,
+      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${angleLabels}) comprehensively. Provide a complete skin analysis report following the exact output structure. Be thorough, specific, and avoid generic language. Every treatment recommendation must come from the clinic's service catalog with exact pricing. Remember: at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products.\n\nSCORING REMINDER: Be STRICT and REALISTIC with the skin health score. Apply age-based baseline deductions. Most adults score 60-70. A score above 80 is uncommon. A score above 90 is extremely rare. Do NOT inflate scores — accuracy and clinical credibility are paramount. Show your full step-by-step calculation.`,
     });
 
     for (let i = 0; i < imageUrls.length; i++) {
@@ -84,7 +84,7 @@ async function runAnalysisInBackground(
         type: "image_url",
         image_url: {
           url: imageUrls[i],
-          detail: imageAngles[i] === "front" ? "high" : "low",
+          detail: "high",
         },
       });
     }
