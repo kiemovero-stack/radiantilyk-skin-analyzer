@@ -760,6 +760,20 @@ export default function ClientReport() {
   const report = data.report as SkinAnalysisReport;
   const firstName = data.patientFirstName || "there";
 
+  // Detect if 3-angle analysis was used
+  const allDetectedAngles = new Set<string>();
+  report.conditions?.forEach((c: any) => {
+    if (c.detectedInAngles && Array.isArray(c.detectedInAngles)) {
+      c.detectedInAngles.forEach((a: string) => allDetectedAngles.add(a.toLowerCase()));
+    }
+  });
+  const anglesArray = Array.from(allDetectedAngles);
+  const hasLeftAngle = anglesArray.some(a => a.includes("left"));
+  const hasRightAngle = anglesArray.some(a => a.includes("right"));
+  const hasFrontAngle = anglesArray.some(a => a.includes("front"));
+  const angleCount = (hasFrontAngle ? 1 : 0) + (hasLeftAngle ? 1 : 0) + (hasRightAngle ? 1 : 0);
+  const is3AngleAnalysis = angleCount >= 3;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-white">
       <ReportWatermark />
@@ -919,6 +933,17 @@ export default function ClientReport() {
                   <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">
                     Fitzpatrick Type {report.fitzpatrickType}
                   </span>
+                  {is3AngleAnalysis ? (
+                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-semibold flex items-center gap-1 border border-emerald-400">
+                      <Shield className="w-3 h-3" />
+                      3-Angle Enhanced Accuracy
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium flex items-center gap-1 border border-amber-200">
+                      <Camera className="w-3 h-3" />
+                      {angleCount === 1 ? "Front Only" : `${angleCount}-Angle`} Analysis
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   {report.scoreJustification}

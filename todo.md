@@ -774,3 +774,19 @@
 - [x] Show accuracy callout explaining why concerns matter
 - [x] Show selected concerns summary on photo upload step
 - [x] Allow "Skip — No Concerns" option for quick analyses
+
+## Staff Consultation Conversion Guide
+- [x] Create staff summary/guide for high-converting consultation conversations in layman's terms
+- [x] Address how to discuss skin concerns and analysis report with clients
+- [x] Include conversation framework for closing consultations and getting bookings (5-step framework: Open, Walk Through, Recommend, Handle Objections, Close)
+- [x] Add guide as accessible page in the staff portal (/guide route with nav link)
+
+## Test Fresh Analysis with Concerns
+- [x] Verified staff 3-step flow is properly wired: concerns passed to tRPC mutation → stored in intakeData → included in AI user message with mandatory validation
+- [x] Confirmed concern validation text includes explicit instructions for each concern
+
+## 3-Angle Accuracy Badge
+- [x] Add "3-Angle Enhanced Accuracy" badge (green gradient) to staff Report page when all 3 angles detected
+- [x] Add "3-Angle Enhanced Accuracy" badge (green gradient) to client ClientReport page when all 3 angles detected
+- [x] Show "Front Only" or "2-Angle" badge (amber) when fewer angles used
+- [x] Detection based on detectedInAngles field across all conditions

@@ -35,6 +35,7 @@ import {
   RefreshCw,
   History as HistoryIcon,
   ArrowRight,
+  Camera,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -423,6 +424,20 @@ export default function Report() {
   const intakeData = data.intakeData as { concerns?: string[]; treatmentGoal?: string; treatmentExperience?: string; budget?: string } | null;
   const scoreHistory = (data.scoreHistory as Array<{ score: number; conditionCount: number; conditions: string[]; analyzedAt: string }>) || [];
 
+  // Detect if 3-angle analysis was used by checking detectedInAngles on conditions
+  const allDetectedAngles = new Set<string>();
+  report.conditions?.forEach((c: any) => {
+    if (c.detectedInAngles && Array.isArray(c.detectedInAngles)) {
+      c.detectedInAngles.forEach((a: string) => allDetectedAngles.add(a.toLowerCase()));
+    }
+  });
+  const anglesArray = Array.from(allDetectedAngles);
+  const hasLeftAngle = anglesArray.some(a => a.includes("left"));
+  const hasRightAngle = anglesArray.some(a => a.includes("right"));
+  const hasFrontAngle = anglesArray.some(a => a.includes("front"));
+  const angleCount = (hasFrontAngle ? 1 : 0) + (hasLeftAngle ? 1 : 0) + (hasRightAngle ? 1 : 0);
+  const is3AngleAnalysis = angleCount >= 3;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -621,6 +636,17 @@ export default function Report() {
                   <span className="px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
                     Fitzpatrick Type {report.fitzpatrickType}
                   </span>
+                  {is3AngleAnalysis ? (
+                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-semibold flex items-center gap-1">
+                      <Shield className="w-3 h-3" />
+                      3-Angle Enhanced Accuracy
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium flex items-center gap-1">
+                      <Camera className="w-3 h-3" />
+                      {angleCount === 1 ? "Front Only" : `${angleCount}-Angle`} Analysis
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {report.scoreJustification}
