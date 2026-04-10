@@ -345,6 +345,7 @@ export default function Report() {
   }
 
   const report = data.report as SkinAnalysisReport;
+  const intakeData = data.intakeData as { concerns?: string[]; treatmentGoal?: string; treatmentExperience?: string; budget?: string } | null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -411,17 +412,17 @@ export default function Report() {
                 </div>
 
                 {/* Client Concerns & Intake Data */}
-                {data.intakeData && (
+                {intakeData && (
                   <div className="mt-4 pt-4 border-t border-border/40">
                     {/* Concerns */}
-                    {data.intakeData.concerns && data.intakeData.concerns.length > 0 && (
+                    {intakeData.concerns && intakeData.concerns.length > 0 && (
                       <div className="mb-3">
                         <div className="flex items-center gap-2 mb-2">
                           <Heart className="w-3.5 h-3.5 text-pink-500" />
                           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client Concerns</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {data.intakeData.concerns.map((concern: string, i: number) => (
+                          {intakeData.concerns.map((concern: string, i: number) => (
                             <span key={i} className="px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-400 text-xs font-medium border border-pink-500/20">
                               {concern}
                             </span>
@@ -431,22 +432,22 @@ export default function Report() {
                     )}
                     {/* Treatment Goal, Experience, Budget */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                      {data.intakeData.treatmentGoal && (
+                      {intakeData.treatmentGoal && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Target className="w-3.5 h-3.5 text-blue-400" />
-                          <span className="text-xs"><strong>Goal:</strong> {data.intakeData.treatmentGoal}</span>
+                          <span className="text-xs"><strong>Goal:</strong> {intakeData.treatmentGoal}</span>
                         </div>
                       )}
-                      {data.intakeData.treatmentExperience && (
+                      {intakeData.treatmentExperience && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Briefcase className="w-3.5 h-3.5 text-purple-400" />
-                          <span className="text-xs"><strong>Experience:</strong> {data.intakeData.treatmentExperience}</span>
+                          <span className="text-xs"><strong>Experience:</strong> {intakeData.treatmentExperience}</span>
                         </div>
                       )}
-                      {data.intakeData.budget && (
+                      {intakeData.budget && (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-xs"><strong>Budget:</strong> {data.intakeData.budget}</span>
+                          <span className="text-xs"><strong>Budget:</strong> {intakeData.budget}</span>
                         </div>
                       )}
                     </div>

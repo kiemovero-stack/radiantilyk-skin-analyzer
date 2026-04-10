@@ -44,6 +44,7 @@ import {
   Calendar,
   Info,
   Hourglass,
+  Camera,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "wouter";
@@ -1024,6 +1025,12 @@ export default function ClientReport() {
                   <p className="text-xs text-gray-500 mb-1">
                     Area: {condition.area}
                   </p>
+                  {condition.detectedInAngles && (
+                    <p className="text-[10px] text-purple-500 font-medium mb-1 flex items-center gap-1">
+                      <Camera className="w-3 h-3" />
+                      {condition.detectedInAngles}
+                    </p>
+                  )}
                   <p className="text-sm leading-relaxed text-gray-700">
                     {condition.description}
                   </p>
@@ -1071,6 +1078,12 @@ export default function ClientReport() {
                         {severityLabel[condition.severity as Severity]}
                       </span>
                     </div>
+                    {condition.detectedInAngles && (
+                      <p className="text-[10px] text-purple-500 font-medium mb-1 flex items-center gap-1">
+                        <Camera className="w-3 h-3" />
+                        {condition.detectedInAngles}
+                      </p>
+                    )}
                     <p className="text-sm leading-relaxed text-gray-700">
                       {condition.description}
                     </p>

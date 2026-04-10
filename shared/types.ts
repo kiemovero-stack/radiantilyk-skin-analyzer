@@ -16,6 +16,8 @@ export interface SkinCondition {
   area: string;
   description: string;
   cellularInsight: string;
+  /** Which photo angle(s) this condition was detected in, e.g. 'front view + left side profile' */
+  detectedInAngles?: string;
 }
 
 export interface FacialTreatment {

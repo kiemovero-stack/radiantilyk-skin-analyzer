@@ -163,9 +163,13 @@ async function runClientAnalysisInBackground(
       ? `\n\nThe client's main concerns are: ${concerns.join(", ")}`
       : "";
 
+    const multiAngleInstructions = imageUrls.length > 1
+      ? `\n\nIMPORTANT — MULTI-ANGLE ANALYSIS: You have ${imageUrls.length} photos from different angles (${imageAngles.join(", ")}). You MUST:\n1. Examine EACH photo independently first — note what you see in each angle\n2. Cross-reference findings across angles — conditions confirmed from multiple angles get higher severity\n3. Look for side-view-only findings (jawline laxity, temple hollowing, nasolabial depth, neck lines, scar texture) that the front view cannot show\n4. Check for asymmetry between left and right profiles\n5. In your scoreCalculation, note which angle(s) confirmed each finding\n6. In each condition's detectedInAngles field, specify exactly which photo(s) revealed it`
+      : `\n\nNote: Only a single front view was provided. Your analysis is based on this angle only. Some conditions (jawline laxity, temple hollowing, profile structure) cannot be fully assessed without side views.`;
+
     imageContents.push({
       type: "text",
-      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${imageAngles.join(", ")}) for a client self-assessment.${concernsText}\n\nProvide a complete, easy-to-understand skin analysis. Remember: explain everything in simple language that anyone can understand. Be warm, encouraging, and thorough. Recommend at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products from the catalog. Pay special attention to Fitzpatrick skin type when recommending treatments — some treatments are not suitable for all skin types.`,
+      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${imageAngles.join(", ")}) for a client self-assessment.${concernsText}${multiAngleInstructions}\n\nProvide a complete, easy-to-understand skin analysis. Remember: explain everything in simple language that anyone can understand. Be warm, encouraging, and thorough. Recommend at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products from the catalog. Pay special attention to Fitzpatrick skin type when recommending treatments — some treatments are not suitable for all skin types.`,
     });
 
     for (let i = 0; i < imageUrls.length; i++) {
@@ -177,7 +181,7 @@ async function runClientAnalysisInBackground(
         type: "image_url",
         image_url: {
           url: imageUrls[i],
-          detail: imageAngles[i] === "front" ? "high" : "low",
+          detail: "high",  // ALL angles at high detail for accurate multi-angle cross-referencing
         },
       });
     }

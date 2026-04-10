@@ -699,3 +699,20 @@
 - [x] Add booking probability bars with color-coded indicators to lead cards
 - [x] Show intake data (budget, goals, experience, concerns) on lead cards with high-value indicators
 - [x] Add tier filter (All/Platinum/Gold/Silver/Bronze) and pipeline revenue stats to dashboard
+
+## Skin Score Accuracy Overhaul — Multi-Angle Cross-Referencing
+- [x] Rewrite AI prompt to mandate cross-referencing front + side views for every finding
+- [x] Add per-angle observation protocol (front, left side, right side analyzed independently then merged)
+- [x] Add explicit deduction table: exact point deductions per condition severity (23 condition types with mild/moderate/severe ranges)
+- [x] Require AI to list what it sees in EACH photo separately before combining (3-step protocol)
+- [x] Add asymmetry detection (conditions visible on one side but not front)
+- [x] Add hidden condition detection from side views (jawline, temple, periauricular area, neck lines)
+- [x] Enforce score distribution: no clustering around 65-75, use full 0-100 range with explicit distribution guidance
+- [x] Add detectedInAngles field to condition schema — each finding now attributes which photo angle(s) confirmed it
+- [x] Set ALL photos to high detail (side views were previously low detail, wasting visual data)
+- [x] Add multi-angle instructions to user message (dynamic based on number of photos provided)
+- [x] Update ClientReport UI to show which angle detected each condition (Camera icon + angle text)
+- [x] Update side view labels to "Highly Recommended" with explanation of accuracy benefits
+- [x] Multi-angle severity modifier: conditions confirmed from 2+ angles get higher severity weight
+- [x] Beauty score now leverages side views for structure, symmetry, and youthfulness scoring
+- [x] Fix all TypeScript errors (0 errors)

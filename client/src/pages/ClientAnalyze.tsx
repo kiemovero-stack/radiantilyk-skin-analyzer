@@ -76,19 +76,19 @@ const FACE_ANGLE_CONFIG: AngleConfig[] = [
   },
   {
     key: "left",
-    label: "Left Side",
+    label: "Left Side — Highly Recommended",
     required: false,
     description: "Turn head to show left profile",
     instruction:
-      "Turn your head to the right so the camera sees your LEFT side. Keep your chin level — don't tilt up or down. Show your full profile from forehead to chin.",
+      "Turn your head to the right so the camera sees your LEFT side. Keep your chin level — don't tilt up or down. Show your full profile from forehead to chin. Side views reveal jawline definition, volume loss, and skin texture that front photos miss — adding this makes your analysis significantly more accurate.",
   },
   {
     key: "right",
-    label: "Right Side",
+    label: "Right Side — Highly Recommended",
     required: false,
     description: "Turn head to show right profile",
     instruction:
-      "Turn your head to the left so the camera sees your RIGHT side. Keep your chin level — don't tilt up or down. Show your full profile from forehead to chin.",
+      "Turn your head to the left so the camera sees your RIGHT side. Keep your chin level — don't tilt up or down. Show your full profile from forehead to chin. Adding both side views lets our AI detect asymmetry and hidden concerns for the most accurate score possible.",
   },
 ];
 

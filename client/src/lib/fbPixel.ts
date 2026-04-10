@@ -62,4 +62,7 @@ export const fbPixel = {
 
   /** Lead event — fires when a client completes the full analysis flow */
   lead: (data?: { content_name?: string }) => track("Lead", data),
+
+  /** Generic custom event for one-off tracking */
+  trackCustom,
 };
