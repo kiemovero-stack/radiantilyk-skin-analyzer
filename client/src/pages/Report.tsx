@@ -36,6 +36,7 @@ import {
   History as HistoryIcon,
   ArrowRight,
   Camera,
+  Printer,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -579,14 +580,74 @@ export default function Report() {
               variants={fadeUp}
               className="mb-10 p-6 md:p-8 rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                    <Briefcase className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-amber-900">Staff Consultation Guide</h2>
+                    <p className="text-xs text-amber-600">Review before speaking with client — staff eyes only</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold text-amber-900">Staff Consultation Guide</h2>
-                  <p className="text-xs text-amber-600">Review before speaking with client — staff eyes only</p>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-amber-400 text-amber-700 hover:bg-amber-100 gap-1.5"
+                  onClick={() => {
+                    const patientName = `${data.patientFirstName || ''} ${data.patientLastName || ''}`.trim() || 'Client';
+                    const date = new Date(data.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    const ss = report.staffSummary!;
+                    const tps = report.talkingPoints || [];
+                    const printWindow = window.open('', '_blank');
+                    if (!printWindow) return;
+                    printWindow.document.write(`<!DOCTYPE html><html><head><title>Consultation Guide - ${patientName}</title><style>
+                      * { margin: 0; padding: 0; box-sizing: border-box; }
+                      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px; color: #1a1a1a; font-size: 11px; line-height: 1.4; }
+                      h1 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+                      .subtitle { font-size: 11px; color: #666; margin-bottom: 12px; }
+                      .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; padding-bottom: 3px; border-bottom: 2px solid #f59e0b; color: #92400e; }
+                      .overview { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; }
+                      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+                      .card { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px 10px; }
+                      .card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 3px; }
+                      .card-label.red { color: #b91c1c; }
+                      .card-label.purple { color: #7e22ce; }
+                      .card-label.green { color: #15803d; }
+                      .card-label.blue { color: #1d4ed8; }
+                      .tp { display: flex; gap: 8px; margin-bottom: 6px; padding: 6px 8px; background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px; }
+                      .tp-num { width: 20px; height: 20px; border-radius: 50%; background: #f59e0b; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+                      .tp-topic { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #92400e; margin-bottom: 2px; }
+                      .tp-say { font-style: italic; color: #374151; }
+                      .tp-why { font-size: 9px; color: #d97706; margin-top: 2px; }
+                      .footer { margin-top: 10px; padding-top: 6px; border-top: 1px solid #e5e5e5; font-size: 9px; color: #999; text-align: center; }
+                      @media print { body { padding: 12px; } @page { margin: 0.4in; size: letter; } }
+                    </style></head><body>
+                      <h1>Consultation Guide: ${patientName}</h1>
+                      <div class="subtitle">Analysis Date: ${date} | Score: ${report.skinHealthScore}/100 | ${report.conditions?.length || 0} conditions detected</div>
+                      
+                      <div class="section-title">Quick Overview</div>
+                      <div class="overview">${ss.quickOverview}</div>
+                      
+                      <div class="grid">
+                        <div class="card"><div class="card-label red">\u25cf Lead With This Concern</div>${ss.topPriorityConcern}</div>
+                        <div class="card"><div class="card-label purple">\u25cf Client Emotional State</div>${ss.emotionalState}</div>
+                        <div class="card"><div class="card-label green">\u25cf Budget Approach</div>${ss.budgetApproach}</div>
+                        <div class="card"><div class="card-label blue">\u25cf Closing Strategy</div>${ss.closingStrategy}</div>
+                      </div>
+                      
+                      <div class="section-title">Conversation Flow</div>
+                      ${tps.map((tp: any, i: number) => `<div class="tp"><div class="tp-num">${i+1}</div><div><div class="tp-topic">${tp.topic}</div><div class="tp-say">\u201c${tp.whatToSay}\u201d</div><div class="tp-why">\u2728 ${tp.whyItWorks}</div></div></div>`).join('')}
+                      
+                      <div class="footer">RADIANTILYK AESTHETIC • Staff Consultation Guide • Confidential</div>
+                    </body></html>`);
+                    printWindow.document.close();
+                    setTimeout(() => printWindow.print(), 300);
+                  }}
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Guide
+                </Button>
               </div>
 
               {/* Quick Overview */}

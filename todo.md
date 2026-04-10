@@ -797,3 +797,8 @@
 - [x] Build Staff Summary & Talking Points UI section on staff Report page (amber-bordered card at top, staff-only)
 - [x] Include: quick overview, lead concern, emotional state, budget approach, closing strategy, numbered conversation flow
 - [x] All talking points in layman's terms with exact words to say and why each works
+
+## Print Consultation Guide Button
+- [x] Add "Print Consultation Guide" button to staff Report page (amber outline button with Printer icon)
+- [x] Print-optimized layout: opens new window with clean one-page handout (patient name, date, score, overview, strategy cards, conversation flow)
+- [x] Verified staffSummary + talkingPoints generate on re-analysis (tested with Jennifer Donnelly ID 690002 — 7 talking points generated)
