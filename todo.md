@@ -790,3 +790,10 @@
 - [x] Add "3-Angle Enhanced Accuracy" badge (green gradient) to client ClientReport page when all 3 angles detected
 - [x] Show "Front Only" or "2-Angle" badge (amber) when fewer angles used
 - [x] Detection based on detectedInAngles field across all conditions
+
+## Per-Report Staff Summary & Talking Points
+- [x] Add staffSummary and talkingPoints fields to AI prompt output schema (both client and staff prompts)
+- [x] Update SkinAnalysisReport type to include StaffSummary and TalkingPoint interfaces
+- [x] Build Staff Summary & Talking Points UI section on staff Report page (amber-bordered card at top, staff-only)
+- [x] Include: quick overview, lead concern, emotional state, budget approach, closing strategy, numbered conversation flow
+- [x] All talking points in layman's terms with exact words to say and why each works

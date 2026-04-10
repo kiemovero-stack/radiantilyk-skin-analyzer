@@ -595,6 +595,8 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       "roadmap",
       "summary",
       "beautyScore",
+      "staffSummary",
+      "talkingPoints",
       "disclaimer"
     ],
     additionalProperties: false,
@@ -833,6 +835,33 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
           percentile: { type: "number", description: "What percentile they rank in for their age group (e.g. 85 means top 15%). Be generous — most people 70-95." },
           topStrength: { type: "string", description: "Their #1 best facial feature described in a flattering, shareable way. E.g. 'Striking bone structure', 'Radiant natural glow', 'Beautiful facial symmetry'" },
           shareCaption: { type: "string", description: "A fun, shareable social media caption for their score. E.g. 'My AI beauty score is 87/100 — top 12% for my age! 💫 Get your free analysis at rkaskinai.com'" }
+        }
+      },
+      staffSummary: {
+        type: "object",
+        description: "A concise staff-only summary designed for the provider to quickly review before speaking with the client. Written in simple, non-clinical language so ANY staff member can use it — not just the provider.",
+        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy"],
+        additionalProperties: false,
+        properties: {
+          quickOverview: { type: "string", description: "2-3 sentence summary of this client's skin situation. What are the main issues? What's the overall picture? Write it like you're briefing a colleague: 'This client is a 45-year-old with moderate jowling and volume loss in the midface. Her main concern is looking tired. She'd benefit most from fillers and a skin tightening treatment.'" },
+          topPriorityConcern: { type: "string", description: "The single most impactful concern to lead the conversation with. This should be the concern that (1) the client cares most about AND (2) has the most visible/treatable solution. E.g., 'Jawline laxity — she specifically mentioned this and it's clearly visible from the side view. Leading with Ultherapy or filler would show her you listened.'" },
+          emotionalState: { type: "string", description: "How this client is likely feeling based on their concerns and what they shared. E.g., 'She's probably self-conscious about looking older than she feels. She took the time to upload 3 photos and selected 5 concerns — she's motivated and ready for solutions.'" },
+          budgetApproach: { type: "string", description: "Suggested approach to discussing cost based on the recommended treatments. E.g., 'Start with the most impactful single treatment ($X) and present the full roadmap as a phased plan. If budget is a concern, the facial + skincare combo ($X) is a great entry point.'" },
+          closingStrategy: { type: "string", description: "The best closing approach for this specific client. E.g., 'She's clearly motivated — don't oversell. Show her the before/after simulation, point out the specific areas that would improve, and ask: Would you like to get started with [top treatment] today? We have availability this week.'" }
+        }
+      },
+      talkingPoints: {
+        type: "array",
+        description: "5-7 specific talking points for the staff to use during the consultation. Each one is a ready-to-say sentence or question in plain English. These should flow naturally in a conversation — not sound scripted. Order them in the sequence they should be discussed.",
+        items: {
+          type: "object",
+          required: ["topic", "whatToSay", "whyItWorks"],
+          additionalProperties: false,
+          properties: {
+            topic: { type: "string", description: "Brief label for this talking point. E.g., 'Open with validation', 'Address jowl concern', 'Present treatment option', 'Handle price objection', 'Create urgency', 'Close the booking'" },
+            whatToSay: { type: "string", description: "The actual words the staff member can say, written in first person as if they're speaking to the client. Use simple, warm language. E.g., 'I can see exactly what you mean about your jawline — look at this area here on your report. The good news is this is one of the most treatable concerns we see, and the results are usually pretty dramatic.'" },
+            whyItWorks: { type: "string", description: "Brief note (for the staff member's eyes only) explaining why this talking point is effective. E.g., 'Validates her concern, shows you read the report, and immediately pivots to hope/solution.'" }
+          }
         }
       },
       disclaimer: {

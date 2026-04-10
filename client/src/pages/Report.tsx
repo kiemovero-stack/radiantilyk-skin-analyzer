@@ -571,6 +571,89 @@ export default function Report() {
             </div>
           </motion.div>
 
+          {/* Staff Summary & Talking Points */}
+          {report.staffSummary && (
+            <motion.section
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="mb-10 p-6 md:p-8 rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-amber-900">Staff Consultation Guide</h2>
+                  <p className="text-xs text-amber-600">Review before speaking with client — staff eyes only</p>
+                </div>
+              </div>
+
+              {/* Quick Overview */}
+              <div className="mb-5 p-4 rounded-xl bg-white/80 border border-amber-200">
+                <h3 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                  <Eye className="w-4 h-4" /> Quick Overview
+                </h3>
+                <p className="text-sm text-gray-700 leading-relaxed">{report.staffSummary.quickOverview}</p>
+              </div>
+
+              {/* Key Strategy Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                <div className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                  <h3 className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4" /> Lead With This Concern
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed">{report.staffSummary.topPriorityConcern}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                  <h3 className="text-sm font-semibold text-purple-700 mb-2 flex items-center gap-2">
+                    <Heart className="w-4 h-4" /> Client Emotional State
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed">{report.staffSummary.emotionalState}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                  <h3 className="text-sm font-semibold text-green-700 mb-2 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" /> Budget Approach
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed">{report.staffSummary.budgetApproach}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                  <h3 className="text-sm font-semibold text-blue-700 mb-2 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> Closing Strategy
+                  </h3>
+                  <p className="text-sm text-gray-700 leading-relaxed">{report.staffSummary.closingStrategy}</p>
+                </div>
+              </div>
+
+              {/* Talking Points */}
+              {report.talkingPoints && report.talkingPoints.length > 0 && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4" /> Conversation Flow — Say This
+                  </h3>
+                  <div className="space-y-3">
+                    {report.talkingPoints.map((tp: any, i: number) => (
+                      <div key={i} className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                        <div className="flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            {i + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">{tp.topic}</div>
+                            <p className="text-sm text-gray-800 leading-relaxed italic">“{tp.whatToSay}”</p>
+                            <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" /> {tp.whyItWorks}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.section>
+          )}
+
           {/* Section 1: Score */}
           <motion.section
             initial="hidden"

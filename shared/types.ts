@@ -98,6 +98,20 @@ export interface RoadmapPhase {
   expectedOutcome: string;
 }
 
+export interface StaffSummary {
+  quickOverview: string;
+  topPriorityConcern: string;
+  emotionalState: string;
+  budgetApproach: string;
+  closingStrategy: string;
+}
+
+export interface TalkingPoint {
+  topic: string;
+  whatToSay: string;
+  whyItWorks: string;
+}
+
 export interface SkinAnalysisReport {
   // Section 1: Score
   skinHealthScore: number;
@@ -136,6 +150,26 @@ export interface SkinAnalysisReport {
   // Meta
   summary: string;
   disclaimer: string;
+
+  // Staff-only consultation tools
+  staffSummary?: StaffSummary;
+  talkingPoints?: TalkingPoint[];
+
+  // Score calculation (internal)
+  scoreCalculation?: string;
+
+  // Beauty Score
+  beautyScore?: {
+    overall: number;
+    symmetry: number;
+    glow: number;
+    texture: number;
+    structure: number;
+    youthfulness: number;
+    percentile: number;
+    topStrength: string;
+    shareCaption: string;
+  };
 }
 
 export interface PatientInfo {

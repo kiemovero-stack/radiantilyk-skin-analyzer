@@ -308,6 +308,8 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       "scarTreatments",
       "roadmap",
       "summary",
+      "staffSummary",
+      "talkingPoints",
       "disclaimer"
     ],
     additionalProperties: false,
@@ -528,6 +530,33 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       summary: {
         type: "string",
         description: "Executive summary of the analysis - premium, intelligent, and specific to this person's skin"
+      },
+      staffSummary: {
+        type: "object",
+        description: "A concise staff-only summary designed for the provider to quickly review before speaking with the client. Written in simple, non-clinical language so ANY staff member can use it.",
+        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy"],
+        additionalProperties: false,
+        properties: {
+          quickOverview: { type: "string", description: "2-3 sentence summary of this client's skin situation. What are the main issues? What's the overall picture? Write it like you're briefing a colleague." },
+          topPriorityConcern: { type: "string", description: "The single most impactful concern to lead the conversation with — the one the client cares most about AND has the most visible/treatable solution." },
+          emotionalState: { type: "string", description: "How this client is likely feeling based on their concerns. Helps staff approach with empathy." },
+          budgetApproach: { type: "string", description: "Suggested approach to discussing cost. Start with highest-impact single treatment, then present phased plan. Include entry-level option if budget is a concern." },
+          closingStrategy: { type: "string", description: "The best closing approach for this specific client based on their motivation level and concerns." }
+        }
+      },
+      talkingPoints: {
+        type: "array",
+        description: "5-7 specific talking points for staff to use during the consultation. Ready-to-say sentences in plain English, ordered in conversation sequence.",
+        items: {
+          type: "object",
+          required: ["topic", "whatToSay", "whyItWorks"],
+          additionalProperties: false,
+          properties: {
+            topic: { type: "string", description: "Brief label: 'Open with validation', 'Address main concern', 'Present treatment', 'Handle objection', 'Create urgency', 'Close the booking'" },
+            whatToSay: { type: "string", description: "Actual words staff can say, written in first person as if speaking to the client. Simple, warm language." },
+            whyItWorks: { type: "string", description: "Brief note for staff explaining why this talking point is effective." }
+          }
+        }
       },
       disclaimer: {
         type: "string",
