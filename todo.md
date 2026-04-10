@@ -679,3 +679,8 @@
 - [x] Show client's intake data (treatment goals, experience, budget) on staff-side report
 - [x] Show concerns summary in staff history list (up to 4 badges per card)
 - [x] Build "See Your Future Self" CTA section on client landing page (dark gradient, two comparison cards, FB Pixel tracking)
+
+## Aging Simulation Realism Improvement
+- [x] Rewrite aging simulation prompts for photorealistic, human-looking results
+- [x] Add explicit anti-AI-artifact instructions (no plastic look, no uncanny valley)
+- [x] Emphasize natural aging patterns, real skin texture, and photographic quality
