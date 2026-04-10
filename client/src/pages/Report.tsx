@@ -33,6 +33,8 @@ import {
   Phone,
   Briefcase,
   RefreshCw,
+  History as HistoryIcon,
+  ArrowRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -419,6 +421,7 @@ export default function Report() {
 
   const report = data.report as SkinAnalysisReport;
   const intakeData = data.intakeData as { concerns?: string[]; treatmentGoal?: string; treatmentExperience?: string; budget?: string } | null;
+  const scoreHistory = (data.scoreHistory as Array<{ score: number; conditionCount: number; conditions: string[]; analyzedAt: string }>) || [];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -561,6 +564,50 @@ export default function Report() {
             className="mb-10 p-6 md:p-8 rounded-2xl border border-border/60 bg-card"
           >
             <SectionHeader icon={Activity} number="01" title="Skin Health Score" />
+            {scoreHistory.length > 0 && (
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <HistoryIcon className="w-4 h-4 text-blue-600" />
+                  <h3 className="font-semibold text-sm text-blue-800">Score History</h3>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {scoreHistory.map((entry, i) => {
+                    const isLast = i === scoreHistory.length - 1;
+                    return (
+                      <div key={i} className="flex items-center gap-2">
+                        <div className="text-center">
+                          <div className={`text-lg font-bold ${isLast ? 'text-gray-400 line-through' : 'text-gray-500'}`}>
+                            {entry.score ?? '—'}
+                          </div>
+                          <div className="text-[10px] text-gray-400">
+                            {new Date(entry.analyzedAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-400" />
+                      </div>
+                    );
+                  })}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {report.skinHealthScore}
+                    </div>
+                    <div className="text-[10px] text-green-600 font-medium">Current</div>
+                  </div>
+                  {scoreHistory.length > 0 && (() => {
+                    const lastPrevious = scoreHistory[scoreHistory.length - 1].score;
+                    const diff = report.skinHealthScore - (lastPrevious ?? 0);
+                    if (lastPrevious == null || diff === 0) return null;
+                    return (
+                      <div className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
+                        diff > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {diff > 0 ? `+${diff}` : diff} points
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
             <div className="flex flex-col md:flex-row items-center gap-8">
               <ScoreGauge score={report.skinHealthScore} />
               <div className="flex-1 text-center md:text-left">

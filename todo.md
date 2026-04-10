@@ -747,3 +747,11 @@
 - [x] Both endpoints auto-detect left/right images from URL patterns
 - [x] Both endpoints pull concerns from intakeData for mandatory concern validation
 - [x] Re-analysis clears old simulation/aging images so they regenerate with new findings
+
+## Score History Tracking
+- [x] Add scoreHistory JSON column to skinAnalyses table (migration applied)
+- [x] Update re-analyze endpoints to save previous score/conditions before overwriting (both client + staff)
+- [x] Display "Previous score → New score" on staff Report page (blue gradient card with timeline)
+- [x] Display "Previous score → New score" on client ClientReport page (purple gradient card with "Your Score Journey")
+- [x] Show score change indicator (+/- points badge in green/red)
+- [x] Backfilled Jennifer Donnelly's history: 96 → 59 (-37 points)

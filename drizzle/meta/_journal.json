@@ -36,6 +36,13 @@
       "when": 1775698215077,
       "tag": "0004_sharp_killer_shrike",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1775861540835,
+      "tag": "0005_foamy_havok",
+      "breakpoints": true
     }
   ]
 }

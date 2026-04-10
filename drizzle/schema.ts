@@ -53,6 +53,8 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   contactMethod: varchar("contactMethod", { length: 32 }),
   /** JSON object with intake form data: concerns, treatmentGoal, treatmentExperience, budget */
   intakeData: json("intakeData"),
+  /** JSON array of previous analysis scores: [{ score, conditionCount, analyzedAt, conditions }] */
+  scoreHistory: json("scoreHistory"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

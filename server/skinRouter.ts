@@ -461,11 +461,27 @@ export const skinRouter = router({
         }
       }
 
-      // Mark as re-processing
+      // Save current score to history before overwriting
+      const previousReport = record.report as any;
+      const previousScore = record.skinHealthScore;
+      const previousConditions = previousReport?.conditions?.map((c: any) => c.name) || [];
+      const existingHistory = (record.scoreHistory as any[]) || [];
+      const updatedHistory = [
+        ...existingHistory,
+        {
+          score: previousScore,
+          conditionCount: previousConditions.length,
+          conditions: previousConditions.slice(0, 6),
+          analyzedAt: new Date().toISOString(),
+        },
+      ];
+
+      // Mark as re-processing and save score history
       await db
         .update(skinAnalyses)
         .set({
           status: "processing",
+          scoreHistory: updatedHistory,
           simulationImages: null,
           agingImages: null,
         })
