@@ -19,11 +19,33 @@ import {
   Mail,
   Calendar,
   LogIn,
+  CheckCircle2,
+  Heart,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
+
+// ── Skin Concerns (same as client portal) ────────────────────────────────
+const SKIN_CONCERNS = [
+  { id: "acne", label: "Acne & Breakouts", emoji: "🔴" },
+  { id: "wrinkles", label: "Wrinkles & Fine Lines", emoji: "〰️" },
+  { id: "dark_spots", label: "Dark Spots & Uneven Tone", emoji: "🟤" },
+  { id: "sagging", label: "Sagging & Loss of Volume", emoji: "⬇️" },
+  { id: "dryness", label: "Dryness & Dehydration", emoji: "💧" },
+  { id: "oiliness", label: "Excess Oil & Shine", emoji: "✨" },
+  { id: "redness", label: "Redness & Sensitivity", emoji: "🌡️" },
+  { id: "scarring", label: "Acne Scars & Texture", emoji: "🔲" },
+  { id: "pores", label: "Large Pores", emoji: "⭕" },
+  { id: "dark_circles", label: "Under-Eye Dark Circles", emoji: "👁️" },
+  { id: "sun_damage", label: "Sun Damage & Age Spots", emoji: "☀️" },
+  { id: "lips", label: "Lip Volume & Shape", emoji: "👄" },
+  { id: "jawline", label: "Jawline & Chin Definition", emoji: "💎" },
+  { id: "body_skin", label: "Body Skin Concerns", emoji: "🧴" },
+  { id: "general", label: "General Anti-Aging", emoji: "⏳" },
+  { id: "other", label: "Other / Not Sure", emoji: "❓" },
+];
 
 type AngleKey = "front" | "left" | "right";
 
@@ -77,14 +99,18 @@ export default function Analyze() {
   const { isAuthenticated, loading } = useAuth();
   const [, navigate] = useLocation();
 
-  // Step management: 1 = patient info, 2 = photo upload
-  const [step, setStep] = useState<1 | 2>(1);
+  // Step management: 1 = patient info, 2 = concerns, 3 = photo upload
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Patient info state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
+
+  // Concerns state
+  const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
+  const [otherConcern, setOtherConcern] = useState("");
 
   // Photo state — now stores File objects instead of base64
   const [photos, setPhotos] = useState<Record<AngleKey, AnglePhoto>>({
@@ -180,6 +206,12 @@ export default function Analyze() {
     if (camRef) camRef.value = "";
   };
 
+  const toggleConcern = (id: string) => {
+    setSelectedConcerns((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
   const hasFrontPhoto = !!photos.front.file;
   const photoCount = [photos.front, photos.left, photos.right].filter((p) => p.file).length;
 
@@ -187,12 +219,16 @@ export default function Analyze() {
 
   const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
-  const handleNextStep = () => {
+  const handleNextToStep2 = () => {
     if (!firstName.trim()) { toast.error("First name is required"); return; }
     if (!lastName.trim()) { toast.error("Last name is required"); return; }
     if (!email.trim() || !validateEmail(email)) { toast.error("Valid email is required"); return; }
     if (!dob) { toast.error("Date of birth is required"); return; }
     setStep(2);
+  };
+
+  const handleNextToStep3 = () => {
+    setStep(3);
   };
 
   const handleAnalyze = async () => {
@@ -224,12 +260,21 @@ export default function Analyze() {
 
       setAnalysisProgress("Starting AI analysis...");
 
+      // Build concern labels
+      const concernLabels = selectedConcerns.map(
+        (id) => SKIN_CONCERNS.find((c) => c.id === id)?.label || id
+      );
+      if (otherConcern.trim()) {
+        concernLabels.push(otherConcern.trim());
+      }
+
       // Step 2: Start analysis with S3 URLs (returns immediately)
       const analyzeResult = await analyzeMutation.mutateAsync({
         patientFirstName: firstName.trim(),
         patientLastName: lastName.trim(),
         patientEmail: email.trim(),
         patientDob: dob,
+        concerns: concernLabels.length > 0 ? concernLabels : undefined,
         imageUrls: uploadResult.uploadedImages.map((img) => ({
           url: img.url,
           angle: img.angle as "front" | "left" | "right",
@@ -291,8 +336,9 @@ export default function Analyze() {
 
       <main className="flex-1 container py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
+     
           {/* Step Indicator */}
-          <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
             <div className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
               step === 1 ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
@@ -303,10 +349,18 @@ export default function Analyze() {
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
             <div className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
-              step === 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              step === 2 ? "bg-primary text-primary-foreground" : step > 2 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+            )}>
+              <Heart className="w-4 h-4" />
+              <span>2. Concerns</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <div className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors",
+              step === 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             )}>
               <Camera className="w-4 h-4" />
-              <span>2. Upload Photos</span>
+              <span>3. Upload Photos</span>
             </div>
           </div>
 
@@ -381,17 +435,117 @@ export default function Analyze() {
                   size="lg"
                   className="w-full font-semibold mt-4"
                   disabled={!isPatientFormValid}
-                  onClick={handleNextStep}
+                  onClick={handleNextToStep2}
                 >
-                  Continue to Photo Upload
+                  Continue to Concerns
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Step 2: Photo Upload */}
+          {/* Step 2: Skin Concerns */}
           {step === 2 && (
+            <div className="max-w-2xl mx-auto">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  Patient Concerns
+                </h1>
+                <p className="mt-3 text-muted-foreground">
+                  Select the patient's skin concerns. This dramatically improves analysis accuracy — the AI will specifically evaluate each selected concern.
+                </p>
+              </div>
+
+              {/* Back button */}
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back to patient info
+              </button>
+
+              {/* Accuracy callout */}
+              <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1">Why This Matters</h3>
+                    <p className="text-sm text-muted-foreground">
+                      When concerns are selected, the AI is <strong>required</strong> to evaluate each one — confirming, acknowledging, or ruling it out with evidence. Without concerns, the AI may miss issues the patient cares about most.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                {SKIN_CONCERNS.map((concern) => (
+                  <button
+                    key={concern.id}
+                    onClick={() => toggleConcern(concern.id)}
+                    className={cn(
+                      "flex items-center gap-3 p-4 rounded-xl border text-left transition-all",
+                      selectedConcerns.includes(concern.id)
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                        : "border-border/60 bg-card hover:border-primary/30 hover:bg-accent/50"
+                    )}
+                  >
+                    <span className="text-xl">{concern.emoji}</span>
+                    <span className="text-sm font-medium">
+                      {concern.label}
+                    </span>
+                    {selectedConcerns.includes(concern.id) && (
+                      <CheckCircle2 className="w-4 h-4 text-primary ml-auto shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {selectedConcerns.includes("other") && (
+                <div className="mb-6">
+                  <Label className="mb-2">
+                    Describe the concern:
+                  </Label>
+                  <Input
+                    placeholder="Describe the patient's concern..."
+                    value={otherConcern}
+                    onChange={(e) => setOtherConcern(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {selectedConcerns.length > 0 && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  {selectedConcerns.length} concern{selectedConcerns.length !== 1 ? "s" : ""} selected — the AI will specifically evaluate each one.
+                </p>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 font-semibold"
+                  onClick={handleNextToStep3}
+                >
+                  Skip — No Concerns
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button
+                  size="lg"
+                  className="flex-1 font-semibold"
+                  onClick={handleNextToStep3}
+                  disabled={selectedConcerns.length === 0}
+                >
+                  Continue with {selectedConcerns.length} Concern{selectedConcerns.length !== 1 ? "s" : ""}
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Photo Upload */}
+          {step === 3 && (
             <>
               <div className="text-center mb-8">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
@@ -402,16 +556,38 @@ export default function Analyze() {
                 </p>
               </div>
 
-              {/* Back to patient info */}
+              {/* Back to concerns */}
               {!isAnalyzing && (
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  Back to patient info
+                  Back to concerns
                 </button>
+              )}
+
+              {/* Selected concerns summary */}
+              {selectedConcerns.length > 0 && (
+                <div className="mb-6 p-3 rounded-xl bg-muted/50 border border-border/40">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Selected concerns:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedConcerns.map((id) => {
+                      const concern = SKIN_CONCERNS.find((c) => c.id === id);
+                      return concern ? (
+                        <span key={id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                          {concern.emoji} {concern.label}
+                        </span>
+                      ) : null;
+                    })}
+                    {otherConcern.trim() && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        ❓ {otherConcern.trim()}
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
 
               {/* Photo Upload Grid */}
@@ -461,7 +637,7 @@ export default function Analyze() {
                         <FaceSilhouette angle={key} className="text-muted-foreground/40 mb-3" />
                         <span className="text-sm font-medium text-foreground">{label}</span>
                         <span className="text-xs text-muted-foreground mt-1">
-                          {required ? "Required" : "Optional"}
+                          {required ? "Required" : "Highly Recommended"}
                         </span>
                         <p className="text-xs text-muted-foreground/70 mt-2 text-center">{description}</p>
 
@@ -571,7 +747,7 @@ export default function Analyze() {
                       <li>For the front view, look directly at the camera</li>
                       <li>For side views, turn your head 90 degrees to show your profile</li>
                       <li>Ensure images are in focus and well-lit</li>
-                      <li>Adding all 3 angles gives the most comprehensive analysis</li>
+                      <li><strong>Adding all 3 angles gives the most comprehensive and accurate analysis</strong></li>
                     </ul>
                   </div>
                 </div>

@@ -755,3 +755,22 @@
 - [x] Display "Previous score → New score" on client ClientReport page (purple gradient card with "Your Score Journey")
 - [x] Show score change indicator (+/- points badge in green/red)
 - [x] Backfilled Jennifer Donnelly's history: 96 → 59 (-37 points)
+
+## Restore Re-analyze Button + Comprehensive Accuracy Improvements
+- [x] Restore Re-analyze button on staff Report page (rolled back to checkpoint c46222a5)
+- [x] Two-Pass Clinical Analysis Protocol added to both client and staff prompts (Pass 1: observe, Pass 2: validate)
+- [x] Severity Calibration Anchors added — concrete visual descriptions for mild/moderate/severe per condition
+- [x] Visual evidence requirement — each condition must describe specific visual markers (color, shape, depth, pattern)
+- [x] Differential reasoning — AI must explain why it's condition X and not condition Y for ambiguous findings
+- [x] Final Accuracy Checklist — 6-point validation before submitting results
+- [x] Anti-hallucination reinforcement strengthened in both prompts
+- [x] Updated scoreCalculation field to require two-pass evidence documentation
+
+## Staff-Side Concern Intake
+- [x] Add concern selection step to staff Analyze page (3-step flow: Patient Info → Concerns → Photos)
+- [x] Add concerns to tRPC analyze mutation input schema (z.array(z.string()).optional())
+- [x] Pass concerns through runAnalysisInBackground to AI user message
+- [x] Store concerns in intakeData for re-analysis
+- [x] Show accuracy callout explaining why concerns matter
+- [x] Show selected concerns summary on photo upload step
+- [x] Allow "Skip — No Concerns" option for quick analyses

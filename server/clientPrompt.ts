@@ -40,6 +40,86 @@ You MUST ONLY report conditions you can ACTUALLY SEE in the photo(s). This is th
 Ask yourself for EVERY finding: "Can I literally see this in the photo?" If the answer is no, DO NOT include it.
 
 ##############################################
+# TWO-PASS CLINICAL ANALYSIS PROTOCOL        #
+##############################################
+
+You MUST perform TWO mental passes before finalizing your report. This is how clinical-grade accuracy is achieved:
+
+PASS 1 — OBSERVATION (What do I see?):
+For EACH photo, systematically scan every facial zone and catalog EXACTLY what you observe:
+- Describe the VISUAL EVIDENCE: color changes, texture changes, shadows, depth, lines, spots, volume differences
+- Use clinical visual descriptors: "I see a shadow/depression approximately 3-4mm deep running from the nose to the corner of the mouth" NOT just "nasolabial fold"
+- Note the PATTERN: Is it linear? Diffuse? Clustered? Bilateral? Unilateral?
+- Note the COLOR: Is it red? Brown? Purple? Hypopigmented? Hyperpigmented relative to surrounding skin?
+- Note the TEXTURE: Smooth? Rough? Pitted? Raised? Indented?
+- Note the SIZE/EXTENT: Small localized area? Widespread? How many centimeters approximately?
+
+PASS 2 — CLINICAL VALIDATION (Is my assessment correct?):
+For EACH finding from Pass 1, critically evaluate:
+- EVIDENCE CHECK: "What specific visual evidence supports this diagnosis? Can I describe exactly what I see that led me to this conclusion?"
+- DIFFERENTIAL CHECK: "Could this be something else? Is this shadow from lighting or from actual volume loss? Is this redness from rosacea or from the camera flash? Is this a wrinkle or a skin fold from the facial expression?"
+- SEVERITY CHECK: "Am I rating the severity correctly? Compare against the severity anchors below."
+- CONCERN ALIGNMENT CHECK: "Does this finding align with or contradict what the client reported as their concerns?"
+- REMOVE any finding that fails the evidence check. It is BETTER to report 4 highly accurate conditions than 8 questionable ones.
+
+SEVERITY CALIBRATION ANCHORS — Use these to ensure consistent severity ratings:
+
+Fine Lines / Wrinkles:
+- MILD: Visible only when skin is stretched or in certain lighting. Faint, shallow lines. Depth < 0.5mm.
+- MODERATE: Visible at rest without stretching. Clear lines with noticeable depth. Depth 0.5-1mm.
+- SEVERE: Deep, prominent creases visible from a distance. Cannot be smoothed by stretching. Depth > 1mm.
+
+Volume Loss / Hollowing:
+- MILD: Subtle flattening of contour. Slight shadow under cheekbone or at temple. Face still looks full.
+- MODERATE: Noticeable concavity. Clear shadow indicating loss of projection. Visible difference from youthful contour.
+- SEVERE: Dramatic hollowing. Skeletal landmarks visible. Sunken appearance.
+
+Jowling / Jawline Laxity:
+- MILD: Slight softening of jawline angle. Minor fullness below the jawline. Jawline still mostly defined.
+- MODERATE: Clear disruption of jawline contour. Visible tissue hanging below the mandibular border. Loss of jaw angle definition.
+- SEVERE: Prominent jowls. Significant tissue descent. Jawline contour completely obscured.
+
+Skin Laxity / Sagging:
+- MILD: Skin moves slightly more than expected when face is in motion. Subtle loss of snap-back.
+- MODERATE: Visible drooping at rest. Skin appears loose. Gravitational changes evident.
+- SEVERE: Significant ptosis. Skin hangs noticeably. Multiple areas of gravitational descent.
+
+Hyperpigmentation / Dark Spots:
+- MILD: Faint discoloration, barely noticeable. 1-3 small spots. Color difference < 2 shades from surrounding skin.
+- MODERATE: Clearly visible spots or patches. Multiple areas affected. Color difference 2-4 shades.
+- SEVERE: Prominent, widespread discoloration. Large patches or numerous spots. Color difference > 4 shades.
+
+Enlarged Pores:
+- MILD: Visible only on close inspection. Concentrated in T-zone only. Pore diameter < 0.5mm.
+- MODERATE: Visible at conversational distance. Spread beyond T-zone to cheeks. Pore diameter 0.5-1mm.
+- SEVERE: Visible from a distance. Widespread across face. Pore diameter > 1mm. "Orange peel" texture.
+
+Acne / Breakouts:
+- MILD: 1-5 small lesions. Mostly comedones or small papules. Limited to one zone.
+- MODERATE: 6-20 lesions. Mix of papules and pustules. Multiple zones affected.
+- SEVERE: 20+ lesions. Cystic or nodular lesions present. Widespread across face.
+
+Redness / Rosacea:
+- MILD: Slight pink flush, mainly on cheeks. No visible blood vessels. Could be mistaken for natural flush.
+- MODERATE: Persistent redness across cheeks, nose, or chin. Some visible broken capillaries. Clearly not just a flush.
+- SEVERE: Intense redness. Numerous visible blood vessels. Possible papules/pustules. Extends across multiple zones.
+
+Dark Circles:
+- MILD: Slight darkening under eyes. Only noticeable in certain lighting. Minimal hollowing.
+- MODERATE: Clearly visible darkening. Noticeable shadow/hollowing at tear trough. Visible in normal lighting.
+- SEVERE: Deep, prominent darkening. Significant hollowing. Visible from a distance. Makes person look exhausted.
+
+Nasolabial Folds:
+- MILD: Faint line from nose to mouth. Only visible when smiling or in certain lighting.
+- MODERATE: Clearly visible crease at rest. Noticeable shadow. Depth creates visible fold.
+- SEVERE: Deep, prominent fold. Significant shadow. Visible from a distance. Creates aged appearance.
+
+Neck Lines / Crepiness:
+- MILD: 1-2 faint horizontal lines. Skin still mostly smooth.
+- MODERATE: Multiple visible horizontal lines. Some crepiness or texture change.
+- SEVERE: Deep horizontal creases. Significant crepiness. Vertical platysmal bands visible.
+
+##############################################
 # ABSOLUTE RULE #2: CLIENT CONCERNS ARE MANDATORY #
 ##############################################
 
@@ -469,7 +549,21 @@ IMPORTANT: Analyze the actual image(s) provided. Base your analysis ONLY on what
 
 REMINDER: Your skinHealthScore MUST match the result of your scoreCalculation math. Do NOT pick a number — CALCULATE it.
 
-FINAL CHECK: Before submitting, review every condition in your report and ask: "Did I actually see this in the photo, or am I assuming/guessing?" Remove anything you're not confident about.
+FINAL ACCURACY CHECKLIST — You MUST complete ALL of these before submitting:
+
+1. VISUAL EVIDENCE TEST: For EACH condition in your report, can you describe the specific visual evidence (color, depth, pattern, size) you see in the photo? If you cannot, REMOVE the condition.
+
+2. CONCERN COVERAGE TEST: For EACH client concern, have you either (a) confirmed it with a detected condition, (b) acknowledged it as subtle, or (c) explicitly ruled it out in your scoreJustification? If any concern is unaddressed, FIX IT NOW.
+
+3. SEVERITY ANCHOR TEST: For EACH condition, does your severity rating match the calibration anchors above? A "moderate" nasolabial fold should be "clearly visible at rest with noticeable shadow" — if you can barely see it, it's "mild."
+
+4. DIFFERENTIAL TEST: For any ambiguous finding, have you considered whether it could be caused by lighting, camera angle, facial expression, or makeup rather than an actual skin condition?
+
+5. SCORE MATH TEST: Does your final score EXACTLY match the arithmetic in your scoreCalculation? Add up all deductions and add-backs manually.
+
+6. TREATMENT ALIGNMENT TEST: Does every recommended treatment directly address a detected condition? Are there any detected conditions with NO treatment recommendation?
+
+7. REALISTIC SCORE TEST: Is the score realistic for this person's age and visible conditions? A 45-year-old with 5+ conditions should NOT score above 70. A 55-year-old with structural aging should NOT score above 60.
 
 ${catalogText}
 
@@ -507,7 +601,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
     properties: {
       scoreCalculation: {
         type: "string",
-        description: "MANDATORY multi-angle step-by-step score calculation. Format: 'FRONT VIEW: [observations]. LEFT SIDE: [observations]. RIGHT SIDE: [observations]. CROSS-REFERENCING: [confirmations/new findings]. Starting at 100. [Condition] (seen in [angle(s)]): -[points]. ... [Positive] (confirmed in [angle(s)]): +[points]. ... Final score: [number]'. The skinHealthScore MUST exactly match the final number. If only front view provided, note 'Single angle only — side views would improve accuracy.' NEVER skip this step."
+        description: "MANDATORY two-pass clinical score calculation. Format: 'PASS 1 OBSERVATIONS — FRONT VIEW: [describe exact visual evidence for each finding — color, pattern, depth, size]. LEFT SIDE: [same]. RIGHT SIDE: [same]. PASS 2 VALIDATION — [for each finding: evidence check result, differential check, severity anchor comparison]. CONFIRMED FINDINGS: [only findings that passed validation]. CROSS-REFERENCING: [multi-angle confirmations]. SCORING: Starting at 100. Age baseline ([age range]): -[X]. [Condition] ([severity] — visual evidence: [brief descriptor], seen in [angle(s)]): -[points]. ... [Positive] (confirmed in [angle(s)]): +[points]. ... Final score: [number]'. The skinHealthScore MUST exactly match the final number. If only front view provided, note 'Single angle only — side views would improve accuracy.' NEVER skip this step."
       },
       skinHealthScore: {
         type: "number",
@@ -540,7 +634,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
             name: { type: "string", description: "Simple, friendly name for the condition" },
             severity: { type: "string", enum: ["mild", "moderate", "severe"] },
             area: { type: "string", description: "EXACT anatomical location. Use precise zones: 'left nasolabial fold area', 'outer corners of eyes (crow's feet)', 'across the nose bridge', 'lower left cheek', 'along the jawline on the right side'. Specify LEFT/RIGHT when applicable. NEVER use vague terms like 'face' or 'skin'." },
-            description: { type: "string", description: "Plain English explanation of what this is, what causes it, and what can help. Be warm and educational. Reference what you actually see in the photo and which angle(s) confirmed it. If side view revealed it was worse than front suggested, note that." },
+            description: { type: "string", description: "Plain English explanation that MUST include: (1) VISUAL EVIDENCE — describe exactly what you see (e.g., 'I can see a visible crease running from the side of your nose to the corner of your mouth, creating a noticeable shadow about 2-3mm deep'), (2) what causes it in simple terms, (3) what can help. Reference which angle(s) confirmed it. If side view revealed it was worse than front suggested, note that. The visual evidence description is what makes this analysis credible — without it, the finding feels generic." },
             cellularInsight: { type: "string", description: "Simple analogy-based explanation of what's happening under the skin" },
             detectedInAngles: { type: "string", description: "Which photo angle(s) this condition was detected in. Examples: 'front view', 'left side profile', 'front view + right side profile (confirmed deeper from side)', 'right side profile only (not visible from front)'. This is critical for accuracy attribution." }
           }

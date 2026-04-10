@@ -213,6 +213,35 @@ ABSOLUTE RULE: NEVER FABRICATE FINDINGS.
    - A shorter, accurate report is better than a longer, fabricated one.
    - Before submitting, review every condition and ask: 'Did I actually see this in the photo?' Remove anything you're not confident about.
 
+TWO-PASS CLINICAL ANALYSIS PROTOCOL:
+   You MUST perform TWO mental passes before finalizing your report:
+
+   PASS 1 — OBSERVATION (What do I see?):
+   For EACH photo, systematically scan every facial zone and catalog EXACTLY what you observe:
+   - Describe VISUAL EVIDENCE: color changes, texture changes, shadows, depth, lines, spots, volume differences
+   - Use clinical visual descriptors: "visible crease approximately 3-4mm deep" NOT just "nasolabial fold"
+   - Note PATTERN (linear, diffuse, clustered, bilateral, unilateral), COLOR, TEXTURE, SIZE/EXTENT
+
+   PASS 2 — CLINICAL VALIDATION (Is my assessment correct?):
+   For EACH finding from Pass 1, critically evaluate:
+   - EVIDENCE CHECK: What specific visual evidence supports this? Can you describe exactly what you see?
+   - DIFFERENTIAL CHECK: Could this be lighting artifact, camera angle, facial expression, or makeup?
+   - SEVERITY CHECK: Does the severity match the calibration anchors below?
+   - REMOVE any finding that fails the evidence check. 4 accurate conditions > 8 questionable ones.
+
+   SEVERITY CALIBRATION ANCHORS:
+   Fine Lines: MILD (visible only when stretched, <0.5mm), MODERATE (visible at rest, 0.5-1mm), SEVERE (deep creases, >1mm)
+   Volume Loss: MILD (subtle flattening), MODERATE (noticeable concavity, clear shadow), SEVERE (dramatic hollowing, skeletal landmarks visible)
+   Jowling: MILD (slight softening of jawline), MODERATE (visible tissue below mandibular border), SEVERE (prominent jowls, contour obscured)
+   Skin Laxity: MILD (subtle loss of snap-back), MODERATE (visible drooping at rest), SEVERE (significant ptosis)
+   Hyperpigmentation: MILD (faint, 1-3 spots, <2 shades difference), MODERATE (clearly visible, multiple areas, 2-4 shades), SEVERE (prominent, widespread, >4 shades)
+   Enlarged Pores: MILD (close inspection only, T-zone, <0.5mm), MODERATE (conversational distance, beyond T-zone, 0.5-1mm), SEVERE (visible from distance, >1mm, orange peel)
+   Acne: MILD (1-5 lesions, one zone), MODERATE (6-20 lesions, multiple zones), SEVERE (20+, cystic/nodular)
+   Redness: MILD (slight flush, no vessels), MODERATE (persistent, some capillaries), SEVERE (intense, numerous vessels)
+   Dark Circles: MILD (slight darkening, certain lighting), MODERATE (clearly visible, noticeable hollowing), SEVERE (deep, prominent, visible from distance)
+   Nasolabial Folds: MILD (faint, only when smiling), MODERATE (visible at rest, noticeable shadow), SEVERE (deep, prominent, aged appearance)
+   Neck Lines: MILD (1-2 faint lines), MODERATE (multiple visible lines, some crepiness), SEVERE (deep creases, platysmal bands)
+
 ABSOLUTE RULE: CLIENT/PATIENT CONCERNS ARE MANDATORY.
    When the patient has listed specific concerns, you MUST address EVERY SINGLE ONE:
    1. CONFIRM IT: If visible in photos, add it as a detected condition with correct severity and location.
@@ -240,6 +269,15 @@ ABSOLUTE RULE: CLIENT/PATIENT CONCERNS ARE MANDATORY.
    FAILURE TO ADDRESS PATIENT CONCERNS IS THE #1 ACCURACY FAILURE.
 
 IMPORTANT: Analyze the actual image(s) provided. Base your entire analysis on what you can LITERALLY SEE in the photos. Do not make up conditions that aren't visible. Be honest about image quality limitations.
+
+FINAL ACCURACY CHECKLIST — Complete ALL before submitting:
+1. VISUAL EVIDENCE TEST: For EACH condition, can you describe the specific visual evidence (color, depth, pattern, size)? If not, REMOVE it.
+2. CONCERN COVERAGE TEST: For EACH patient concern, have you confirmed, acknowledged, or ruled it out?
+3. SEVERITY ANCHOR TEST: Does each severity rating match the calibration anchors above?
+4. DIFFERENTIAL TEST: Have you considered lighting, camera angle, expression, or makeup as alternative explanations?
+5. SCORE MATH TEST: Does your final score EXACTLY match the arithmetic in scoreCalculation?
+6. TREATMENT ALIGNMENT TEST: Does every treatment address a detected condition? Any conditions without treatment?
+7. REALISTIC SCORE TEST: Is the score realistic? 45-year-old with 5+ conditions should NOT score above 70. 55-year-old with structural aging should NOT score above 60.
 
 ${catalogText}
 
@@ -276,7 +314,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
     properties: {
       scoreCalculation: {
         type: "string",
-        description: "MANDATORY step-by-step score calculation. Format: 'Starting at 100. [Condition]: -[points]. ... [Positive]: +[points]. Final score: [number]'. The skinHealthScore MUST exactly match the final number here. NEVER skip this."
+        description: "MANDATORY two-pass clinical score calculation. Format: 'PASS 1 OBSERVATIONS: [describe exact visual evidence for each finding per angle — color, pattern, depth, size]. PASS 2 VALIDATION: [for each finding: evidence check, differential check, severity anchor comparison]. CONFIRMED FINDINGS: [only findings that passed validation]. SCORING: Starting at 100. Age baseline ([age range]): -[X]. [Condition] ([severity] — visual evidence: [brief descriptor]): -[points]. ... [Positive]: +[points]. Final score: [number]'. The skinHealthScore MUST exactly match the final number. NEVER skip this."
       },
       skinHealthScore: {
         type: "number",

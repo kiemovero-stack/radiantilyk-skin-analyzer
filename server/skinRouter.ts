@@ -60,7 +60,8 @@ async function generateSimulationsInBackground(
 async function runAnalysisInBackground(
   analysisId: number,
   imageUrls: string[],
-  imageAngles: string[]
+  imageAngles: string[],
+  concerns?: string[]
 ) {
   try {
     // Build image content for AI — use S3 URLs directly
@@ -70,9 +71,15 @@ async function runAnalysisInBackground(
     > = [];
 
     const angleLabels = imageAngles.join(", ");
+    let userText = `Analyze these ${imageUrls.length} skin photo(s) (angles: ${angleLabels}) comprehensively. Provide a complete skin analysis report following the exact output structure. Be thorough, specific, and avoid generic language. Every treatment recommendation must come from the clinic's service catalog with exact pricing. Remember: at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products.\n\nSCORING REMINDER: Be STRICT and REALISTIC with the skin health score. Apply age-based baseline deductions. Most adults score 60-70. A score above 80 is uncommon. A score above 90 is extremely rare. Do NOT inflate scores — accuracy and clinical credibility are paramount. Use the TWO-PASS CLINICAL ANALYSIS PROTOCOL. Show your full step-by-step calculation.`;
+
+    if (concerns && concerns.length > 0) {
+      userText += `\n\n⚠️ MANDATORY — PATIENT CONCERNS (selected by patient/staff):\n${concerns.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\nYou MUST address EVERY concern listed above. For each concern, either:\n(a) CONFIRM it as a detected condition with severity and location\n(b) ACKNOWLEDGE it as subtle/mild if barely visible\n(c) EXPLICITLY rule it out in your scoreJustification with evidence\n\nFailing to address ANY of these concerns is an ACCURACY FAILURE. These are what the patient is worried about — ignoring them destroys trust and clinical credibility.`;
+    }
+
     imageContents.push({
       type: "text",
-      text: `Analyze these ${imageUrls.length} skin photo(s) (angles: ${angleLabels}) comprehensively. Provide a complete skin analysis report following the exact output structure. Be thorough, specific, and avoid generic language. Every treatment recommendation must come from the clinic's service catalog with exact pricing. Remember: at least 3 facials, 4-8 procedures (with treatment series stacking when appropriate), and 5-7 skincare products.\n\nSCORING REMINDER: Be STRICT and REALISTIC with the skin health score. Apply age-based baseline deductions. Most adults score 60-70. A score above 80 is uncommon. A score above 90 is extremely rare. Do NOT inflate scores — accuracy and clinical credibility are paramount. Show your full step-by-step calculation.`,
+      text: userText,
     });
 
     for (let i = 0; i < imageUrls.length; i++) {
@@ -181,6 +188,7 @@ export const skinRouter = router({
         patientLastName: z.string().min(1, "Last name is required"),
         patientEmail: z.string().email("Valid email is required"),
         patientDob: z.string().min(1, "Date of birth is required"),
+        concerns: z.array(z.string()).optional(),
         imageUrls: z.array(
           z.object({
             url: z.string().url(),
@@ -190,7 +198,7 @@ export const skinRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const { imageUrls, patientFirstName, patientLastName, patientEmail, patientDob } = input;
+      const { imageUrls, patientFirstName, patientLastName, patientEmail, patientDob, concerns } = input;
 
       const db = await getDb();
       if (!db) throw new Error("Database not available");
@@ -216,10 +224,18 @@ export const skinRouter = router({
 
       console.log(`[SkinAnalysis] Created record ${analysisId} with status=processing, starting background analysis`);
 
+      // Store concerns in intakeData if provided
+      if (concerns && concerns.length > 0) {
+        await db
+          .update(skinAnalyses)
+          .set({ intakeData: { concerns } })
+          .where(eq(skinAnalyses.id, analysisId));
+      }
+
       // Start the analysis in the background — don't await it
       const urls = imageUrls.map((img) => img.url);
       const angles = imageUrls.map((img) => img.angle);
-      runAnalysisInBackground(analysisId, urls, angles).catch((err) => {
+      runAnalysisInBackground(analysisId, urls, angles, concerns).catch((err) => {
         console.error(`[SkinAnalysis] Unhandled background error for record ${analysisId}:`, err);
       });
 
