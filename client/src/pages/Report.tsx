@@ -232,7 +232,7 @@ export default function Report() {
   const [simulationsLoading, setSimulationsLoading] = useState(false);
   const [agingImages, setAgingImages] = useState<Record<string, string>>({});
   const [agingLoading, setAgingLoading] = useState(false);
-
+  const [reanalyzing, setReanalyzing] = useState(false);
 
   // Poll for simulation images
   useEffect(() => {
@@ -349,7 +349,42 @@ export default function Report() {
     emailReport.mutate({ id: reportId });
   };
 
+  const reanalyzeMutation = trpc.skin.reanalyze.useMutation({
+    onSuccess: () => {
+      toast.success("Re-analysis started! The page will refresh when complete.");
+      // Poll for completion
+      const pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/trpc/skin.getStatus?batch=1&input=${encodeURIComponent(JSON.stringify({ "0": { json: { id: reportId } } }))}`);
+          const json = await res.json();
+          const result = json?.[0]?.result?.data?.json;
+          if (result?.status === "completed") {
+            clearInterval(pollInterval);
+            window.location.reload();
+          } else if (result?.status === "failed") {
+            clearInterval(pollInterval);
+            setReanalyzing(false);
+            toast.error("Re-analysis failed: " + (result?.errorMessage || "Unknown error"));
+          }
+        } catch { /* ignore */ }
+      }, 3000);
+      // Timeout after 3 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        setReanalyzing(false);
+      }, 180000);
+    },
+    onError: (err) => {
+      toast.error(`Re-analysis failed: ${err.message}`);
+      setReanalyzing(false);
+    },
+  });
 
+  const handleReanalyze = () => {
+    if (!confirm("This will re-run the AI analysis with the latest prompt. The current report will be replaced. Continue?")) return;
+    setReanalyzing(true);
+    reanalyzeMutation.mutate({ id: reportId });
+  };
 
   if (isLoading) {
     return (
@@ -1358,7 +1393,19 @@ export default function Report() {
                 New Analysis
               </Link>
             </Button>
-
+            <Button
+              onClick={handleReanalyze}
+              disabled={reanalyzing}
+              variant="outline"
+              className="border-orange-300 text-orange-700 hover:bg-orange-50"
+            >
+              {reanalyzing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              {reanalyzing ? "Re-analyzing..." : "Re-analyze"}
+            </Button>
             <Button variant="outline" asChild>
               <Link href="/history">View History</Link>
             </Button>

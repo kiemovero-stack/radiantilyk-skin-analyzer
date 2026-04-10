@@ -755,6 +755,3 @@
 - [x] Display "Previous score → New score" on client ClientReport page (purple gradient card with "Your Score Journey")
 - [x] Show score change indicator (+/- points badge in green/red)
 - [x] Backfilled Jennifer Donnelly's history: 96 → 59 (-37 points)
-
-## Remove Re-analyze Button
-- [x] Remove Re-analyze button from staff Report page (no longer needed — prompt is accurate)
