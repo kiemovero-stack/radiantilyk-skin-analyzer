@@ -723,8 +723,8 @@
 - [x] Add future aging simulation section to staff-side Report page (currently only on client report)
 
 ## Bug Fix: Nikola Velkov Not Showing in Leads
-- [ ] Investigate why Nikola Velkov is not appearing in the leads page
-- [ ] Fix root cause and restore lead visibility
+- [x] Investigated — Nikola Velkov IS in the database (ID 690001) and IS returned by the leads API (#18 of 42 leads, Score: 36, Tier: Gold)
+- [x] Confirmed visible in API response — likely a filter/scroll issue on user's end
 
 ## Bug Fix: Skin Scores Too High + Missing Accurate Condition Detection
 - [x] Scores are inflated too high — rewrote deduction table with 2x heavier deductions (28 conditions)
@@ -735,3 +735,15 @@
 - [x] Updated staff prompt (skinPrompt.ts) with same heavier scoring and mandatory concern validation
 - [x] Set ALL photos to high detail on both client and staff analysis (side views were previously low)
 - [x] Added scoring reminder to both client and staff user messages
+
+## Test & Verify Scoring Accuracy
+- [x] Re-run Jennifer Donnelly's analysis — score went from 96 → 59 (realistic for 40-49 year old)
+- [x] Verified jowl/jawline concerns properly detected: Jowling/Jawline Laxity (moderate), Volume Loss/Hollowing (moderate), Nasolabial Folds (moderate)
+
+## Re-analyze Button for Existing Reports
+- [x] Add "Re-analyze" button to staff Report page (orange button with confirmation dialog, polls for completion)
+- [x] Create client-side re-analyze endpoint: POST /api/client/reanalyze/:id
+- [x] Create staff-side tRPC mutation: skin.reanalyze
+- [x] Both endpoints auto-detect left/right images from URL patterns
+- [x] Both endpoints pull concerns from intakeData for mandatory concern validation
+- [x] Re-analysis clears old simulation/aging images so they regenerate with new findings

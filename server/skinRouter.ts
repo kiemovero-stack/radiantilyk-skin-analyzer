@@ -419,6 +419,69 @@ export const skinRouter = router({
   }),
 
   /**
+   * Re-analyze an existing report using stored photos and the updated prompt.
+   * Resets the report to "processing" and re-runs the AI analysis.
+   */
+  reanalyze: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const results = await db
+        .select()
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, input.id))
+        .limit(1);
+
+      if (results.length === 0) throw new Error("Report not found");
+
+      const record = results[0];
+      const imageUrl = record.imageUrl as string;
+      if (!imageUrl) throw new Error("No source image available for re-analysis");
+
+      // Collect image URLs
+      const imageUrls: string[] = [imageUrl];
+      const imageAngles: string[] = ["front"];
+
+      // Try to find left/right images with same timestamp prefix
+      const urlMatch = imageUrl.match(/(\d+)-front-/);
+      if (urlMatch) {
+        for (const angle of ["left", "right"]) {
+          const candidateUrl = imageUrl.replace(/-front-/, `-${angle}-`);
+          try {
+            const headResp = await fetch(candidateUrl, { method: "HEAD" });
+            if (headResp.ok) {
+              imageUrls.push(candidateUrl);
+              imageAngles.push(angle);
+            }
+          } catch {
+            // Image doesn't exist for this angle
+          }
+        }
+      }
+
+      // Mark as re-processing
+      await db
+        .update(skinAnalyses)
+        .set({
+          status: "processing",
+          simulationImages: null,
+          agingImages: null,
+        })
+        .where(eq(skinAnalyses.id, input.id));
+
+      console.log(`[ReAnalyze-Staff] Starting re-analysis for record ${input.id} with ${imageUrls.length} image(s)`);
+
+      // Run analysis in background
+      runAnalysisInBackground(input.id, imageUrls, imageAngles).catch((err) => {
+        console.error(`[ReAnalyze-Staff] Error for record ${input.id}:`, err);
+      });
+
+      return { status: "processing" };
+    }),
+
+  /**
    * Get multiple analyses by IDs for comparison.
    * Only returns completed analyses belonging to the current user.
    */

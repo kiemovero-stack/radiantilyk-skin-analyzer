@@ -805,6 +805,94 @@ export function registerClientRoutes(app: Express) {
     }
   });
 
+  // ── Re-analyze Existing Report ─────────────────────────────────────
+  // Re-runs the AI analysis on an existing report using stored photos and the updated prompt
+  app.post("/api/client/reanalyze/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid ID" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const results = await db
+        .select()
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, id))
+        .limit(1);
+
+      if (results.length === 0) {
+        res.status(404).json({ error: "Analysis not found" });
+        return;
+      }
+
+      const record = results[0];
+      const imageUrl = record.imageUrl as string;
+      if (!imageUrl) {
+        res.status(400).json({ error: "No source image available for re-analysis" });
+        return;
+      }
+
+      // Collect all image URLs — check for left/right based on URL pattern
+      const imageUrls: string[] = [imageUrl];
+      const imageAngles: string[] = ["front"];
+
+      // Try to find left/right images with same timestamp prefix
+      const urlMatch = imageUrl.match(/\/(\d+)-front-/);
+      if (urlMatch) {
+        const ts = urlMatch[1];
+        const baseUrl = imageUrl.substring(0, imageUrl.lastIndexOf("/") + 1);
+        // Check for left/right images by trying common patterns
+        for (const angle of ["left", "right"]) {
+          const candidateUrl = imageUrl.replace(/-front-/, `-${angle}-`);
+          try {
+            const headResp = await fetch(candidateUrl, { method: "HEAD" });
+            if (headResp.ok) {
+              imageUrls.push(candidateUrl);
+              imageAngles.push(angle);
+            }
+          } catch {
+            // Image doesn't exist for this angle
+          }
+        }
+      }
+
+      // Get concerns from intakeData
+      const intakeData = record.intakeData as any;
+      const concerns: string[] = intakeData?.concerns || intakeData?.selectedConcerns || [];
+
+      // Mark as re-processing
+      await db
+        .update(skinAnalyses)
+        .set({
+          status: "processing",
+          // Clear old simulation/aging images so they regenerate
+          simulationImages: null,
+          agingImages: null,
+        })
+        .where(eq(skinAnalyses.id, id));
+
+      console.log(`[ReAnalyze] Starting re-analysis for record ${id} with ${imageUrls.length} image(s), concerns: ${concerns.join(", ")}`);
+
+      // Return immediately
+      res.json({ status: "processing", message: "Re-analysis started" });
+
+      // Run analysis in background with the updated prompt
+      runClientAnalysisInBackground(id, imageUrls, imageAngles, concerns).catch((err) => {
+        console.error(`[ReAnalyze] Error for record ${id}:`, err);
+      });
+    } catch (error: any) {
+      console.error("[ReAnalyze] Error:", error?.message);
+      res.status(500).json({ error: "Failed to start re-analysis" });
+    }
+  });
+
   // ── Scar Consultation Intake Form ────────────────────────────────
   app.post("/api/client/scar-consultation", async (req: Request, res: Response) => {
     try {
