@@ -337,6 +337,11 @@ export default function ClientAnalyze() {
   const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
   const [otherConcern, setOtherConcern] = useState("");
 
+  // Treatment goals & budget (Ageless AI-style lead qualification)
+  const [treatmentGoal, setTreatmentGoal] = useState("");
+  const [treatmentExperience, setTreatmentExperience] = useState("");
+  const [budget, setBudget] = useState("");
+
   // Photos
   const [photos, setPhotos] = useState<Record<AngleKey, AnglePhoto>>({
     front: { file: null, preview: null },
@@ -517,6 +522,9 @@ export default function ClientAnalyze() {
           patientPhone: phone.trim(),
           patientDob: dob,
           concerns: concernLabels,
+          treatmentGoal: treatmentGoal || undefined,
+          treatmentExperience: treatmentExperience || undefined,
+          budget: budget || undefined,
           imageUrls: uploadResult.uploadedImages.map((img: { url: string; angle: string }) => ({
             url: img.url,
             angle: img.angle,
@@ -767,6 +775,87 @@ export default function ClientAnalyze() {
                     />
                   </div>
                 )}
+
+                {/* Treatment Goals & Budget - Lead Qualification */}
+                <div className="space-y-4 pt-4 border-t border-border/40">
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Help Us Personalize Your Plan</p>
+
+                  <div>
+                    <Label className="mb-2 text-sm">What's your primary goal?</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "prevention", label: "Prevent aging early" },
+                        { id: "refresh", label: "Look more refreshed" },
+                        { id: "restore", label: "Restore youthful look" },
+                        { id: "special", label: "Special event prep" },
+                        { id: "maintenance", label: "Maintain results" },
+                        { id: "explore", label: "Just exploring" },
+                      ].map((g) => (
+                        <button
+                          key={g.id}
+                          onClick={() => setTreatmentGoal(g.id)}
+                          className={cn(
+                            "p-3 rounded-lg border text-sm text-left transition-all",
+                            treatmentGoal === g.id
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/30 font-medium"
+                              : "border-border/60 bg-card hover:border-primary/30"
+                          )}
+                        >
+                          {g.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="mb-2 text-sm">Have you had aesthetic treatments before?</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: "first_time", label: "First time" },
+                        { id: "some", label: "A few times" },
+                        { id: "regular", label: "Regular client" },
+                      ].map((e) => (
+                        <button
+                          key={e.id}
+                          onClick={() => setTreatmentExperience(e.id)}
+                          className={cn(
+                            "p-3 rounded-lg border text-sm text-center transition-all",
+                            treatmentExperience === e.id
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/30 font-medium"
+                              : "border-border/60 bg-card hover:border-primary/30"
+                          )}
+                        >
+                          {e.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="mb-2 text-sm">Monthly skincare budget?</Label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { id: "under100", label: "< $100" },
+                        { id: "100_300", label: "$100-300" },
+                        { id: "300_500", label: "$300-500" },
+                        { id: "500plus", label: "$500+" },
+                      ].map((b) => (
+                        <button
+                          key={b.id}
+                          onClick={() => setBudget(b.id)}
+                          className={cn(
+                            "p-3 rounded-lg border text-sm text-center transition-all",
+                            budget === b.id
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/30 font-medium"
+                              : "border-border/60 bg-card hover:border-primary/30"
+                          )}
+                        >
+                          {b.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex gap-3">
                   <Button

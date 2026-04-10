@@ -605,6 +605,17 @@ interface ReportData {
   imageUrl: string;
   simulationImages: Record<string, string>;
   agingImages: Record<string, string>;
+  beautyScore?: {
+    overall: number;
+    symmetry: number;
+    glow: number;
+    texture: number;
+    structure: number;
+    youthfulness: number;
+    percentile: number;
+    topStrength: string;
+    shareCaption: string;
+  } | null;
   createdAt: string;
   referralCode?: string | null;
 }
@@ -882,6 +893,97 @@ export default function ClientReport() {
               </div>
             )}
           </motion.section>
+
+          {/* Beauty Score Card */}
+          {data.beautyScore && (
+            <motion.section
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              className="mb-8 rounded-2xl overflow-hidden shadow-lg"
+            >
+              <div className="relative bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 p-6 md:p-8 text-white">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="w-5 h-5" />
+                    <h2 className="text-lg font-bold">Your Beauty Score</h2>
+                  </div>
+                  
+                  {/* Main score */}
+                  <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
+                    <div className="relative">
+                      <div className="w-32 h-32 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white/40">
+                        <div className="text-center">
+                          <span className="text-5xl font-black">{data.beautyScore.overall}</span>
+                          <span className="text-lg font-light">/100</span>
+                        </div>
+                      </div>
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-white text-fuchsia-600 text-xs font-bold rounded-full shadow-lg whitespace-nowrap">
+                        Top {100 - data.beautyScore.percentile}% for your age
+                      </div>
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                      <p className="text-xl font-semibold mb-1">{data.beautyScore.topStrength}</p>
+                      <p className="text-white/80 text-sm">Your standout feature that makes you uniquely beautiful</p>
+                    </div>
+                  </div>
+                  
+                  {/* Sub-scores */}
+                  <div className="grid grid-cols-5 gap-3 mb-6">
+                    {[
+                      { label: "Symmetry", score: data.beautyScore.symmetry, icon: "\u2B50" },
+                      { label: "Glow", score: data.beautyScore.glow, icon: "\u2728" },
+                      { label: "Texture", score: data.beautyScore.texture, icon: "\u{1F48E}" },
+                      { label: "Structure", score: data.beautyScore.structure, icon: "\u{1F3DB}" },
+                      { label: "Youth", score: data.beautyScore.youthfulness, icon: "\u{1F33F}" },
+                    ].map((dim) => (
+                      <div key={dim.label} className="text-center">
+                        <div className="text-lg mb-1">{dim.icon}</div>
+                        <div className="text-2xl font-bold">{dim.score}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-white/70">{dim.label}</div>
+                        <div className="mt-1 h-1 rounded-full bg-white/20 overflow-hidden">
+                          <div className="h-full rounded-full bg-white/80" style={{ width: `${dim.score}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Share button */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => {
+                        const text = data.beautyScore!.shareCaption;
+                        if (navigator.share) {
+                          navigator.share({ title: "My Beauty Score", text, url: window.location.href });
+                        } else {
+                          navigator.clipboard.writeText(`${text}\n${window.location.href}`);
+                          alert("Copied to clipboard!");
+                        }
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-fuchsia-600 font-semibold text-sm hover:bg-white/90 transition-all shadow-lg"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Share My Score
+                    </button>
+                    <a
+                      href={withUtm(CHECKIN_URL, "beauty-score-cta")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/20 backdrop-blur-sm text-white font-semibold text-sm hover:bg-white/30 transition-all border border-white/30"
+                    >
+                      <CalendarCheck className="w-4 h-4" />
+                      Boost My Score
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.section>
+          )}
 
           {/* Section 2: Conditions */}
           <motion.section
@@ -1194,8 +1296,43 @@ export default function ClientReport() {
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">
-                <p className="text-sm text-gray-500">Your future self simulation will appear here once generated.</p>
+              <div className="p-6 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <Telescope className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <p className="text-base font-bold text-gray-800">See Yourself in 20 Years</p>
+                  <p className="text-sm text-gray-500 mt-1">Our AI will generate a realistic preview of how you'll look in 20 years — with and without professional treatment.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    setAgingLoading(true);
+                    try {
+                      await fetch(`/api/client/aging/${reportId}/generate`, { method: 'POST' });
+                      // Start polling
+                      const poll = setInterval(async () => {
+                        try {
+                          const res = await fetch(`/api/client/aging/${reportId}`);
+                          const result = await res.json();
+                          if (result.ready && result.agingImages) {
+                            setData((prev) => prev ? { ...prev, agingImages: result.agingImages } : prev);
+                            setAgingLoading(false);
+                            clearInterval(poll);
+                          }
+                        } catch {}
+                      }, 8000);
+                      // Stop polling after 5 minutes
+                      setTimeout(() => { clearInterval(poll); setAgingLoading(false); }, 300000);
+                    } catch {
+                      setAgingLoading(false);
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-sm hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Generate My Future Self
+                </button>
+                <p className="text-[10px] text-gray-400">Takes 1-3 minutes. AI-generated simulation for illustration purposes only.</p>
               </div>
             )}
           </motion.section>

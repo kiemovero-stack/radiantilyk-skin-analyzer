@@ -51,6 +51,8 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   contactNotes: text("contactNotes"),
   /** Contact method used: call, email, text */
   contactMethod: varchar("contactMethod", { length: 32 }),
+  /** JSON object with intake form data: concerns, treatmentGoal, treatmentExperience, budget */
+  intakeData: json("intakeData"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

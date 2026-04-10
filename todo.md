@@ -664,3 +664,12 @@
 ## Domain Routing - rkaskinai.com
 - [x] Add rkaskinai.com and www.rkaskinai.com to client-facing domain list (auto-routed: any domain not in STAFF_DOMAINS serves client app)
 - [x] Fix rkaskinai.com serving staff dashboard instead of client site (added explicit CLIENT_DOMAINS set)
+
+## Fix Aging Simulation & Ageless AI Feature Parity
+- [x] Fix aging simulation: added manual "Generate My Future Self" button + POST /api/client/aging/:id/generate endpoint
+- [x] Research Ageless AI features and identify gaps
+- [x] Add Beauty Score to AI prompt (overall, symmetry, glow, texture, structure, youthfulness, percentile, topStrength, shareCaption)
+- [x] Enhanced intake form with treatment goals, experience level, and budget selector
+- [x] Add interactive before/after comparison for aging (slider on report page)
+- [x] Built shareable Beauty Score card (gradient design, 5 sub-scores, share button, boost CTA)
+- [ ] Add "See Your Future Self" standalone CTA on landing page (future enhancement)

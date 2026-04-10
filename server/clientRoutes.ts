@@ -455,6 +455,9 @@ export function registerClientRoutes(app: Express) {
         patientPhone,
         patientDob,
         concerns,
+        treatmentGoal,
+        treatmentExperience,
+        budget,
         imageUrls,
       } = req.body;
 
@@ -482,6 +485,12 @@ export function registerClientRoutes(app: Express) {
         skinHealthScore: 0,
         skinType: "",
         status: "processing",
+        intakeData: {
+          concerns: concerns || [],
+          treatmentGoal: treatmentGoal || "",
+          treatmentExperience: treatmentExperience || "",
+          budget: budget || "",
+        },
       });
 
       const analysisId = insertResult[0].insertId;
@@ -594,6 +603,7 @@ export function registerClientRoutes(app: Express) {
         imageUrl: record.imageUrl,
         simulationImages: record.simulationImages || {},
         agingImages: record.agingImages || {},
+        beautyScore: (record.report as any)?.beautyScore || null,
         createdAt: record.createdAt,
         referralCode,
       });
@@ -677,6 +687,84 @@ export function registerClientRoutes(app: Express) {
       });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to check aging images" });
+    }
+  });
+
+  // ── Trigger/Retry Aging Simulation ─────────────────────────────────────
+  // Allows clients to manually trigger aging simulation from their report page
+  app.post("/api/client/aging/:id/generate", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid ID" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      // Fetch the analysis record
+      const results = await db
+        .select({
+          imageUrl: skinAnalyses.imageUrl,
+          report: skinAnalyses.report,
+          patientDob: skinAnalyses.patientDob,
+          agingImages: skinAnalyses.agingImages,
+          status: skinAnalyses.status,
+        })
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, id))
+        .limit(1);
+
+      if (results.length === 0) {
+        res.status(404).json({ error: "Analysis not found" });
+        return;
+      }
+
+      const record = results[0];
+
+      // Check if already has aging images
+      const existingAging = record.agingImages as Record<string, string> | null;
+      if (existingAging && Object.keys(existingAging).length >= 2) {
+        res.json({ status: "already_complete", agingImages: existingAging });
+        return;
+      }
+
+      if (record.status !== "completed") {
+        res.status(400).json({ error: "Analysis not yet completed" });
+        return;
+      }
+
+      const report = record.report as any;
+      const imageUrls = (record.imageUrl as string || "").split(",").map((u: string) => u.trim()).filter(Boolean);
+      const frontImageUrl = imageUrls[0];
+
+      if (!frontImageUrl) {
+        res.status(400).json({ error: "No source image available" });
+        return;
+      }
+
+      // Return immediately, generate in background
+      res.json({ status: "generating" });
+
+      // Fire-and-forget
+      generateAgingInBackground(
+        id,
+        frontImageUrl,
+        report?.fitzpatrickType || 3,
+        report?.skinHealthScore || 50,
+        (report?.conditions || []).map((c: any) => c.name),
+        (report?.skinProcedures || []).map((p: any) => p.name),
+        record.patientDob || undefined
+      ).catch((err) => {
+        console.error(`[AgingSim] Manual trigger failed for ${id}:`, err?.message);
+      });
+    } catch (error: any) {
+      console.error("[AgingSim] Generate endpoint error:", error?.message);
+      res.status(500).json({ error: "Failed to trigger aging simulation" });
     }
   });
 

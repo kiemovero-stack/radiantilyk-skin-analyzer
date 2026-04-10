@@ -339,6 +339,7 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       "scarTreatments",
       "roadmap",
       "summary",
+      "beautyScore",
       "disclaimer"
     ],
     additionalProperties: false,
@@ -559,6 +560,23 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       summary: {
         type: "string",
         description: "Warm, encouraging summary that makes the client feel good about taking this step. Highlight the positive and the potential for improvement. Reference specific things you observed."
+      },
+      beautyScore: {
+        type: "object",
+        description: "A viral-worthy beauty score card that clients will want to share on social media. Analyze facial aesthetics across 5 dimensions. Be generous but honest — most people should score 70-90.",
+        required: ["overall", "symmetry", "glow", "texture", "structure", "youthfulness", "percentile", "topStrength", "shareCaption"],
+        additionalProperties: false,
+        properties: {
+          overall: { type: "number", description: "Overall beauty score 0-100. Most people 70-90. Be generous but differentiated." },
+          symmetry: { type: "number", description: "Facial symmetry score 0-100. Assess left-right balance of eyes, brows, cheeks, jawline." },
+          glow: { type: "number", description: "Skin glow/luminosity score 0-100. How healthy and radiant the skin looks." },
+          texture: { type: "number", description: "Skin texture score 0-100. Smoothness, pore size, evenness." },
+          structure: { type: "number", description: "Facial structure score 0-100. Bone structure, jawline definition, cheekbone prominence." },
+          youthfulness: { type: "number", description: "Youthfulness score 0-100. How youthful the face appears relative to actual age." },
+          percentile: { type: "number", description: "What percentile they rank in for their age group (e.g. 85 means top 15%). Be generous — most people 70-95." },
+          topStrength: { type: "string", description: "Their #1 best facial feature described in a flattering, shareable way. E.g. 'Striking bone structure', 'Radiant natural glow', 'Beautiful facial symmetry'" },
+          shareCaption: { type: "string", description: "A fun, shareable social media caption for their score. E.g. 'My AI beauty score is 87/100 — top 12% for my age! 💫 Get your free analysis at rkaskinai.com'" }
+        }
       },
       disclaimer: {
         type: "string",
