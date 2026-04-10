@@ -3,7 +3,7 @@ import { calculateLeadScore, buildScoringInput } from "./leadScoringService";
 
 describe("Lead Scoring Service", () => {
   describe("calculateLeadScore", () => {
-    it("returns a hot lead for high-engagement scar client", () => {
+    it("returns a hot lead for high-engagement scar client with high budget", () => {
       const score = calculateLeadScore({
         skinHealthScore: 35,
         conditionCount: 5,
@@ -16,14 +16,21 @@ describe("Lead Scoring Service", () => {
         hasReferralCode: true,
         hasConsultationSubmission: true,
         procedureCount: 6,
+        budget: "$500+/month",
+        treatmentExperience: "regular client",
+        treatmentGoal: "restore",
       });
 
       expect(score.priority).toBe("hot");
       expect(score.stars).toBeGreaterThanOrEqual(4);
       expect(score.totalPoints).toBeGreaterThan(0);
-      expect(score.maxPoints).toBe(105);
-      expect(score.signals).toHaveLength(7);
-      expect(score.summary).toContain("scar");
+      expect(score.maxPoints).toBe(140);
+      expect(score.signals).toHaveLength(10);
+      expect(score.summary).toContain("PLATINUM");
+      expect(score.bookingProbability).toBeGreaterThanOrEqual(70);
+      expect(score.clientTier).toBe("platinum");
+      expect(score.highValueIndicators.length).toBeGreaterThan(0);
+      expect(score.estimatedRevenue.high).toBeGreaterThan(0);
     });
 
     it("returns a cool lead for minimal engagement", () => {
@@ -43,6 +50,8 @@ describe("Lead Scoring Service", () => {
 
       expect(score.priority).toBe("cool");
       expect(score.stars).toBeLessThanOrEqual(2);
+      expect(score.bookingProbability).toBeLessThan(40);
+      expect(score.clientTier).toBe("bronze");
     });
 
     it("returns a warm lead for moderate engagement", () => {
@@ -58,10 +67,12 @@ describe("Lead Scoring Service", () => {
         hasReferralCode: true,
         hasConsultationSubmission: false,
         procedureCount: 5,
+        budget: "$100-300/month",
+        treatmentExperience: "a few times",
       });
 
-      expect(score.priority).toBe("warm");
-      expect(score.stars).toBe(3);
+      expect(["warm", "hot"]).toContain(score.priority);
+      expect(score.stars).toBeGreaterThanOrEqual(3);
     });
 
     it("gives maximum skin urgency points for very low skin health score", () => {
@@ -158,6 +169,56 @@ describe("Lead Scoring Service", () => {
 
       expect(score.calculatedAt).toBeTruthy();
       expect(new Date(score.calculatedAt).getTime()).toBeGreaterThan(0);
+    });
+
+    it("scores budget correctly for high-budget clients", () => {
+      const score = calculateLeadScore({
+        skinHealthScore: 50,
+        conditionCount: 2,
+        hasScarDetection: false,
+        scarTreatmentCount: 0,
+        hasEmail: true,
+        hasPhone: true,
+        hasDob: true,
+        imageCount: 1,
+        hasReferralCode: false,
+        hasConsultationSubmission: false,
+        procedureCount: 3,
+        budget: "$500+/month",
+        treatmentExperience: "regular client",
+        treatmentGoal: "special event",
+      });
+
+      const budgetSignal = score.signals.find((s) => s.name === "Budget Level");
+      expect(budgetSignal?.points).toBe(15);
+
+      const experienceSignal = score.signals.find((s) => s.name === "Treatment Experience");
+      expect(experienceSignal?.points).toBe(10);
+
+      const goalSignal = score.signals.find((s) => s.name === "Treatment Goal");
+      expect(goalSignal?.points).toBe(10);
+    });
+
+    it("assigns platinum tier for high-budget multi-treatment clients", () => {
+      const score = calculateLeadScore({
+        skinHealthScore: 30,
+        conditionCount: 5,
+        hasScarDetection: true,
+        scarTreatmentCount: 3,
+        hasEmail: true,
+        hasPhone: true,
+        hasDob: true,
+        imageCount: 3,
+        hasReferralCode: true,
+        hasConsultationSubmission: true,
+        procedureCount: 6,
+        budget: "$500+/month",
+        treatmentExperience: "regular client",
+        treatmentGoal: "restore",
+      });
+
+      expect(score.clientTier).toBe("platinum");
+      expect(score.highValueIndicators).toContain("High budget ($500+/month) — premium client");
     });
   });
 

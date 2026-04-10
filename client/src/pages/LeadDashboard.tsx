@@ -2,8 +2,8 @@
  * Lead Scoring Dashboard
  *
  * Staff-facing page that displays all client analyses ranked by lead score.
- * Helps staff prioritize outreach by showing hot/warm/cool leads with
- * engagement signals, contact information, and quick action buttons.
+ * Includes booking probability, estimated revenue, client tiers (platinum/gold/silver/bronze),
+ * high-value indicators, and quick action buttons for outreach.
  */
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import {
   ThermometerSun,
   Snowflake,
   ChevronRight,
+  ChevronDown,
   Mail,
   Phone,
   Calendar,
@@ -28,6 +29,13 @@ import {
   X,
   MessageSquare,
   UserCheck,
+  DollarSign,
+  TrendingUp,
+  Crown,
+  Target,
+  Gem,
+  Award,
+  Zap,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,6 +57,10 @@ interface LeadScore {
   priority: "hot" | "warm" | "cool";
   summary: string;
   calculatedAt: string;
+  bookingProbability: number;
+  estimatedRevenue: { low: number; high: number };
+  clientTier: "platinum" | "gold" | "silver" | "bronze";
+  highValueIndicators: string[];
 }
 
 interface Lead {
@@ -74,6 +86,8 @@ interface Lead {
   contactedAt: string | null;
   contactNotes: string | null;
   contactMethod: string | null;
+  intakeData: any;
+  concerns: string[];
 }
 
 interface LeadStats {
@@ -81,8 +95,15 @@ interface LeadStats {
   hot: number;
   warm: number;
   cool: number;
+  contacted: number;
   avgScore: number;
   avgStars: string;
+  avgBookingProbability: number;
+  estimatedPipelineRevenue: { low: number; high: number };
+  platinum: number;
+  gold: number;
+  silver: number;
+  bronze: number;
 }
 
 /* ─── Animation ─── */
@@ -90,6 +111,20 @@ interface LeadStats {
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+/* ─── Helpers ─── */
+
+function formatCurrency(amount: number): string {
+  if (amount >= 1000) return `$${(amount / 1000).toFixed(amount >= 10000 ? 0 : 1)}k`;
+  return `$${amount}`;
+}
+
+const TIER_CONFIG = {
+  platinum: { icon: Crown, label: "Platinum", bg: "bg-gradient-to-r from-purple-100 to-indigo-100", text: "text-purple-700", border: "border-purple-200", badge: "bg-purple-600" },
+  gold: { icon: Award, label: "Gold", bg: "bg-gradient-to-r from-amber-50 to-yellow-100", text: "text-amber-700", border: "border-amber-200", badge: "bg-amber-500" },
+  silver: { icon: Gem, label: "Silver", bg: "bg-gradient-to-r from-gray-50 to-slate-100", text: "text-gray-600", border: "border-gray-200", badge: "bg-gray-500" },
+  bronze: { icon: Target, label: "Bronze", bg: "bg-gradient-to-r from-orange-50 to-amber-50", text: "text-orange-600", border: "border-orange-200", badge: "bg-orange-400" },
 };
 
 /* ─── Sub-components ─── */
@@ -122,6 +157,31 @@ function PriorityBadge({ priority }: { priority: "hot" | "warm" | "cool" }) {
       <Icon className="w-3 h-3" />
       {label}
     </span>
+  );
+}
+
+function TierBadge({ tier }: { tier: "platinum" | "gold" | "silver" | "bronze" }) {
+  const config = TIER_CONFIG[tier];
+  const Icon = config.icon;
+  return (
+    <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold text-white", config.badge)}>
+      <Icon className="w-3 h-3" />
+      {config.label}
+    </span>
+  );
+}
+
+function BookingProbabilityBar({ probability }: { probability: number }) {
+  const color = probability >= 70 ? "bg-green-500" : probability >= 40 ? "bg-amber-500" : "bg-red-400";
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${probability}%` }} />
+      </div>
+      <span className={cn("text-xs font-bold", probability >= 70 ? "text-green-600" : probability >= 40 ? "text-amber-600" : "text-red-500")}>
+        {probability}%
+      </span>
+    </div>
   );
 }
 
@@ -246,6 +306,7 @@ function LeadCard({
   const [marking, setMarking] = useState(false);
   const score = lead.leadScore;
   const isContacted = !!lead.contactedAt;
+  const tierConfig = TIER_CONFIG[score.clientTier];
 
   const createdDate = new Date(lead.createdAt).toLocaleDateString("en-US", {
     month: "short",
@@ -312,6 +373,8 @@ function LeadCard({
         className={cn(
           "bg-white rounded-xl border shadow-sm overflow-hidden transition-all",
           isContacted ? "border-green-200 bg-green-50/30" :
+          score.clientTier === "platinum" ? "border-purple-200 ring-1 ring-purple-100" :
+          score.clientTier === "gold" ? "border-amber-200" :
           score.priority === "hot" ? "border-red-200 hover:border-red-300" :
           score.priority === "warm" ? "border-amber-200 hover:border-amber-300" :
           "border-gray-200 hover:border-gray-300"
@@ -327,6 +390,8 @@ function LeadCard({
             <div className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center shrink-0 font-bold text-lg relative",
               isContacted ? "bg-green-100 text-green-700" :
+              score.clientTier === "platinum" ? "bg-purple-100 text-purple-700" :
+              score.clientTier === "gold" ? "bg-amber-100 text-amber-700" :
               score.priority === "hot" ? "bg-red-100 text-red-700" :
               score.priority === "warm" ? "bg-amber-100 text-amber-700" :
               "bg-blue-100 text-blue-700"
@@ -338,135 +403,123 @@ function LeadCard({
               )}
             </div>
 
-            {/* Client Info */}
+            {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-semibold text-sm truncate">
                   {lead.patientFirstName} {lead.patientLastName}
                 </h3>
-                {isContacted ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border bg-green-100 text-green-700 border-green-200">
+                <PriorityBadge priority={score.priority} />
+                <TierBadge tier={score.clientTier} />
+                {isContacted && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
                     <CheckCircle2 className="w-3 h-3" />
-                    Contacted
+                    Contacted {contactedDate}
                   </span>
-                ) : (
-                  <PriorityBadge priority={score.priority} />
                 )}
-                <StarRating stars={score.stars} />
               </div>
               <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
-                <span className="flex items-center gap-1">
-                  <Mail className="w-3 h-3" />
-                  {lead.patientEmail}
-                </span>
+                <StarRating stars={score.stars} />
+                {lead.patientEmail && (
+                  <span className="flex items-center gap-1 truncate">
+                    <Mail className="w-3 h-3" />
+                    {lead.patientEmail}
+                  </span>
+                )}
                 {lead.patientPhone && (
-                  <a
-                    href={`tel:${lead.patientPhone}`}
-                    className="flex items-center gap-1 text-green-600 hover:text-green-700 hover:underline"
-                  >
+                  <span className="flex items-center gap-1 text-green-600 font-medium">
                     <Phone className="w-3 h-3" />
                     {lead.patientPhone}
-                  </a>
+                  </span>
                 )}
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {createdDate} {createdTime}
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                {!isContacted && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 font-medium">
-                    Score: {score.totalPoints}/100
-                  </span>
+              {/* Booking Probability & Revenue Row */}
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex-1 max-w-[200px]">
+                  <p className="text-[10px] text-gray-400 mb-0.5">Booking Probability</p>
+                  <BookingProbabilityBar probability={score.bookingProbability} />
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400">Est. Revenue</p>
+                  <p className="text-xs font-bold text-green-600">
+                    {formatCurrency(score.estimatedRevenue.low)} – {formatCurrency(score.estimatedRevenue.high)}
+                  </p>
+                </div>
+                {score.highValueIndicators.length > 0 && (
+                  <div className="hidden md:flex items-center gap-1 flex-wrap">
+                    {score.highValueIndicators.slice(0, 3).map((indicator, i) => (
+                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 font-medium flex items-center gap-0.5">
+                        <Zap className="w-2.5 h-2.5" />
+                        {indicator}
+                      </span>
+                    ))}
+                  </div>
                 )}
-                {isContacted && contactedDate && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 font-medium">
-                    Contacted {contactedDate} via {lead.contactMethod || "—"}
-                  </span>
-                )}
-                {lead.reportSummary.scarTreatmentCount > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-600 font-medium">
-                    Scar Client
-                  </span>
-                )}
-                {lead.reportSummary.topConcerns.slice(0, 2).map((c, i) => (
-                  <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
-                    {c}
-                  </span>
-                ))}
               </div>
+              {/* Concerns Row */}
+              {lead.concerns && lead.concerns.length > 0 && (
+                <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                  <span className="text-[10px] text-gray-400">Concerns:</span>
+                  {lead.concerns.slice(0, 4).map((c, i) => (
+                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-pink-50 text-pink-600 font-medium">
+                      {c}
+                    </span>
+                  ))}
+                  {lead.concerns.length > 4 && (
+                    <span className="text-[10px] text-gray-400">+{lead.concerns.length - 4} more</span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Quick Actions */}
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Call Button */}
-              <button
-                onClick={handleCall}
-                title="Mark as called"
-                className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                  "bg-green-50 text-green-600 hover:bg-green-100 border border-green-200"
-                )}
-              >
-                <Phone className="w-3.5 h-3.5" />
-              </button>
-
-              {/* Email Button */}
-              <button
-                onClick={handleEmail}
-                title="Send email"
-                className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                  "bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-                )}
-              >
-                <Mail className="w-3.5 h-3.5" />
-              </button>
-
-              {/* Mark Contacted / Undo */}
-              {isContacted ? (
-                <button
-                  onClick={handleUndo}
-                  title="Undo contacted"
-                  disabled={marking}
-                  className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                    "bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-200"
-                  )}
-                >
-                  {marking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Undo2 className="w-3.5 h-3.5" />}
-                </button>
+              {!isContacted ? (
+                <>
+                  <button
+                    onClick={handleCall}
+                    className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+                    title="Call client"
+                  >
+                    <Phone className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleEmail}
+                    className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                    title="Email client"
+                  >
+                    <Mail className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleMarkContacted}
+                    className="p-2 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
+                    title="Mark as contacted"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                  </button>
+                </>
               ) : (
                 <button
-                  onClick={handleMarkContacted}
-                  title="Mark as contacted"
-                  className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                    "bg-purple-50 text-purple-600 hover:bg-purple-100 border border-purple-200"
-                  )}
+                  onClick={handleUndo}
+                  disabled={marking}
+                  className="p-2 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                  title="Undo contacted"
                 >
-                  <UserCheck className="w-3.5 h-3.5" />
+                  {marking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Undo2 className="w-4 h-4" />}
                 </button>
               )}
-
-              {/* View Report */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 ml-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onViewReport(lead.id);
-                }}
+              <button
+                onClick={(e) => { e.stopPropagation(); onViewReport(lead.id); }}
+                className="p-2 rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors"
+                title="View report"
               >
-                <Eye className="w-3 h-3 mr-1" />
-                Report
-              </Button>
-
-              <ChevronRight className={cn(
-                "w-4 h-4 text-gray-400 transition-transform",
-                expanded && "rotate-90"
-              )} />
+                <Eye className="w-4 h-4" />
+              </button>
+              <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", expanded && "rotate-180")} />
             </div>
           </div>
         </div>
@@ -474,30 +527,74 @@ function LeadCard({
         {/* Expanded Details */}
         {expanded && (
           <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-            {/* Contact Notes (if contacted) */}
-            {isContacted && lead.contactNotes && (
-              <div className="mb-3 p-3 rounded-lg bg-green-50 border border-green-100">
-                <p className="text-xs font-semibold text-green-700 mb-1 flex items-center gap-1">
+            {/* Contact Notes */}
+            {lead.contactNotes && (
+              <div className="mb-3 p-2.5 rounded-lg bg-green-50 border border-green-100">
+                <p className="text-[10px] text-green-600 font-semibold mb-0.5 flex items-center gap-1">
                   <MessageSquare className="w-3 h-3" />
-                  Contact Notes
+                  Contact Notes ({lead.contactMethod})
                 </p>
-                <p className="text-xs text-green-800">{lead.contactNotes}</p>
+                <p className="text-xs text-green-700">{lead.contactNotes}</p>
               </div>
             )}
 
-            <p className="text-xs font-semibold text-gray-700 mb-2">Lead Score Breakdown</p>
-            <div className="space-y-2">
-              {score.signals.map((signal, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-xs font-medium text-gray-700">{signal.name}</span>
-                      <span className="text-xs text-gray-500">{signal.points}/{signal.maxPoints}</span>
+            {/* Intake Data */}
+            {lead.intakeData && (
+              <div className="mb-3 p-2.5 rounded-lg bg-indigo-50 border border-indigo-100">
+                <p className="text-[10px] text-indigo-600 font-semibold mb-1.5">Client Intake Data</p>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  {lead.intakeData.treatmentGoal && (
+                    <div>
+                      <p className="text-[10px] text-indigo-400">Treatment Goal</p>
+                      <p className="font-medium text-indigo-700 capitalize">{lead.intakeData.treatmentGoal}</p>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                  )}
+                  {lead.intakeData.treatmentExperience && (
+                    <div>
+                      <p className="text-[10px] text-indigo-400">Experience</p>
+                      <p className="font-medium text-indigo-700 capitalize">{lead.intakeData.treatmentExperience}</p>
+                    </div>
+                  )}
+                  {lead.intakeData.budget && (
+                    <div>
+                      <p className="text-[10px] text-indigo-400">Budget</p>
+                      <p className="font-medium text-indigo-700">{lead.intakeData.budget}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* High-Value Indicators */}
+            {score.highValueIndicators.length > 0 && (
+              <div className="mb-3 p-2.5 rounded-lg bg-purple-50 border border-purple-100">
+                <p className="text-[10px] text-purple-600 font-semibold mb-1.5 flex items-center gap-1">
+                  <Zap className="w-3 h-3" />
+                  High-Value Indicators
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {score.highValueIndicators.map((indicator, i) => (
+                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">
+                      {indicator}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Score Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {score.signals.map((signal, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="font-medium text-gray-700">{signal.name}</span>
+                      <span className="text-gray-400">{signal.points}/{signal.maxPoints}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                       <div
                         className={cn(
-                          "h-1.5 rounded-full transition-all",
+                          "h-full rounded-full",
                           signal.points >= signal.maxPoints * 0.7 ? "bg-green-500" :
                           signal.points >= signal.maxPoints * 0.4 ? "bg-amber-500" :
                           signal.points > 0 ? "bg-red-400" : "bg-gray-200"
@@ -510,10 +607,12 @@ function LeadCard({
                 </div>
               ))}
             </div>
+
             <div className="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
               <p className="text-xs font-semibold text-gray-700 mb-1">Recommended Action</p>
               <p className="text-xs text-gray-600">{score.summary}</p>
             </div>
+
             <div className="mt-3 flex items-center gap-2 flex-wrap">
               <span className="text-[10px] text-gray-400">Treatments:</span>
               {lead.reportSummary.topTreatments.map((t, i) => (
@@ -549,6 +648,7 @@ export default function LeadDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "hot" | "warm" | "cool">("all");
+  const [tierFilter, setTierFilter] = useState<"all" | "platinum" | "gold" | "silver" | "bronze">("all");
   const [contactFilter, setContactFilter] = useState<"all" | "contacted" | "not_contacted">("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -582,7 +682,6 @@ export default function LeadDashboard() {
       });
       if (!res.ok) throw new Error("Failed to mark as contacted");
       const data = await res.json();
-      // Update local state
       setLeads((prev) =>
         prev.map((l) =>
           l.id === id
@@ -602,7 +701,6 @@ export default function LeadDashboard() {
         headers: { "Content-Type": "application/json" },
       });
       if (!res.ok) throw new Error("Failed to undo contact");
-      // Update local state
       setLeads((prev) =>
         prev.map((l) =>
           l.id === id
@@ -617,6 +715,9 @@ export default function LeadDashboard() {
 
   // Apply filters
   let filteredLeads = leads;
+  if (tierFilter !== "all") {
+    filteredLeads = filteredLeads.filter((l) => l.leadScore.clientTier === tierFilter);
+  }
   if (contactFilter === "contacted") {
     filteredLeads = filteredLeads.filter((l) => !!l.contactedAt);
   } else if (contactFilter === "not_contacted") {
@@ -665,7 +766,7 @@ export default function LeadDashboard() {
                 <BarChart3 className="w-5 h-5 text-purple-600" />
                 Lead Scoring Dashboard
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">Prioritize outreach by engagement level</p>
+              <p className="text-xs text-gray-500 mt-0.5">Screen high-value clients and prioritize outreach</p>
             </div>
             <Button
               size="sm"
@@ -682,27 +783,55 @@ export default function LeadDashboard() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Stats Cards */}
+        {/* Stats Cards - Row 1: Core Metrics */}
         {stats && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-            className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6"
-          >
-            <StatCard label="Total Leads" value={stats.total} icon={Users} color="bg-purple-500" />
-            <StatCard label="Hot Leads" value={stats.hot} icon={Flame} color="bg-red-500" subtext="Contact within 24h" />
-            <StatCard label="Warm Leads" value={stats.warm} icon={ThermometerSun} color="bg-amber-500" subtext="Follow up in 48h" />
-            <StatCard label="Cool Leads" value={stats.cool} icon={Snowflake} color="bg-blue-500" subtext="Nurture with emails" />
-            <StatCard label="Contacted" value={contactedCount} icon={CheckCircle2} color="bg-green-500" subtext={`${notContactedCount} remaining`} />
-            <StatCard
-              label="Avg Rating"
-              value={`${stats.avgStars} / 5`}
-              icon={Star}
-              color="bg-gradient-to-br from-amber-400 to-amber-600"
-              subtext={`${stats.avgScore} avg points`}
-            />
-          </motion.div>
+          <>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3"
+            >
+              <StatCard label="Total Leads" value={stats.total} icon={Users} color="bg-purple-500" />
+              <StatCard
+                label="Avg Booking Prob."
+                value={`${stats.avgBookingProbability}%`}
+                icon={TrendingUp}
+                color="bg-green-500"
+                subtext={`${stats.avgStars} avg stars`}
+              />
+              <StatCard
+                label="Pipeline Revenue"
+                value={`${formatCurrency(stats.estimatedPipelineRevenue.low)} – ${formatCurrency(stats.estimatedPipelineRevenue.high)}`}
+                icon={DollarSign}
+                color="bg-emerald-600"
+                subtext="Estimated total value"
+              />
+              <StatCard
+                label="Contacted"
+                value={contactedCount}
+                icon={CheckCircle2}
+                color="bg-green-500"
+                subtext={`${notContactedCount} remaining`}
+              />
+            </motion.div>
+
+            {/* Stats Cards - Row 2: Priority & Tiers */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+              className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6"
+            >
+              <StatCard label="Hot Leads" value={stats.hot} icon={Flame} color="bg-red-500" subtext="Contact within 24h" />
+              <StatCard label="Warm Leads" value={stats.warm} icon={ThermometerSun} color="bg-amber-500" subtext="Follow up in 48h" />
+              <StatCard label="Cool Leads" value={stats.cool} icon={Snowflake} color="bg-blue-500" subtext="Nurture with emails" />
+              <StatCard label="Platinum" value={stats.platinum} icon={Crown} color="bg-purple-600" subtext="$500+/mo budget" />
+              <StatCard label="Gold" value={stats.gold} icon={Award} color="bg-amber-500" subtext="$300-500/mo" />
+              <StatCard label="Silver" value={stats.silver} icon={Gem} color="bg-gray-500" subtext="$100-300/mo" />
+              <StatCard label="Bronze" value={stats.bronze} icon={Target} color="bg-orange-400" subtext="<$100/mo" />
+            </motion.div>
+          </>
         )}
 
         {/* Filters & Search */}
@@ -719,6 +848,22 @@ export default function LeadDashboard() {
                 )}
               >
                 {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Tier Filter */}
+          <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-0.5">
+            {(["all", "platinum", "gold", "silver", "bronze"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTierFilter(t)}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                  tierFilter === t ? "bg-indigo-600 text-white" : "text-gray-600 hover:bg-gray-100"
+                )}
+              >
+                {t === "all" ? "All Tiers" : t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
           </div>
@@ -748,7 +893,7 @@ export default function LeadDashboard() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder="Search by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"

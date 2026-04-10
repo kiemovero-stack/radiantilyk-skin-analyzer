@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 import type { SkinAnalysisReport, Severity, ScarTreatment } from "@shared/types";
 import { PRODUCT_CATALOG, BUNDLE_DEALS, findMatchingBundlesByName } from "@shared/productCatalog";
 import type { BundleDeal } from "@shared/productCatalog";
-import { ShoppingBag, Gift, Tag } from "lucide-react";
+import { ShoppingBag, Gift, Tag, CreditCard, DollarSign, Layers, Award, BadgeCheck } from "lucide-react";
+import { SERVICE_CATALOG } from "@shared/serviceCatalog";
 import {
   Sparkles,
   Activity,
@@ -42,6 +43,7 @@ import {
   User,
   Calendar,
   Info,
+  Hourglass,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "wouter";
@@ -1954,6 +1956,145 @@ export default function ClientReport() {
                   </div>
                 ))}
               </div>
+            </div>
+          </motion.section>
+
+          {/* Section: Full Services Overview */}
+          <motion.section
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mb-8 p-6 md:p-8 rounded-2xl border border-purple-100 bg-gradient-to-br from-white to-purple-50/30 shadow-sm"
+          >
+            <SectionHeader
+              icon={Layers}
+              title="Our Complete Menu of Services"
+              subtitle="113+ treatments across 25 specialties — all under one roof"
+            />
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="text-center p-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                <p className="text-2xl font-bold">113+</p>
+                <p className="text-xs opacity-90">Procedures</p>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 text-white">
+                <p className="text-2xl font-bold">68+</p>
+                <p className="text-xs opacity-90">Skincare Products</p>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                <p className="text-2xl font-bold">25</p>
+                <p className="text-xs opacity-90">Specialties</p>
+              </div>
+            </div>
+
+            {/* Category Grid */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Treatment Categories</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { name: "Neurotoxins", icon: "💉", desc: "Botox, Daxxify, Jeuveau" },
+                  { name: "Dermal Fillers", icon: "✨", desc: "All fillers — $600" },
+                  { name: "CO2 Laser", icon: "⚡", desc: "Resurfacing & rejuvenation" },
+                  { name: "Microneedling", icon: "🔬", desc: "With PRP & exosomes" },
+                  { name: "Chemical Peels", icon: "🧪", desc: "Light to deep peels" },
+                  { name: "HIFU", icon: "🎯", desc: "Non-surgical face lift" },
+                  { name: "Ultherapy", icon: "🔊", desc: "FDA-cleared skin lifting" },
+                  { name: "IPL", icon: "💡", desc: "Sun damage & pigmentation" },
+                  { name: "Hair Restoration", icon: "💇", desc: "PRP & exosome therapy" },
+                  { name: "Weight Loss", icon: "⚖️", desc: "Semaglutide & tirzepatide" },
+                  { name: "Hormone Therapy", icon: "🧬", desc: "Bioidentical HRT" },
+                  { name: "Peptide Therapy", icon: "🔗", desc: "BPC-157, GHK-Cu & more" },
+                  { name: "Scar Treatment", icon: "🩹", desc: "Customized scar packages" },
+                  { name: "Skin Tightening", icon: "🌟", desc: "Exilis Ultra & RF" },
+                  { name: "Facials", icon: "🧖", desc: "Medical-grade facials" },
+                ].map((cat, i) => (
+                  <div key={i} className="p-3 rounded-xl border border-gray-100 bg-white hover:border-purple-200 transition-colors">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-base">{cat.icon}</span>
+                      <span className="text-xs font-semibold text-gray-800">{cat.name}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500">{cat.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Membership Highlight */}
+            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shrink-0">
+                  <Award className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-gray-800">Membership Plans Available</h4>
+                  <p className="text-xs text-gray-600">Starting at <strong>$110/month</strong> — includes monthly facials, member-only pricing on all treatments, and exclusive perks.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Cherry & Affirm Financing */}
+            <div className="p-5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200">
+              <div className="flex items-center gap-2 mb-3">
+                <CreditCard className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-base text-gray-800">Flexible Financing — 0% Interest Available</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Don't let cost hold you back from looking and feeling your best. We partner with <strong className="text-emerald-700">Cherry</strong> and <strong className="text-emerald-700">Affirm</strong> to offer flexible payment plans so you can start your treatments today.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-4 rounded-xl bg-white border border-emerald-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">🍒</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm">Cherry</h4>
+                      <p className="text-[10px] text-gray-500">Patient financing made simple</p>
+                    </div>
+                  </div>
+                  <ul className="space-y-1">
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> 0% APR plans available</li>
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> Approval in seconds</li>
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> No hard credit check</li>
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> Plans from $35/month</li>
+                  </ul>
+                </div>
+                <div className="p-4 rounded-xl bg-white border border-emerald-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">A</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm">Affirm</h4>
+                      <p className="text-[10px] text-gray-500">Buy now, pay over time</p>
+                    </div>
+                  </div>
+                  <ul className="space-y-1">
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> Pay in 4 interest-free payments</li>
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> 3, 6, or 12 month plans</li>
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> No hidden fees</li>
+                    <li className="text-xs text-gray-600 flex items-center gap-1.5"><BadgeCheck className="w-3 h-3 text-emerald-500 shrink-0" /> Real-time decision</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-3 text-center">
+                Ask about financing during your consultation — most patients qualify for 0% interest plans.
+              </p>
+            </div>
+
+            <div className="mt-6 text-center">
+              <a
+                href={withUtm(CHECKIN_URL, "services_overview")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg"
+              >
+                <CalendarCheck className="w-4 h-4" />
+                Book Your Free Consultation
+              </a>
+              <p className="text-xs text-gray-400 mt-2">No obligation. We'll create a personalized plan and discuss financing options.</p>
             </div>
           </motion.section>
 

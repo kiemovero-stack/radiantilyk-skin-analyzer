@@ -50,6 +50,7 @@ export function registerLeadScoringRoutes(app: Express) {
           patientPhone: record.patientPhone,
           patientDob: record.patientDob,
           imageUrl: record.imageUrl,
+          intakeData: record.intakeData,
         });
 
         // Enrich with referral code presence
@@ -81,6 +82,8 @@ export function registerLeadScoringRoutes(app: Express) {
           contactedAt: record.contactedAt ? record.contactedAt.toISOString() : null,
           contactNotes: record.contactNotes,
           contactMethod: record.contactMethod,
+          intakeData: record.intakeData,
+          concerns: ((record.report as any)?.conditions || []).map((c: any) => c.name),
         };
       });
 
@@ -97,17 +100,30 @@ export function registerLeadScoringRoutes(app: Express) {
 
       // Summary stats
       const allScored = leads;
+      const contacted = allScored.filter((l) => l.contactedAt).length;
+      const totalEstRevLow = allScored.reduce((sum, l) => sum + l.leadScore.estimatedRevenue.low, 0);
+      const totalEstRevHigh = allScored.reduce((sum, l) => sum + l.leadScore.estimatedRevenue.high, 0);
+      const avgBookingProb = allScored.length > 0
+        ? Math.round(allScored.reduce((sum, l) => sum + l.leadScore.bookingProbability, 0) / allScored.length)
+        : 0;
       const stats = {
         total: allScored.length,
         hot: allScored.filter((l) => l.leadScore.priority === "hot").length,
         warm: allScored.filter((l) => l.leadScore.priority === "warm").length,
         cool: allScored.filter((l) => l.leadScore.priority === "cool").length,
+        contacted,
         avgScore: allScored.length > 0
           ? Math.round(allScored.reduce((sum, l) => sum + l.leadScore.totalPoints, 0) / allScored.length)
           : 0,
         avgStars: allScored.length > 0
           ? (allScored.reduce((sum, l) => sum + l.leadScore.stars, 0) / allScored.length).toFixed(1)
           : "0",
+        avgBookingProbability: avgBookingProb,
+        estimatedPipelineRevenue: { low: totalEstRevLow, high: totalEstRevHigh },
+        platinum: allScored.filter((l) => l.leadScore.clientTier === "platinum").length,
+        gold: allScored.filter((l) => l.leadScore.clientTier === "gold").length,
+        silver: allScored.filter((l) => l.leadScore.clientTier === "silver").length,
+        bronze: allScored.filter((l) => l.leadScore.clientTier === "bronze").length,
       };
 
       res.json({
@@ -159,8 +175,10 @@ export function registerLeadScoringRoutes(app: Express) {
         skinHealthScore: record.skinHealthScore,
         report: record.report,
         patientEmail: record.patientEmail,
+        patientPhone: record.patientPhone,
         patientDob: record.patientDob,
         imageUrl: record.imageUrl,
+        intakeData: record.intakeData,
       });
 
       const score = calculateLeadScore(scoringInput);
@@ -170,6 +188,7 @@ export function registerLeadScoringRoutes(app: Express) {
         patientFirstName: record.patientFirstName,
         patientLastName: record.patientLastName,
         patientEmail: record.patientEmail,
+        patientPhone: record.patientPhone,
         skinHealthScore: record.skinHealthScore,
         createdAt: record.createdAt,
         leadScore: score,
@@ -287,8 +306,10 @@ export function registerLeadScoringRoutes(app: Express) {
           skinHealthScore: r.skinHealthScore,
           report: r.report,
           patientEmail: r.patientEmail,
+          patientPhone: r.patientPhone,
           patientDob: r.patientDob,
           imageUrl: r.imageUrl,
+          intakeData: r.intakeData,
         });
         return calculateLeadScore(input);
       });

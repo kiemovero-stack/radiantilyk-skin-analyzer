@@ -684,3 +684,18 @@
 - [x] Rewrite aging simulation prompts for photorealistic, human-looking results
 - [x] Add explicit anti-AI-artifact instructions (no plastic look, no uncanny valley)
 - [x] Emphasize natural aging patterns, real skin texture, and photographic quality
+
+## Full Procedure/Skincare Catalog & Financing
+- [x] Add comprehensive services overview section to client report (113 procedures, 68 products, 20 categories)
+- [x] Include Cherry and Affirm financing CTAs with monthly payment messaging
+- [x] Add total procedure count and skincare product count to services section
+- [x] Make financing section visually compelling with gradient cards and CTA buttons
+- [x] Add procedure categories grid with counts per category
+
+## High-Value Client Screening & Booking Likelihood
+- [x] Enhance lead scoring with booking probability percentage (0-100%)
+- [x] Add high-value signals: budget, treatment experience, treatment goals, scar intent, consultation submission
+- [x] Add client tier badges (platinum/gold/silver/bronze) to lead dashboard
+- [x] Add booking probability bars with color-coded indicators to lead cards
+- [x] Show intake data (budget, goals, experience, concerns) on lead cards with high-value indicators
+- [x] Add tier filter (All/Platinum/Gold/Silver/Bronze) and pipeline revenue stats to dashboard
