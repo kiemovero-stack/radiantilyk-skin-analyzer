@@ -672,4 +672,10 @@
 - [x] Enhanced intake form with treatment goals, experience level, and budget selector
 - [x] Add interactive before/after comparison for aging (slider on report page)
 - [x] Built shareable Beauty Score card (gradient design, 5 sub-scores, share button, boost CTA)
-- [ ] Add "See Your Future Self" standalone CTA on landing page (future enhancement)
+- [x] Add "See Your Future Self" standalone CTA on landing page (dark gradient section with comparison cards)
+
+## Staff-Side Client Concerns & Future Self CTA
+- [x] Show client's selected concerns on staff-side report page (pink badges)
+- [x] Show client's intake data (treatment goals, experience, budget) on staff-side report
+- [x] Show concerns summary in staff history list (up to 4 badges per card)
+- [x] Build "See Your Future Self" CTA section on client landing page (dark gradient, two comparison cards, FB Pixel tracking)

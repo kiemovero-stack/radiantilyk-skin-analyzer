@@ -31,6 +31,7 @@ import {
   Phone,
   Mail,
   Gift,
+  Hourglass,
 } from "lucide-react";
 import { useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
@@ -752,6 +753,82 @@ export default function ClientLanding() {
                 <span className="text-sm text-gray-700">{item}</span>
               </motion.div>
             ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* See Your Future Self CTA */}
+      <section className="py-16 md:py-20 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-purple-500 rounded-full blur-[120px]" />
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-pink-500 rounded-full blur-[120px]" />
+        </div>
+        <div className="container px-4 relative z-10">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-xs font-medium mb-6">
+              <Hourglass className="w-3.5 h-3.5" />
+              AI-Powered Aging Simulation
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
+              See Your Future Self
+            </h2>
+            <p className="text-lg md:text-xl text-white/70 mb-4 max-w-2xl mx-auto">
+              What will you look like in <span className="text-pink-400 font-semibold">20 years</span>?
+            </p>
+            <p className="text-sm md:text-base text-white/50 mb-8 max-w-xl mx-auto">
+              Our AI generates two futures: one without treatment, and one with consistent skincare.
+              The difference is striking — and it starts with a single photo.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-xl mx-auto mb-10">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+              >
+                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-3">
+                  <Hourglass className="w-6 h-6 text-red-400" />
+                </div>
+                <h3 className="text-white font-semibold mb-1">Without Treatment</h3>
+                <p className="text-white/50 text-xs">See the natural aging process — sun damage, volume loss, and fine lines compounding over time.</p>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+              >
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                  <Sparkles className="w-6 h-6 text-emerald-400" />
+                </div>
+                <h3 className="text-white font-semibold mb-1">With Treatment</h3>
+                <p className="text-white/50 text-xs">See how consistent treatments preserve your youthful appearance — prevention is the best anti-aging.</p>
+              </motion.div>
+            </div>
+
+            <Button
+              size="lg"
+              onClick={() => {
+                fbPixel.trackCustom("FutureSelfCTA");
+                navigate(paths.start);
+              }}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-6 text-base rounded-full shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
+            >
+              <Camera className="w-5 h-5 mr-2" />
+              See My Future Self — Free
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <p className="text-white/40 text-xs mt-4">Takes 60 seconds. No signup required.</p>
           </motion.div>
         </div>
       </section>

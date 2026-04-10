@@ -482,6 +482,11 @@ export default function History() {
                               {analysis.patientEmail}
                             </span>
                           )}
+                          {analysis.patientPhone && (
+                            <span className="truncate max-w-[140px]">
+                              {analysis.patientPhone}
+                            </span>
+                          )}
                           {isCompleted && analysis.skinType && (
                             <span className="px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground text-[10px] font-medium">
                               {analysis.skinType}
@@ -501,6 +506,21 @@ export default function History() {
                             )}
                           </span>
                         </div>
+                        {/* Client Concerns */}
+                        {analysis.intakeData && (analysis.intakeData as any).concerns && (analysis.intakeData as any).concerns.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {((analysis.intakeData as any).concerns as string[]).slice(0, 4).map((concern: string, i: number) => (
+                              <span key={i} className="px-1.5 py-0.5 rounded-full bg-pink-500/10 text-pink-400 text-[10px] font-medium border border-pink-500/20">
+                                {concern}
+                              </span>
+                            ))}
+                            {((analysis.intakeData as any).concerns as string[]).length > 4 && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] font-medium">
+                                +{((analysis.intakeData as any).concerns as string[]).length - 4} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {!compareMode && isCompleted && (

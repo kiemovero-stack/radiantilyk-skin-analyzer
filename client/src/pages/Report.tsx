@@ -27,6 +27,11 @@ import {
   Send,
   Check,
   Eye,
+  Heart,
+  Target,
+  DollarSign,
+  Phone,
+  Briefcase,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -379,6 +384,12 @@ export default function Report() {
                     <Mail className="w-3.5 h-3.5" />
                     <span>{data.patientEmail}</span>
                   </div>
+                  {data.patientPhone && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Phone className="w-3.5 h-3.5" />
+                      <a href={`tel:${data.patientPhone}`} className="hover:text-primary transition-colors">{data.patientPhone}</a>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>DOB: {data.patientDob ? new Date(data.patientDob + "T00:00:00").toLocaleDateString() : "N/A"}</span>
@@ -398,6 +409,49 @@ export default function Report() {
                     </span>
                   </div>
                 </div>
+
+                {/* Client Concerns & Intake Data */}
+                {data.intakeData && (
+                  <div className="mt-4 pt-4 border-t border-border/40">
+                    {/* Concerns */}
+                    {data.intakeData.concerns && data.intakeData.concerns.length > 0 && (
+                      <div className="mb-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Heart className="w-3.5 h-3.5 text-pink-500" />
+                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client Concerns</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {data.intakeData.concerns.map((concern: string, i: number) => (
+                            <span key={i} className="px-2.5 py-1 rounded-full bg-pink-500/10 text-pink-400 text-xs font-medium border border-pink-500/20">
+                              {concern}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Treatment Goal, Experience, Budget */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                      {data.intakeData.treatmentGoal && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Target className="w-3.5 h-3.5 text-blue-400" />
+                          <span className="text-xs"><strong>Goal:</strong> {data.intakeData.treatmentGoal}</span>
+                        </div>
+                      )}
+                      {data.intakeData.treatmentExperience && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Briefcase className="w-3.5 h-3.5 text-purple-400" />
+                          <span className="text-xs"><strong>Experience:</strong> {data.intakeData.treatmentExperience}</span>
+                        </div>
+                      )}
+                      {data.intakeData.budget && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-xs"><strong>Budget:</strong> {data.intakeData.budget}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
