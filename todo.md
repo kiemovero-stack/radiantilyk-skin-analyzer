@@ -716,3 +716,8 @@
 - [x] Multi-angle severity modifier: conditions confirmed from 2+ angles get higher severity weight
 - [x] Beauty score now leverages side views for structure, symmetry, and youthfulness scoring
 - [x] Fix all TypeScript errors (0 errors)
+
+## Bug Fix: Future Aging Simulation Not Showing
+- [x] Investigate why future aging simulation is no longer displaying on client report
+- [x] Fix root cause and restore simulation functionality (was never added to staff-side Report.tsx)
+- [x] Add future aging simulation section to staff-side Report page (currently only on client report)

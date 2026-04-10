@@ -227,6 +227,8 @@ export default function Report() {
   const [emailSent, setEmailSent] = useState(false);
   const [simulationImages, setSimulationImages] = useState<Record<string, string>>({});
   const [simulationsLoading, setSimulationsLoading] = useState(false);
+  const [agingImages, setAgingImages] = useState<Record<string, string>>({});
+  const [agingLoading, setAgingLoading] = useState(false);
 
   // Poll for simulation images
   useEffect(() => {
@@ -260,6 +262,38 @@ export default function Report() {
       clearInterval(interval);
       clearTimeout(timeout);
     };
+  }, [data, isLoading, reportId]);
+
+  // Poll for aging images
+  useEffect(() => {
+    if (!data || isLoading) return;
+    const existingAging = (data as any).agingImages;
+    if (existingAging && typeof existingAging === "object" && Object.keys(existingAging).length > 0) {
+      setAgingImages(existingAging);
+      return;
+    }
+    // Start polling
+    setAgingLoading(true);
+    let attempts = 0;
+    const maxAttempts = 40;
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await fetch(`/api/client/aging/${reportId}`);
+        if (!res.ok) return;
+        const result = await res.json();
+        if (result.ready && result.agingImages) {
+          setAgingImages(result.agingImages);
+          setAgingLoading(false);
+          clearInterval(interval);
+        }
+      } catch { /* ignore polling errors */ }
+      if (attempts >= maxAttempts) {
+        setAgingLoading(false);
+        clearInterval(interval);
+      }
+    }, 10000);
+    return () => clearInterval(interval);
   }, [data, isLoading, reportId]);
 
   const downloadPdf = trpc.skin.downloadPdf.useMutation({
@@ -791,6 +825,134 @@ export default function Report() {
               </motion.section>
             );
           })()}
+
+          {/* Section: Future Aging Self — See Yourself in 20 Years */}
+          <motion.section
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mb-10 p-6 md:p-8 rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/50 to-orange-50/30"
+          >
+            <SectionHeader
+              icon={Telescope}
+              number=""
+              title="Future Aging Simulation"
+            />
+            {agingImages && Object.keys(agingImages).length > 0 ? (
+              <div className="space-y-6">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  AI-projected appearance in <strong>20 years</strong> — comparing natural aging vs. aging with consistent professional treatment.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Without Treatment */}
+                  {agingImages.withoutTreatment && (
+                    <div className="rounded-xl overflow-hidden border border-border shadow-sm">
+                      <div className="bg-muted px-4 py-2 flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Without Treatment</span>
+                      </div>
+                      <div className="relative aspect-square">
+                        <img
+                          src={agingImages.withoutTreatment}
+                          alt="Projected appearance in 20 years without treatment"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-black/60 text-white text-[10px] font-bold">
+                          +20 YEARS
+                        </div>
+                      </div>
+                      <div className="p-3 bg-muted/50">
+                        <p className="text-xs text-muted-foreground">Natural aging without professional treatments or advanced skincare</p>
+                      </div>
+                    </div>
+                  )}
+                  {/* With Treatment */}
+                  {agingImages.withTreatment && (
+                    <div className="rounded-xl overflow-hidden border border-primary/30 shadow-sm ring-2 ring-primary/10">
+                      <div className="bg-primary/10 px-4 py-2 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-bold text-primary uppercase tracking-wide">With Treatment</span>
+                      </div>
+                      <div className="relative aspect-square">
+                        <img
+                          src={agingImages.withTreatment}
+                          alt="Projected appearance in 20 years with consistent treatment"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                          +20 YEARS WITH CARE
+                        </div>
+                      </div>
+                      <div className="p-3 bg-primary/5">
+                        <p className="text-xs text-primary/80">Aging gracefully with consistent professional treatments and advanced skincare</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Interactive slider if both images are available */}
+                {agingImages.withoutTreatment && agingImages.withTreatment && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      Drag to compare — Without vs. With Treatment
+                    </p>
+                    <BeforeAfterSlider
+                      beforeUrl={agingImages.withoutTreatment}
+                      afterUrl={agingImages.withTreatment}
+                      label="20-Year Aging Comparison: Without Treatment vs. With Treatment"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : agingLoading ? (
+              <div className="flex items-center gap-3 p-5 rounded-xl bg-amber-50 border border-amber-200">
+                <Loader2 className="w-5 h-5 animate-spin text-amber-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-700">Generating Aging Simulation</p>
+                  <p className="text-xs text-amber-500 mt-0.5">AI is creating a personalized aging simulation showing the client in 20 years — with and without treatment. This takes a couple of minutes...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 rounded-xl bg-amber-50/50 border border-amber-200 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <Telescope className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <p className="text-base font-bold">Future Aging Simulation</p>
+                  <p className="text-sm text-muted-foreground mt-1">Generate a realistic preview of how this client will look in 20 years — with and without professional treatment.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    setAgingLoading(true);
+                    try {
+                      await fetch(`/api/client/aging/${reportId}/generate`, { method: 'POST' });
+                      // Start polling
+                      const poll = setInterval(async () => {
+                        try {
+                          const res = await fetch(`/api/client/aging/${reportId}`);
+                          const result = await res.json();
+                          if (result.ready && result.agingImages) {
+                            setAgingImages(result.agingImages);
+                            setAgingLoading(false);
+                            clearInterval(poll);
+                          }
+                        } catch {}
+                      }, 8000);
+                      setTimeout(() => { clearInterval(poll); setAgingLoading(false); }, 300000);
+                    } catch {
+                      setAgingLoading(false);
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-sm hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Generate Aging Simulation
+                </button>
+                <p className="text-[10px] text-muted-foreground">Takes 1-3 minutes. AI-generated simulation for illustration purposes only.</p>
+              </div>
+            )}
+          </motion.section>
 
           {/* Section 6: Skincare Products */}
           <motion.section
