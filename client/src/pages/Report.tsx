@@ -41,10 +41,11 @@ import {
   HelpCircle,
   BookOpen,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 import { motion } from "framer-motion";
+import { StickyNote } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -238,6 +239,49 @@ export default function Report() {
   const [agingImages, setAgingImages] = useState<Record<string, string>>({});
   const [agingLoading, setAgingLoading] = useState(false);
   const [reanalyzing, setReanalyzing] = useState(false);
+  const [staffNotes, setStaffNotes] = useState("");
+  const [notesSaving, setNotesSaving] = useState(false);
+  const [notesSaved, setNotesSaved] = useState(false);
+  const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Initialize staff notes from data
+  useEffect(() => {
+    if (data && (data as any).staffNotes) {
+      setStaffNotes((data as any).staffNotes);
+    }
+  }, [data]);
+
+  // Auto-save staff notes mutation
+  const updateNotesMutation = trpc.skin.updateStaffNotes.useMutation({
+    onSuccess: () => {
+      setNotesSaving(false);
+      setNotesSaved(true);
+      setTimeout(() => setNotesSaved(false), 2000);
+    },
+    onError: (err) => {
+      setNotesSaving(false);
+      toast.error(`Failed to save notes: ${err.message}`);
+    },
+  });
+
+  const debouncedSaveNotes = useCallback(
+    (notes: string) => {
+      if (notesTimerRef.current) clearTimeout(notesTimerRef.current);
+      notesTimerRef.current = setTimeout(() => {
+        setNotesSaving(true);
+        setNotesSaved(false);
+        updateNotesMutation.mutate({ id: reportId, notes });
+      }, 1000);
+    },
+    [reportId]
+  );
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setStaffNotes(val);
+    setNotesSaved(false);
+    debouncedSaveNotes(val);
+  };
 
   // Poll for simulation images
   useEffect(() => {
@@ -810,6 +854,79 @@ export default function Report() {
                 </div>
               )}
 
+              {/* Treatment Pricing */}
+              {report.staffSummary.treatmentPricing && report.staffSummary.treatmentPricing.length > 0 && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" /> Treatment Pricing Quick Reference
+                  </h3>
+                  <div className="rounded-xl overflow-hidden border border-amber-200 bg-white/80">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-amber-100/70">
+                          <th className="text-left px-4 py-2.5 text-xs font-semibold text-amber-800 uppercase tracking-wide">Treatment</th>
+                          <th className="text-left px-4 py-2.5 text-xs font-semibold text-amber-800 uppercase tracking-wide">Per Session</th>
+                          <th className="text-left px-4 py-2.5 text-xs font-semibold text-amber-800 uppercase tracking-wide">Sessions</th>
+                          <th className="text-right px-4 py-2.5 text-xs font-semibold text-amber-800 uppercase tracking-wide">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(() => {
+                          const pricing = report.staffSummary!.treatmentPricing!;
+                          const categories = ['Procedure', 'Facial', 'Package', 'Product', 'Consultation'];
+                          const grouped = categories.map(cat => ({
+                            cat,
+                            items: pricing.filter(p => p.category === cat),
+                          })).filter(g => g.items.length > 0);
+                          
+                          return grouped.flatMap((group, gi) => [
+                            <tr key={`cat-${gi}`} className="bg-amber-50/50">
+                              <td colSpan={4} className="px-4 py-1.5 text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                                {group.cat}s
+                              </td>
+                            </tr>,
+                            ...group.items.map((item: any, ii: number) => (
+                              <tr key={`item-${gi}-${ii}`} className={ii % 2 === 0 ? 'bg-white' : 'bg-amber-50/30'}>
+                                <td className="px-4 py-2 text-gray-800 font-medium">
+                                  {item.treatment}
+                                  {item.savingsNote && (
+                                    <span className="block text-[10px] text-green-600 mt-0.5">{item.savingsNote}</span>
+                                  )}
+                                </td>
+                                <td className="px-4 py-2 text-gray-600">{item.pricePerSession}</td>
+                                <td className="px-4 py-2 text-gray-600">{item.sessionsRecommended}</td>
+                                <td className="px-4 py-2 text-right font-semibold text-gray-800">{item.totalCost}</td>
+                              </tr>
+                            )),
+                          ]);
+                        })()}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-amber-100/70 border-t-2 border-amber-300">
+                          <td colSpan={3} className="px-4 py-2.5 text-xs font-bold text-amber-900 uppercase">Estimated Total Investment</td>
+                          <td className="px-4 py-2.5 text-right font-bold text-amber-900">
+                            {(() => {
+                              const pricing = report.staffSummary!.treatmentPricing!;
+                              let total = 0;
+                              pricing.forEach(p => {
+                                const num = parseFloat(p.totalCost.replace(/[^0-9.]/g, ''));
+                                if (!isNaN(num)) total += num;
+                              });
+                              return `$${total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                            })()}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colSpan={4} className="px-4 py-2 text-[10px] text-gray-500">
+                            Financing available through Cherry &amp; Affirm for treatments over $500. Ask about package discounts and membership pricing.
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {/* Talking Points */}
               {report.talkingPoints && report.talkingPoints.length > 0 && (
                 <div className="mt-5">
@@ -838,6 +955,45 @@ export default function Report() {
               )}
             </motion.section>
           )}
+
+          {/* Staff Quick Notes */}
+          <motion.section
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="mb-10 p-5 rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50/50 to-blue-50/50"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center">
+                  <StickyNote className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-sky-900">Quick Notes</h3>
+                  <p className="text-[10px] text-sky-600">Staff-only — jot down consultation notes</p>
+                </div>
+              </div>
+              <div className="text-xs">
+                {notesSaving && (
+                  <span className="text-sky-500 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+                  </span>
+                )}
+                {notesSaved && (
+                  <span className="text-emerald-600 flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Saved
+                  </span>
+                )}
+              </div>
+            </div>
+            <textarea
+              value={staffNotes}
+              onChange={handleNotesChange}
+              placeholder="Type your consultation notes here... (auto-saves as you type)"
+              className="w-full min-h-[100px] p-3 rounded-xl border border-sky-200 bg-white/80 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300 resize-y"
+              rows={4}
+            />
+          </motion.section>
 
           {/* Section 1: Score */}
           <motion.section

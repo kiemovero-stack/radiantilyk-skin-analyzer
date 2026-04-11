@@ -809,3 +809,20 @@
 - [x] Add "No Guide Yet" placeholder with one-click "Generate Guide" button for older reports without staffSummary
 - [x] Bulk re-analyze skipped per user request — individual re-analyze available via Generate Guide button or Re-analyze button
 - [x] Update shared types to match new schema (StaffSummary, ConcernAnalysis, AnticipatedQuestion, EducationalPoint)
+
+## Test Generate Consultation Guide
+- [ ] Test Generate Consultation Guide button on an existing report without staffSummary
+- [ ] Verify the full enhanced summary (concern analysis, Q&A, educational points) populates correctly
+
+## Quick Notes Field
+- [x] Add staffNotes column to skinAnalyses database table
+- [x] Add Quick Notes text field to staff Report page with auto-save (1s debounce)
+- [x] Persist notes to database via tRPC updateStaffNotes mutation
+- [x] Sky-blue styled card with StickyNote icon, Saving.../Saved indicators
+
+## Treatment Pricing in Staff Summary
+- [x] Add treatmentPricing array to staffSummary AI prompt schema (treatment, category, pricePerSession, sessionsRecommended, totalCost, savingsNote)
+- [x] Add TreatmentPricingItem TypeScript interface to shared types
+- [x] Display pricing table in staff consultation guide section (grouped by category, with estimated total and financing note)
+- [x] Include Cherry & Affirm financing note for totals over $500
+- [x] Vitest tests for staffNotes column, updateStaffNotes mutation (143 tests passing)

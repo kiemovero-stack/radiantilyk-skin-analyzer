@@ -534,7 +534,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       staffSummary: {
         type: "object",
         description: "A comprehensive staff-only consultation guide designed for the provider to review before speaking with the client. Includes concern analysis, anticipated questions, and educational talking points. Written in simple, non-clinical language so ANY staff member can use it.",
-        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy", "concernAnalysis", "anticipatedQuestions", "educationalPoints"],
+        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy", "concernAnalysis", "anticipatedQuestions", "educationalPoints", "treatmentPricing"],
         additionalProperties: false,
         properties: {
           quickOverview: { type: "string", description: "2-3 sentence summary of this client's skin situation. What are the main issues? What's the overall picture? Write it like you're briefing a colleague." },
@@ -553,7 +553,7 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
                 concern: { type: "string", description: "The concern name. E.g., 'Jawline & Chin Definition' or 'Large Pores'" },
                 whatWeFound: { type: "string", description: "What the AI analysis actually found related to this concern. Be specific about severity and location." },
                 howToExplain: { type: "string", description: "How to explain this to the client in simple, empathetic terms. Include exact words staff can say." },
-                recommendedAction: { type: "string", description: "The specific treatment recommendation for this concern." }
+                recommendedAction: { type: "string", description: "The specific treatment recommendation for this concern, including the treatment name and exact price from the catalog." }
               }
             }
           },
@@ -567,6 +567,23 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
               properties: {
                 question: { type: "string", description: "A realistic question the client might ask. E.g., 'How long will the results last?' or 'Is this going to hurt?'" },
                 answer: { type: "string", description: "A clear, honest, reassuring answer in simple language. Include specific details when possible." }
+              }
+            }
+          },
+          treatmentPricing: {
+            type: "array",
+            description: "A clear pricing summary for ALL recommended treatments. Staff use this to confidently discuss costs. Include every procedure, facial, and product recommended in the report. Group by category. Include financing options (Cherry, Affirm) for totals over $500.",
+            items: {
+              type: "object",
+              required: ["treatment", "category", "pricePerSession", "sessionsRecommended", "totalCost", "savingsNote"],
+              additionalProperties: false,
+              properties: {
+                treatment: { type: "string", description: "Treatment name exactly as it appears in the catalog" },
+                category: { type: "string", description: "Category: 'Procedure', 'Facial', 'Product', 'Package', 'Consultation'" },
+                pricePerSession: { type: "string", description: "Price per session/unit from the catalog, e.g. '$350'" },
+                sessionsRecommended: { type: "string", description: "Number of sessions recommended, e.g. 'Series of 3' or 'Single session' or 'Monthly'" },
+                totalCost: { type: "string", description: "Total cost for the recommended course, e.g. '$1,050' or '$350' for single session" },
+                savingsNote: { type: "string", description: "Any bundle/package savings, financing options, or value proposition. E.g. 'Save $150 with series pricing' or 'Cherry financing available — as low as $87/mo' or '' if no savings apply" }
               }
             }
           },

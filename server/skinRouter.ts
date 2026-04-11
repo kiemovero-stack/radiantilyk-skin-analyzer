@@ -514,6 +514,23 @@ export const skinRouter = router({
     }),
 
   /**
+   * Update staff notes for a report.
+   */
+  updateStaffNotes: protectedProcedure
+    .input(z.object({ id: z.number(), notes: z.string() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      await db
+        .update(skinAnalyses)
+        .set({ staffNotes: input.notes })
+        .where(eq(skinAnalyses.id, input.id));
+
+      return { success: true };
+    }),
+
+  /**
    * Get multiple analyses by IDs for comparison.
    * Only returns completed analyses belonging to the current user.
    */

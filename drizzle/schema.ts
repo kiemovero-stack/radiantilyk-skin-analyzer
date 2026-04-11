@@ -55,6 +55,8 @@ export const skinAnalyses = mysqlTable("skinAnalyses", {
   intakeData: json("intakeData"),
   /** JSON array of previous analysis scores: [{ score, conditionCount, analyzedAt, conditions }] */
   scoreHistory: json("scoreHistory"),
+  /** Staff notes about the consultation or client preferences */
+  staffNotes: text("staffNotes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

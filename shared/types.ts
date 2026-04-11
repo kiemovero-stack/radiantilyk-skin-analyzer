@@ -116,6 +116,15 @@ export interface EducationalPoint {
   whyItMatters: string;
 }
 
+export interface TreatmentPricingItem {
+  treatment: string;
+  category: string;
+  pricePerSession: string;
+  sessionsRecommended: string;
+  totalCost: string;
+  savingsNote: string;
+}
+
 export interface StaffSummary {
   quickOverview: string;
   topPriorityConcern: string;
@@ -125,6 +134,7 @@ export interface StaffSummary {
   concernAnalysis?: ConcernAnalysis[];
   anticipatedQuestions?: AnticipatedQuestion[];
   educationalPoints?: EducationalPoint[];
+  treatmentPricing?: TreatmentPricingItem[];
 }
 
 export interface TalkingPoint {
