@@ -30,7 +30,8 @@ CRITICAL RULES:
    - The score MUST be different for every patient based on their actual skin. Show your full step-by-step calculation in scoreCalculation.
    - Clearly differentiate between mild, moderate, and severe conditions with evidence
    - Include deeper skin insights: texture depth analysis, scarring type classification, pigmentation pattern mapping, collagen loss indicators
-   - When multiple angles are provided (front, left, right), analyze ALL images together for a comprehensive assessment. Note conditions visible from specific angles.
+   - SCARRING DETECTION PRIORITY: Carefully examine cheeks, jawline, jowls, and temples for ANY scarring — including atrophic (ice pick, boxcar, rolling), hypertrophic, post-inflammatory, and acne scarring. Scarring is one of the most commonly MISSED conditions. Look for: uneven skin texture, small pitted depressions, shadow patterns under lighting, and areas where the skin surface is not smooth. If you see ANY texture irregularity on the cheeks or jowls, classify it as scarring with appropriate severity. When in doubt, REPORT it as mild scarring rather than miss it.
+   - When multiple angles are provided (front, left, right), analyze ALL images together for a comprehensive assessment. Note conditions visible from specific angles. Side views often reveal scarring and texture issues that are less visible in front-facing photos.
 
 2. SKIN TYPE & TONE DETECTION
    - Detect Fitzpatrick skin type (I-VI) from the image with HIGH ACCURACY:
@@ -580,9 +581,9 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
               properties: {
                 treatment: { type: "string", description: "Treatment name exactly as it appears in the catalog" },
                 category: { type: "string", description: "Category: 'Procedure', 'Facial', 'Product', 'Package', 'Consultation'" },
-                pricePerSession: { type: "string", description: "Price per session/unit from the catalog, e.g. '$350'" },
+                pricePerSession: { type: "string", description: "Price per session/unit from the catalog as a SINGLE dollar amount, e.g. '$350'. For per-unit pricing like injectables, show estimated total for typical usage, e.g. '$180 (est. 15 units)'. NEVER use ranges." },
                 sessionsRecommended: { type: "string", description: "Number of sessions recommended, e.g. 'Series of 3' or 'Single session' or 'Monthly'" },
-                totalCost: { type: "string", description: "Total cost for the recommended course, e.g. '$1,050' or '$350' for single session" },
+                totalCost: { type: "string", description: "Total cost for the recommended course as a SINGLE dollar amount — NEVER a range. Use the midpoint if variable. E.g. '$1,050' or '$350'. WRONG: '$120-$240'. CORRECT: '$180'." },
                 savingsNote: { type: "string", description: "Any bundle/package savings, financing options, or value proposition. E.g. 'Save $150 with series pricing' or 'Cherry financing available — as low as $87/mo' or '' if no savings apply" }
               }
             }

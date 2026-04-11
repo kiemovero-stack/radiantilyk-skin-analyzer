@@ -909,8 +909,24 @@ export default function Report() {
                               const pricing = report.staffSummary!.treatmentPricing!;
                               let total = 0;
                               pricing.forEach(p => {
-                                const num = parseFloat(p.totalCost.replace(/[^0-9.]/g, ''));
-                                if (!isNaN(num)) total += num;
+                                // Handle ranges like "$120-$240" by taking the first number
+                                const rangeMatch = p.totalCost.match(/\$([\d,]+(?:\.\d+)?)/g);
+                                if (rangeMatch && rangeMatch.length >= 2) {
+                                  // It's a range — average the first two dollar amounts
+                                  const low = parseFloat(rangeMatch[0].replace(/[^0-9.]/g, ''));
+                                  const high = parseFloat(rangeMatch[1].replace(/[^0-9.]/g, ''));
+                                  if (!isNaN(low) && !isNaN(high)) {
+                                    total += Math.round((low + high) / 2);
+                                    return;
+                                  }
+                                }
+                                // Single value — extract first dollar amount only
+                                const singleMatch = p.totalCost.match(/\$([\d,]+(?:\.\d+)?)/);
+                                if (singleMatch) {
+                                  const num = parseFloat(singleMatch[1].replace(/,/g, ''));
+                                  // Sanity cap: no single line item should exceed $15,000
+                                  if (!isNaN(num) && num <= 15000) total += num;
+                                }
                               });
                               return `$${total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
                             })()}

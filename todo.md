@@ -826,3 +826,16 @@
 - [x] Display pricing table in staff consultation guide section (grouped by category, with estimated total and financing note)
 - [x] Include Cherry & Affirm financing note for totals over $500
 - [x] Vitest tests for staffNotes column, updateStaffNotes mutation (143 tests passing)
+
+## Bug Fix: Treatment Pricing Total Showing $120k+
+- [x] Investigated: Botox line had "$120-$240 (estimate)" which parsed as 120240 ($120k)
+- [x] Fixed UI parser to handle ranges (averages low/high), extract first dollar amount only, and cap at $15k per item
+- [x] Updated AI prompt: totalCost must be a SINGLE dollar amount, NEVER a range
+- [x] Updated AI prompt: pricePerSession must be a SINGLE dollar amount for per-unit pricing
+- [x] Added 10 unit tests for pricing parser (ranges, commas, cents, caps, edge cases) — 153 tests passing
+
+## Bug Fix: AI Not Detecting Scarring on Japanjot Kaur
+- [x] Added SCARRING DETECTION PRIORITY section to AI prompt — explicit instructions to examine cheeks, jawline, jowls, temples
+- [x] Lists all scar types to look for: atrophic (ice pick, boxcar, rolling), hypertrophic, post-inflammatory, acne
+- [x] Instructs AI to report mild scarring when in doubt rather than miss it
+- [x] Enhanced multi-angle instruction: side views reveal scarring/texture not visible in front photos
