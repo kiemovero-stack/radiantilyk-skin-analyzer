@@ -37,6 +37,9 @@ import {
   ArrowRight,
   Camera,
   Printer,
+  Search,
+  HelpCircle,
+  BookOpen,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -573,6 +576,35 @@ export default function Report() {
           </motion.div>
 
           {/* Staff Summary & Talking Points */}
+          {!report.staffSummary && (
+            <motion.section
+              initial="hidden"
+              animate="visible"
+              variants={fadeUp}
+              className="mb-10 p-6 md:p-8 rounded-2xl border-2 border-dashed border-amber-300 bg-gradient-to-br from-amber-50/50 to-orange-50/50"
+            >
+              <div className="text-center py-6">
+                <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Briefcase className="w-7 h-7 text-amber-500" />
+                </div>
+                <h2 className="text-lg font-bold text-amber-900 mb-2">Staff Consultation Guide</h2>
+                <p className="text-sm text-amber-700 mb-1">This report was created before the consultation guide feature was added.</p>
+                <p className="text-sm text-gray-500 mb-6">Click below to generate a personalized consultation guide with talking points, anticipated Q&A, and educational content for this client.</p>
+                <Button
+                  onClick={handleReanalyze}
+                  disabled={reanalyzing}
+                  className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2"
+                >
+                  {reanalyzing ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating Guide...</>
+                  ) : (
+                    <><RefreshCw className="w-4 h-4 mr-2" /> Generate Consultation Guide</>
+                  )}
+                </Button>
+                <p className="text-xs text-gray-400 mt-3">This will re-analyze the report with the latest AI to generate the guide and update the score.</p>
+              </div>
+            </motion.section>
+          )}
           {report.staffSummary && (
             <motion.section
               initial="hidden"
@@ -686,6 +718,98 @@ export default function Report() {
                 </div>
               </div>
 
+              {/* Concern Analysis */}
+              {report.staffSummary.concernAnalysis && report.staffSummary.concernAnalysis.length > 0 && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                    <Search className="w-4 h-4" /> Concern-by-Concern Breakdown
+                  </h3>
+                  <div className="space-y-3">
+                    {report.staffSummary.concernAnalysis.map((ca: any, i: number) => (
+                      <div key={i} className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                        <div className="flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            {i + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-amber-900 mb-2">{ca.concern}</div>
+                            <div className="space-y-2">
+                              <div>
+                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">What We Found:</span>
+                                <p className="text-sm text-gray-700 leading-relaxed mt-0.5">{ca.whatWeFound}</p>
+                              </div>
+                              <div>
+                                <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">How to Explain:</span>
+                                <p className="text-sm text-gray-700 leading-relaxed mt-0.5 italic">"{ca.howToExplain}"</p>
+                              </div>
+                              <div>
+                                <span className="text-xs font-semibold text-green-600 uppercase tracking-wide">Recommended Action:</span>
+                                <p className="text-sm text-gray-700 leading-relaxed mt-0.5">{ca.recommendedAction}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Anticipated Questions */}
+              {report.staffSummary.anticipatedQuestions && report.staffSummary.anticipatedQuestions.length > 0 && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4" /> Client May Ask
+                  </h3>
+                  <div className="space-y-3">
+                    {report.staffSummary.anticipatedQuestions.map((qa: any, i: number) => (
+                      <div key={i} className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                        <div className="flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            Q
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-800 mb-2">"{qa.question}"</p>
+                            <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                              <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Suggested Answer:</p>
+                              <p className="text-sm text-gray-700 leading-relaxed">{qa.answer}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Educational Points */}
+              {report.staffSummary.educationalPoints && report.staffSummary.educationalPoints.length > 0 && (
+                <div className="mt-5">
+                  <h3 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" /> Educate the Client
+                  </h3>
+                  <div className="space-y-3">
+                    {report.staffSummary.educationalPoints.map((ep: any, i: number) => (
+                      <div key={i} className="p-4 rounded-xl bg-white/80 border border-amber-200">
+                        <div className="flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            <BookOpen className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-indigo-800 mb-2">{ep.topic}</div>
+                            <p className="text-sm text-gray-700 leading-relaxed mb-2">{ep.explanation}</p>
+                            <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200">
+                              <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide mb-1">For This Client:</p>
+                              <p className="text-sm text-gray-700 leading-relaxed">{ep.whyItMatters}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Talking Points */}
               {report.talkingPoints && report.talkingPoints.length > 0 && (
                 <div className="mt-5">
@@ -701,7 +825,7 @@ export default function Report() {
                           </div>
                           <div className="flex-1">
                             <div className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">{tp.topic}</div>
-                            <p className="text-sm text-gray-800 leading-relaxed italic">“{tp.whatToSay}”</p>
+                            <p className="text-sm text-gray-800 leading-relaxed italic">"{tp.whatToSay}"</p>
                             <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
                               <Sparkles className="w-3 h-3" /> {tp.whyItWorks}
                             </p>

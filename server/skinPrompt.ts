@@ -533,15 +533,57 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
       },
       staffSummary: {
         type: "object",
-        description: "A concise staff-only summary designed for the provider to quickly review before speaking with the client. Written in simple, non-clinical language so ANY staff member can use it.",
-        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy"],
+        description: "A comprehensive staff-only consultation guide designed for the provider to review before speaking with the client. Includes concern analysis, anticipated questions, and educational talking points. Written in simple, non-clinical language so ANY staff member can use it.",
+        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy", "concernAnalysis", "anticipatedQuestions", "educationalPoints"],
         additionalProperties: false,
         properties: {
           quickOverview: { type: "string", description: "2-3 sentence summary of this client's skin situation. What are the main issues? What's the overall picture? Write it like you're briefing a colleague." },
           topPriorityConcern: { type: "string", description: "The single most impactful concern to lead the conversation with — the one the client cares most about AND has the most visible/treatable solution." },
           emotionalState: { type: "string", description: "How this client is likely feeling based on their concerns. Helps staff approach with empathy." },
           budgetApproach: { type: "string", description: "Suggested approach to discussing cost. Start with highest-impact single treatment, then present phased plan. Include entry-level option if budget is a concern." },
-          closingStrategy: { type: "string", description: "The best closing approach for this specific client based on their motivation level and concerns." }
+          closingStrategy: { type: "string", description: "The best closing approach for this specific client based on their motivation level and concerns." },
+          concernAnalysis: {
+            type: "array",
+            description: "A breakdown of EACH client concern — what the AI found, how it relates to the report findings, and how to discuss it. One entry per concern the client selected (or per major detected condition if no concerns were selected).",
+            items: {
+              type: "object",
+              required: ["concern", "whatWeFound", "howToExplain", "recommendedAction"],
+              additionalProperties: false,
+              properties: {
+                concern: { type: "string", description: "The concern name. E.g., 'Jawline & Chin Definition' or 'Large Pores'" },
+                whatWeFound: { type: "string", description: "What the AI analysis actually found related to this concern. Be specific about severity and location." },
+                howToExplain: { type: "string", description: "How to explain this to the client in simple, empathetic terms. Include exact words staff can say." },
+                recommendedAction: { type: "string", description: "The specific treatment recommendation for this concern." }
+              }
+            }
+          },
+          anticipatedQuestions: {
+            type: "array",
+            description: "5-8 questions the client is likely to ask during the consultation, with suggested answers. Include questions about cost, pain, downtime, results timeline, and safety.",
+            items: {
+              type: "object",
+              required: ["question", "answer"],
+              additionalProperties: false,
+              properties: {
+                question: { type: "string", description: "A realistic question the client might ask. E.g., 'How long will the results last?' or 'Is this going to hurt?'" },
+                answer: { type: "string", description: "A clear, honest, reassuring answer in simple language. Include specific details when possible." }
+              }
+            }
+          },
+          educationalPoints: {
+            type: "array",
+            description: "3-5 educational talking points to help the client understand their skin conditions. Teach WHY they have these issues and WHAT causes them. Educated clients are more likely to commit to treatment.",
+            items: {
+              type: "object",
+              required: ["topic", "explanation", "whyItMatters"],
+              additionalProperties: false,
+              properties: {
+                topic: { type: "string", description: "The educational topic. E.g., 'Why Collagen Loss Causes Sagging' or 'How Sun Damage Shows Up Years Later'" },
+                explanation: { type: "string", description: "Simple, friendly explanation of the science using analogies. E.g., 'Collagen is like the scaffolding that holds your skin up — when it breaks down, skin starts to sag.'" },
+                whyItMatters: { type: "string", description: "Why this matters for THIS specific client and how it connects to their treatment plan." }
+              }
+            }
+          }
         }
       },
       talkingPoints: {

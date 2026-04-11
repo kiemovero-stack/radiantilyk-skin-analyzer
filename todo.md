@@ -802,3 +802,10 @@
 - [x] Add "Print Consultation Guide" button to staff Report page (amber outline button with Printer icon)
 - [x] Print-optimized layout: opens new window with clean one-page handout (patient name, date, score, overview, strategy cards, conversation flow)
 - [x] Verified staffSummary + talkingPoints generate on re-analysis (tested with Jennifer Donnelly ID 690002 — 7 talking points generated)
+
+## Enhanced Staff Summary + Bulk Re-analyze + No Guide Placeholder
+- [x] Enhance staffSummary schema: add concernAnalysis (per-concern breakdown), anticipatedQuestions (Q&A pairs), educationalPoints (condition education for clients)
+- [x] Update staff Report UI with new sections: Concern Analysis, Client May Ask, Education Points
+- [x] Add "No Guide Yet" placeholder with one-click "Generate Guide" button for older reports without staffSummary
+- [x] Bulk re-analyze skipped per user request — individual re-analyze available via Generate Guide button or Re-analyze button
+- [x] Update shared types to match new schema (StaffSummary, ConcernAnalysis, AnticipatedQuestion, EducationalPoint)

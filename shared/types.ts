@@ -98,12 +98,33 @@ export interface RoadmapPhase {
   expectedOutcome: string;
 }
 
+export interface ConcernAnalysis {
+  concern: string;
+  whatWeFound: string;
+  howToExplain: string;
+  recommendedAction: string;
+}
+
+export interface AnticipatedQuestion {
+  question: string;
+  answer: string;
+}
+
+export interface EducationalPoint {
+  topic: string;
+  explanation: string;
+  whyItMatters: string;
+}
+
 export interface StaffSummary {
   quickOverview: string;
   topPriorityConcern: string;
   emotionalState: string;
   budgetApproach: string;
   closingStrategy: string;
+  concernAnalysis?: ConcernAnalysis[];
+  anticipatedQuestions?: AnticipatedQuestion[];
+  educationalPoints?: EducationalPoint[];
 }
 
 export interface TalkingPoint {

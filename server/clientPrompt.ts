@@ -839,15 +839,57 @@ export const CLIENT_ANALYSIS_OUTPUT_SCHEMA = {
       },
       staffSummary: {
         type: "object",
-        description: "A concise staff-only summary designed for the provider to quickly review before speaking with the client. Written in simple, non-clinical language so ANY staff member can use it — not just the provider.",
-        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy"],
+        description: "A comprehensive staff-only consultation guide designed for the provider to review before speaking with the client. Includes concern analysis, anticipated questions, and educational talking points. Written in simple, non-clinical language so ANY staff member can use it.",
+        required: ["quickOverview", "topPriorityConcern", "emotionalState", "budgetApproach", "closingStrategy", "concernAnalysis", "anticipatedQuestions", "educationalPoints"],
         additionalProperties: false,
         properties: {
           quickOverview: { type: "string", description: "2-3 sentence summary of this client's skin situation. What are the main issues? What's the overall picture? Write it like you're briefing a colleague: 'This client is a 45-year-old with moderate jowling and volume loss in the midface. Her main concern is looking tired. She'd benefit most from fillers and a skin tightening treatment.'" },
           topPriorityConcern: { type: "string", description: "The single most impactful concern to lead the conversation with. This should be the concern that (1) the client cares most about AND (2) has the most visible/treatable solution. E.g., 'Jawline laxity — she specifically mentioned this and it's clearly visible from the side view. Leading with Ultherapy or filler would show her you listened.'" },
           emotionalState: { type: "string", description: "How this client is likely feeling based on their concerns and what they shared. E.g., 'She's probably self-conscious about looking older than she feels. She took the time to upload 3 photos and selected 5 concerns — she's motivated and ready for solutions.'" },
           budgetApproach: { type: "string", description: "Suggested approach to discussing cost based on the recommended treatments. E.g., 'Start with the most impactful single treatment ($X) and present the full roadmap as a phased plan. If budget is a concern, the facial + skincare combo ($X) is a great entry point.'" },
-          closingStrategy: { type: "string", description: "The best closing approach for this specific client. E.g., 'She's clearly motivated — don't oversell. Show her the before/after simulation, point out the specific areas that would improve, and ask: Would you like to get started with [top treatment] today? We have availability this week.'" }
+          closingStrategy: { type: "string", description: "The best closing approach for this specific client. E.g., 'She's clearly motivated — don't oversell. Show her the before/after simulation, point out the specific areas that would improve, and ask: Would you like to get started with [top treatment] today? We have availability this week.'" },
+          concernAnalysis: {
+            type: "array",
+            description: "A breakdown of EACH client concern — what the AI found, how it relates to the report findings, and how to discuss it. One entry per concern the client selected (or per major detected condition if no concerns were selected).",
+            items: {
+              type: "object",
+              required: ["concern", "whatWeFound", "howToExplain", "recommendedAction"],
+              additionalProperties: false,
+              properties: {
+                concern: { type: "string", description: "The concern name as the client stated it. E.g., 'Jawline & Chin Definition' or 'Large Pores'" },
+                whatWeFound: { type: "string", description: "What the AI analysis actually found related to this concern. Be specific about severity and location. E.g., 'Moderate jowling visible along the jawline, more pronounced on the left side. Early loss of definition between chin and neck.'" },
+                howToExplain: { type: "string", description: "How to explain this to the client in simple, empathetic terms. E.g., 'You can say: I can see what you're noticing here — there's some softening along the jawline, which is really common in your age group. The good news is this responds really well to treatment.'" },
+                recommendedAction: { type: "string", description: "The specific treatment recommendation for this concern. E.g., 'Ultherapy for the lower face would be the gold standard here, or dermal filler along the jawline for more immediate results.'" }
+              }
+            }
+          },
+          anticipatedQuestions: {
+            type: "array",
+            description: "5-8 questions the client is likely to ask during the consultation, with suggested answers. Think about what a real person would ask when seeing their skin report for the first time. Include questions about cost, pain, downtime, results timeline, and safety.",
+            items: {
+              type: "object",
+              required: ["question", "answer"],
+              additionalProperties: false,
+              properties: {
+                question: { type: "string", description: "A realistic question the client might ask. E.g., 'How long will the results last?' or 'Is this going to hurt?' or 'Why is my score so low?' or 'Can I do all of these treatments at once?'" },
+                answer: { type: "string", description: "A clear, honest, reassuring answer in simple language. Include specific details when possible. E.g., 'Filler results typically last 12-18 months, and most clients say the treatment is very tolerable — we use numbing cream and the filler itself contains lidocaine.'" }
+              }
+            }
+          },
+          educationalPoints: {
+            type: "array",
+            description: "3-5 educational talking points to help the client understand their skin conditions. These should teach the client WHY they have these issues and WHAT causes them — not just what to do about them. Educated clients are more likely to commit to treatment because they understand the underlying issue.",
+            items: {
+              type: "object",
+              required: ["topic", "explanation", "whyItMatters"],
+              additionalProperties: false,
+              properties: {
+                topic: { type: "string", description: "The educational topic. E.g., 'Why Collagen Loss Causes Sagging' or 'How Sun Damage Shows Up Years Later' or 'The Connection Between Pore Size and Skin Texture'" },
+                explanation: { type: "string", description: "Simple, friendly explanation of the science. E.g., 'After age 25, we lose about 1% of our collagen every year. Collagen is like the scaffolding that holds your skin up — when it breaks down, skin starts to sag and lose that firm, bouncy quality. Think of it like a mattress that's lost its springs.'" },
+                whyItMatters: { type: "string", description: "Why this matters for THIS specific client and how it connects to their treatment plan. E.g., 'This is exactly what's happening along your jawline. The good news is treatments like Ultherapy actually stimulate your body to rebuild collagen, so you're not just masking the problem — you're fixing the root cause.'" }
+              }
+            }
+          }
         }
       },
       talkingPoints: {
