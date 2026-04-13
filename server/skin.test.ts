@@ -702,7 +702,7 @@ describe("Client Landing Page Route", () => {
     expect(content).toContain("rkaemr.click/portal");
     expect(content).toContain("How It Works");
     expect(content).toContain("What Our Clients Say");
-    expect(content).toContain("Get My Free Skin Analysis");
+    expect(content).toContain("GET YOUR SKIN ANALYSIS");
   });
 
   it("ClientLanding uses clientPaths for navigation to the analysis flow", async () => {
@@ -1004,7 +1004,7 @@ describe("Client Landing Page - Marketing Ready", () => {
       "utf-8"
     );
     expect(content).toContain("RadiantilyK");
-    expect(content).toContain("logo");
+    expect(content).toContain("LOGO_URL");
   });
 
   it("landing page includes business addresses", async () => {
@@ -1035,9 +1035,9 @@ describe("Client Landing Page - Marketing Ready", () => {
       "/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx",
       "utf-8"
     );
-    expect(content).toContain("Get My Free Skin Analysis");
-    expect(content).toContain("Start My Free Analysis Now");
-    expect(content).toContain("Start My Free Skin Analysis");
+    expect(content).toContain("GET YOUR SKIN ANALYSIS");
+    expect(content).toContain("START MY ANALYSIS NOW");
+    expect(content).toContain("START MY SKIN ANALYSIS");
   });
 
   it("landing page includes social proof elements", async () => {
@@ -1175,9 +1175,10 @@ describe("Marketing Features", () => {
       "/home/ubuntu/skin-analyzer/client/src/pages/ClientLanding.tsx",
       "utf-8"
     );
-    expect(content).toContain("25% off");
-    expect(content).toContain("48 hours");
-    expect(content).toContain("Limited Offer");
+    // Promo banners are now fetched dynamically from /api/promotions/active
+    // and displayed as elegant single-line text (no urgency language)
+    expect(content).toContain("SeasonalPromoBanner");
+    expect(content).toContain("/api/promotions/active");
   });
 
   it("client landing page has Google Maps embeds", async () => {

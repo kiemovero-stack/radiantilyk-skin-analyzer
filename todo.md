@@ -839,3 +839,18 @@
 - [x] Lists all scar types to look for: atrophic (ice pick, boxcar, rolling), hypertrophic, post-inflammatory, acne
 - [x] Instructs AI to report mild scarring when in doubt rather than miss it
 - [x] Enhanced multi-angle instruction: side views reveal scarring/texture not visible in front photos
+
+## Luxury Client Storefront Redesign
+- [x] Color palette overhaul: champagne gold (#B8964A), warm ivory (#FAF7F2), soft rose taupe (#C4A882), charcoal (#2C2C2C)
+- [x] Typography: Cormorant Garamond serif for headings (wght 400-500), Inter Light for body, letter-spacing 0.05em on headings
+- [x] Remove promo banners: replaced with dynamic SeasonalPromoBanner — elegant single-line text from /api/promotions/active
+- [x] Hero section: AI-generated luxury spa interior image with dark frosted overlay, serif headline, gold CTA
+- [x] CTA buttons: LuxuryButton component — solid champagne gold or 1px outline, all-caps, 0.15em letter-spacing
+- [x] Service cards: removed bright badges, italic serif labels ("Complimentary", "Most Requested"), "Starting at $X", 3-column grid
+- [x] Whitespace & layout: py-24 section padding, 1100px max-width, GoldDivider component (1px gold 20% opacity) between sections
+- [x] Copy tweaks: all "Free" → "Complimentary", removed urgency language, all-caps CTAs
+- [x] Overall aesthetic: warm ivory backgrounds, charcoal footer, gold accents, serif headings — La Mer / Beverly Hills med spa feel
+- [x] Google Fonts loaded: Cormorant Garamond + Inter via preconnect in index.html
+- [x] Referral banner restyled to match luxury palette
+- [x] Footer redesigned: charcoal background, muted text, gold social icons
+- [x] All 153 tests passing after updating test assertions for new copy

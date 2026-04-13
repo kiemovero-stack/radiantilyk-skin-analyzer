@@ -41,6 +41,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
 }
 
 :root {

@@ -1,19 +1,13 @@
 /**
- * Client-Facing Landing Page — Marketing-Ready for Facebook Ads.
+ * Client-Facing Landing Page — Luxury High-End Aesthetic
  *
- * High-conversion landing page with:
- * - RadiantilyK Aesthetic logo & branding
- * - Hero section optimized for Facebook ad traffic
- * - Social proof (5,000+ patients, 5-star reviews)
- * - How It Works steps
- * - Location cards with addresses & hours
- * - Testimonials
- * - Strong CTAs throughout
- * - Mobile-first (Facebook traffic is mostly mobile)
+ * Inspired by La Mer, Augustinus Bader, and Beverly Hills medical spas.
+ * Color palette: champagne gold (#B8964A), warm ivory (#FAF7F2),
+ * soft rose taupe (#C4A882), charcoal (#2C2C2C).
+ * Typography: Cormorant Garamond for headings, Inter Light for body.
  */
 import { Button } from "@/components/ui/button";
 import {
-  Sparkles,
   Camera,
   Brain,
   ClipboardCheck,
@@ -21,10 +15,8 @@ import {
   Star,
   Shield,
   ChevronRight,
-  Heart,
   ArrowRight,
   CheckCircle2,
-  Zap,
   Users,
   Clock,
   MapPin,
@@ -32,6 +24,7 @@ import {
   Mail,
   Gift,
   Hourglass,
+  Sparkles,
 } from "lucide-react";
 import { useLocation, useSearch } from "wouter";
 import { motion } from "framer-motion";
@@ -41,25 +34,34 @@ import { useEffect, useState } from "react";
 
 const CHECKIN_URL = "https://rkaemr.click/portal";
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/IMG_2517_3c23507d.PNG";
+const HERO_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/luxury-hero-spa-TM9GyzeMoTvyGbsxQ49qRv.webp";
+
+/* ── Luxury color tokens ── */
+const C = {
+  gold: "#B8964A",
+  goldLight: "#C4A882",
+  ivory: "#FAF7F2",
+  charcoal: "#2C2C2C",
+  charcoalLight: "#4A4A4A",
+  divider: "rgba(184, 150, 74, 0.20)",
+};
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0, 0, 0.2, 1] as const } },
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
 };
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+/* ── Data ── */
 const HOW_IT_WORKS = [
   {
     step: 1,
@@ -67,7 +69,6 @@ const HOW_IT_WORKS = [
     title: "Snap a Few Photos",
     description:
       "Follow our simple guided photo capture — front, left, and right views. Takes less than 30 seconds.",
-    color: "from-pink-400 to-rose-500",
   },
   {
     step: 2,
@@ -75,7 +76,6 @@ const HOW_IT_WORKS = [
     title: "AI Analyzes Your Skin",
     description:
       "Our advanced AI examines your skin at a cellular level — detecting conditions, measuring skin health, and identifying your unique needs.",
-    color: "from-purple-400 to-indigo-500",
   },
   {
     step: 3,
@@ -83,7 +83,6 @@ const HOW_IT_WORKS = [
     title: "Get Your Personalized Plan",
     description:
       "Receive a detailed report with treatment simulations showing results on YOUR face, product picks, and a step-by-step improvement roadmap.",
-    color: "from-blue-400 to-cyan-500",
   },
   {
     step: 4,
@@ -91,18 +90,17 @@ const HOW_IT_WORKS = [
     title: "Book & Transform",
     description:
       "Ready to start? Book your consultation at either of our locations and our expert team will bring your plan to life.",
-    color: "from-emerald-400 to-teal-500",
   },
 ];
 
 const FEATURES = [
   {
-    icon: Zap,
+    icon: Sparkles,
     title: "AI-Powered Analysis",
     description: "Advanced skin diagnostics that detect conditions others miss",
   },
   {
-    icon: Heart,
+    icon: Star,
     title: "Personalized For You",
     description: "Every recommendation is tailored to your unique skin type and tone",
   },
@@ -144,90 +142,79 @@ const SERVICE_CATEGORIES = [
     title: "AI Skin Analysis",
     description: "Advanced AI diagnostics that detect conditions others miss — personalized to your skin",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/ai-skin-analysis_6d5eb451.jpg",
-    gradient: "from-purple-500 to-indigo-600",
-    tag: "FREE",
+    label: "Complimentary",
     price: "Complimentary",
   },
   {
     title: "Injectables & Fillers",
     description: "Botox, Daxxify, Restylane, Juvederm, Sculptra & Radiesse — expert injectors",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/injectables_9aa6dfa0.jpg",
-    gradient: "from-pink-500 to-rose-600",
-    tag: "POPULAR",
-    price: "From $9/unit",
+    label: "Most Requested",
+    price: "Starting at $9/unit",
   },
   {
     title: "Signature Facials",
     description: "From Dermaplaning to 24K Gold Recovery — 7 luxury facials tailored to your skin",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/facials_5471aaad.jpg",
-    gradient: "from-amber-400 to-orange-500",
-    tag: "MEMBERSHIPS",
-    price: "From $100",
+    label: "",
+    price: "Starting at $100",
   },
   {
     title: "Scar Treatment",
-    description: "Acne scars, keloids, surgical scars, stretch marks & more — multi-step protocols to reduce scarring",
+    description: "Acne scars, keloids, surgical scars, stretch marks & more — multi-step protocols",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
-    gradient: "from-purple-500 to-violet-600",
-    tag: "PACKAGES",
-    price: "From $650",
+    label: "",
+    price: "Starting at $650",
     link: "/scar-treatment",
   },
   {
     title: "Laser Treatments",
     description: "CO2 Resurfacing, IPL, PICO/ND:YAG, RF Microneedling — advanced skin renewal",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
-    gradient: "from-blue-500 to-cyan-600",
-    tag: "RESULTS",
-    price: "From $300",
+    label: "",
+    price: "Starting at $300",
   },
   {
     title: "HIFU & Ultherapy",
-    description: "Precision ultrasound lifting — HIFU for maintenance, Ultherapy for deep lifting with visualization",
+    description: "Precision ultrasound lifting — HIFU for maintenance, Ultherapy for deep lifting",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/laser-treatments_1bdf48b6.jpg",
-    gradient: "from-indigo-500 to-blue-600",
-    tag: "LIFTING",
-    price: "From $300",
+    label: "",
+    price: "Starting at $300",
   },
   {
     title: "Body Contouring",
     description: "RKsculpt muscle toning, lipolytic injections & RF skin tightening",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/body-contouring_075505de.jpg",
-    gradient: "from-emerald-500 to-teal-600",
-    tag: "SCULPT",
-    price: "From $150",
+    label: "",
+    price: "Starting at $150",
   },
   {
     title: "Medical Weight Loss",
     description: "Semaglutide (GLP-1) & Tirzepatide programs — medically supervised, real results",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/weight-loss_9129de16.jpg",
-    gradient: "from-green-500 to-emerald-600",
-    tag: "NEW",
-    price: "From $35",
+    label: "",
+    price: "Starting at $35",
   },
   {
     title: "Peptide Therapy",
     description: "BPC-157, GHK-Cu, Thymosin Alpha-1 & CJC/Ipamorelin — repair, rejuvenate, protect",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/peptide-therapy_3e308073.jpg",
-    gradient: "from-violet-500 to-purple-600",
-    tag: "NEW",
-    price: "From $150/mo",
+    label: "",
+    price: "Starting at $150/mo",
   },
   {
     title: "Hormone Therapy",
     description: "Bioidentical HRT, testosterone optimization & thyroid management — restore balance",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hormone-therapy_2f7b43ac.jpg",
-    gradient: "from-rose-500 to-pink-600",
-    tag: "NEW",
-    price: "From $200/mo",
+    label: "",
+    price: "Starting at $200/mo",
   },
   {
     title: "Hair Restoration",
     description: "Exosome therapy — regrow thicker, healthier hair with cutting-edge stem cell science",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/hair-restoration_49e5a4dc.webp",
-    gradient: "from-sky-500 to-blue-600",
-    tag: "NEW",
-    price: "From $1,200",
+    label: "",
+    price: "Starting at $1,200",
   },
 ];
 
@@ -250,6 +237,68 @@ const LOCATIONS = [
   },
 ];
 
+/* ── Shared luxury components ── */
+function GoldDivider() {
+  return (
+    <div className="flex justify-center">
+      <div className="w-full" style={{ maxWidth: 1100, borderTop: `1px solid ${C.divider}` }} />
+    </div>
+  );
+}
+
+function LuxuryButton({
+  children,
+  onClick,
+  variant = "solid",
+  size = "default",
+  className = "",
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "solid" | "outline";
+  size?: "default" | "lg";
+  className?: string;
+}) {
+  const base =
+    "inline-flex items-center justify-center font-sans uppercase tracking-[0.15em] transition-all duration-300 rounded-sm";
+  const sizeClass = size === "lg" ? "px-10 py-4 text-sm" : "px-7 py-3 text-xs";
+  const variantClass =
+    variant === "outline"
+      ? `border border-[${C.gold}] text-[${C.gold}] hover:bg-[${C.gold}] hover:text-white`
+      : "text-white";
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${base} ${sizeClass} ${className}`}
+      style={
+        variant === "solid"
+          ? { backgroundColor: C.gold, color: "#fff" }
+          : { borderColor: C.gold, color: C.gold }
+      }
+      onMouseEnter={(e) => {
+        if (variant === "outline") {
+          e.currentTarget.style.backgroundColor = C.gold;
+          e.currentTarget.style.color = "#fff";
+        } else {
+          e.currentTarget.style.backgroundColor = "#A6843F";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (variant === "outline") {
+          e.currentTarget.style.backgroundColor = "transparent";
+          e.currentTarget.style.color = C.gold;
+        } else {
+          e.currentTarget.style.backgroundColor = C.gold;
+        }
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ── Seasonal Promo (elegant single line) ── */
 interface SeasonalPromotion {
   id: string;
   title: string;
@@ -279,46 +328,37 @@ function SeasonalPromoBanner() {
   if (!promo || dismissed) return null;
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-b border-emerald-200">
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-cyan-500/5" />
-      <div className="relative container py-3 px-4">
-        <button
-          onClick={() => setDismissed(true)}
-          className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-lg leading-none"
-          aria-label="Dismiss"
-        >
-          &times;
-        </button>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            {promo.icon && <span className="text-xl">{promo.icon}</span>}
-            {promo.badgeText && (
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider">
-                {promo.badgeText}
-              </span>
-            )}
-          </div>
-          <div>
-            <p className="text-sm font-bold text-gray-800">
-              {promo.title} &mdash; <span className="text-emerald-600">{promo.subtitle}</span>
-            </p>
-            <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">{promo.description}</p>
-          </div>
+    <div
+      className="relative py-2.5 px-4 text-center"
+      style={{ backgroundColor: C.ivory, borderBottom: `1px solid ${C.divider}` }}
+    >
+      <button
+        onClick={() => setDismissed(true)}
+        className="absolute top-1.5 right-3 text-gray-400 hover:text-gray-600 text-sm leading-none"
+        aria-label="Dismiss"
+      >
+        &times;
+      </button>
+      <p className="text-xs tracking-wide" style={{ color: C.charcoalLight, fontFamily: "var(--font-sans)" }}>
+        {promo.icon && <span className="mr-1">{promo.icon}</span>}
+        {promo.title} — <span style={{ color: C.gold }}>{promo.subtitle}</span>
+        {promo.ctaUrl && (
           <a
             href={promo.ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
+            className="ml-3 underline underline-offset-2 hover:opacity-80 transition-opacity"
+            style={{ color: C.gold }}
           >
             {promo.ctaText}
-            <ArrowRight className="w-3 h-3 inline ml-1" />
           </a>
-        </div>
-      </div>
+        )}
+      </p>
     </div>
   );
 }
 
+/* ── Referral Banner (elegant) ── */
 function ReferralBanner() {
   const search = useSearch();
   const params = new URLSearchParams(search);
@@ -336,7 +376,6 @@ function ReferralBanner() {
       .then((data) => {
         if (data?.valid) {
           setReferrer({ referrerName: data.referrerName, discountPercent: data.discountPercent });
-          // Store in sessionStorage so the analyze page can use it
           sessionStorage.setItem("referralCode", refCode);
           sessionStorage.setItem("referralDiscount", String(data.discountPercent));
         }
@@ -347,51 +386,60 @@ function ReferralBanner() {
   if (!referrer) return null;
 
   return (
-    <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-3 px-4">
-      <div className="container flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
-        <div className="flex items-center gap-2">
-          <Gift className="w-5 h-5 shrink-0" />
-          <p className="text-sm font-semibold">
-            {referrer.referrerName.split(" ")[0]} referred you! You both get{" "}
-            <span className="underline decoration-2 underline-offset-2">{referrer.discountPercent}% off</span>{" "}
-            your next treatment.
-          </p>
-        </div>
+    <div className="py-3 px-4 text-center" style={{ backgroundColor: C.ivory, borderBottom: `1px solid ${C.divider}` }}>
+      <p className="text-xs tracking-wide" style={{ color: C.charcoalLight }}>
+        <Gift className="w-3.5 h-3.5 inline mr-1.5" style={{ color: C.gold }} />
+        {referrer.referrerName.split(" ")[0]} referred you — you both receive{" "}
+        <span className="font-medium" style={{ color: C.gold }}>{referrer.discountPercent}% off</span>{" "}
+        your next treatment.{" "}
         <button
           onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
-          className="shrink-0 px-4 py-1.5 rounded-full bg-white text-purple-600 text-xs font-bold hover:bg-white/90 transition-colors"
+          className="underline underline-offset-2 hover:opacity-80 transition-opacity font-medium"
+          style={{ color: C.gold }}
         >
-          Claim Your Discount
-          <ArrowRight className="w-3 h-3 inline ml-1" />
+          Claim Your Offer
         </button>
-      </div>
+      </p>
     </div>
   );
 }
 
+/* ── Main Component ── */
 export default function ClientLanding() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-pink-100 sticky top-0 z-50">
-        <div className="container flex items-center justify-between py-2 px-4">
+    <div className="min-h-screen" style={{ backgroundColor: C.ivory, color: C.charcoal }}>
+      {/* ─── Header ─── */}
+      <header
+        className="sticky top-0 z-50 backdrop-blur-md"
+        style={{ backgroundColor: `${C.ivory}ee`, borderBottom: `1px solid ${C.divider}` }}
+      >
+        <div className="flex items-center justify-between py-3 px-4 mx-auto" style={{ maxWidth: 1100 }}>
           <div className="flex items-center gap-2.5">
             <img
               src={LOGO_URL}
               alt="RadiantilyK Aesthetic"
-              className="w-10 h-10 rounded-full object-cover shadow-sm border border-pink-100"
+              className="w-10 h-10 rounded-full object-cover"
+              style={{ border: `1px solid ${C.divider}` }}
             />
             <div className="hidden sm:block">
-              <span className="font-bold text-sm text-gray-800 leading-tight block">RadiantilyK</span>
-              <span className="text-[10px] text-gray-400 leading-tight block">Aesthetic</span>
+              <span
+                className="text-sm leading-tight block"
+                style={{ fontFamily: "var(--font-serif)", fontWeight: 500, letterSpacing: "0.05em", color: C.charcoal }}
+              >
+                RadiantilyK
+              </span>
+              <span className="text-[10px] leading-tight block" style={{ color: C.goldLight, letterSpacing: "0.1em" }}>
+                AESTHETIC
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <a
               href="tel:4089002674"
-              className="text-xs text-gray-500 hover:text-purple-600 transition-colors hidden md:flex items-center gap-1"
+              className="text-xs hidden md:flex items-center gap-1 hover:opacity-70 transition-opacity"
+              style={{ color: C.charcoalLight }}
             >
               <Phone className="w-3 h-3" />
               (408) 900-2674
@@ -400,103 +448,101 @@ export default function ClientLanding() {
               href={CHECKIN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:text-purple-600 transition-colors hidden sm:block"
+              className="text-xs hidden sm:block hover:opacity-70 transition-opacity"
+              style={{ color: C.charcoalLight }}
             >
               Already a client? Check in
             </a>
-            <Button
-              size="sm"
-              className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xs font-semibold hover:opacity-90 border-0 shadow-md"
+            <LuxuryButton
               onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
+              size="default"
             >
-              Get Free Analysis
-              <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
+              GET YOUR ANALYSIS
+              <ArrowRight className="w-3.5 h-3.5 ml-2" />
+            </LuxuryButton>
           </div>
         </div>
       </header>
 
-      {/* Referral Banner (shows when ?ref=CODE is in URL) */}
+      {/* Referral & Promo Banners (elegant single-line) */}
       <ReferralBanner />
-
-      {/* Seasonal Promotion Banner (fetched from API) */}
       <SeasonalPromoBanner />
 
-      {/* Default Offer Banner */}
-      <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-white py-2.5 px-4">
-        <div className="container flex items-center justify-center gap-2 text-center">
-          <Zap className="w-4 h-4 shrink-0 animate-pulse" />
-          <p className="text-xs md:text-sm font-semibold">
-            Limited Offer: Book within 48 hours of your analysis and get{" "}
-            <span className="underline decoration-2 underline-offset-2">25% off</span>{" "}
-            your first treatment!
-          </p>
-          <Zap className="w-4 h-4 shrink-0 animate-pulse" />
+      {/* ─── Hero Section ─── */}
+      <section className="relative overflow-hidden" style={{ minHeight: "70vh" }}>
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src={HERO_IMAGE}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          {/* Dark frosted overlay for readability */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(44,44,44,0.55) 0%, rgba(44,44,44,0.35) 50%, rgba(184,150,74,0.15) 100%)" }} />
         </div>
-      </div>
 
-      {/* Hero Section — Optimized for Facebook Ad Traffic */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50/40 to-white" />
-        <div className="absolute top-10 right-0 w-80 h-80 bg-pink-200/25 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
-
-        <div className="relative container py-16 md:py-28 px-4">
+        <div className="relative mx-auto px-4 flex items-center justify-center" style={{ maxWidth: 1100, minHeight: "70vh" }}>
           <motion.div
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            className="max-w-3xl mx-auto text-center"
+            className="text-center max-w-2xl"
           >
-            {/* Logo prominent for brand recognition */}
-            <div className="mb-6">
+            {/* Logo */}
+            <div className="mb-8">
               <img
                 src={LOGO_URL}
                 alt="RadiantilyK Aesthetic"
-                className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover mx-auto shadow-lg border-2 border-white ring-2 ring-pink-200/50"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover mx-auto shadow-xl"
+                style={{ border: "2px solid rgba(255,255,255,0.3)" }}
               />
             </div>
 
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-pink-200 text-purple-700 text-xs font-medium mb-5 shadow-sm">
-              <Sparkles className="w-3 h-3" />
-              Free AI Skin Analysis — Instant Results
-            </div>
+            <p
+              className="text-xs md:text-sm mb-5 uppercase"
+              style={{ letterSpacing: "0.2em", color: C.goldLight, fontFamily: "var(--font-sans)", fontWeight: 300 }}
+            >
+              Complimentary AI Skin Analysis
+            </p>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+            <h1
+              className="text-4xl md:text-5xl lg:text-6xl leading-tight mb-6"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.03em", color: "#fff" }}
+            >
               Discover What Your Skin{" "}
-              <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                Really Needs
-              </span>
+              <span style={{ color: C.goldLight }}>Really Needs</span>
             </h1>
 
-            <p className="mt-5 text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p
+              className="text-base md:text-lg max-w-xl mx-auto leading-relaxed mb-8"
+              style={{ color: "rgba(255,255,255,0.75)", fontFamily: "var(--font-sans)", fontWeight: 300 }}
+            >
               Upload a few photos and our AI will analyze your skin, show you what treatments would look like on{" "}
               <em>your</em> face, and create a personalized plan — all in simple terms you'll actually understand.
             </p>
 
-            <div className="mt-7 flex flex-col items-center gap-3">
-              <Button
+            <div className="flex flex-col items-center gap-4">
+              <LuxuryButton
                 size="lg"
-                className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-base px-8 py-6 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50 w-full sm:w-auto"
                 onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
               >
-                <Camera className="w-5 h-5 mr-2" />
-                Get My Free Skin Analysis
-              </Button>
-              <p className="text-xs text-gray-400">
-                Takes less than 2 minutes · No account needed · 100% Free
+                <Camera className="w-4 h-4 mr-2.5" />
+                GET YOUR SKIN ANALYSIS
+              </LuxuryButton>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)", fontFamily: "var(--font-sans)", fontWeight: 300 }}>
+                Takes less than 2 minutes · No account needed · Complimentary
               </p>
             </div>
 
             {/* Trust badges */}
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-gray-400">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-6" style={{ color: "rgba(255,255,255,0.5)" }}>
               <div className="flex items-center gap-1.5 text-xs">
                 <Users className="w-3.5 h-3.5" />
-                <span>Trusted by <strong className="text-gray-600">5,000+</strong> Patients</span>
+                <span>Trusted by <strong style={{ color: "rgba(255,255,255,0.8)" }}>5,000+</strong> Patients</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span><strong className="text-gray-600">5.0</strong> Rating on Google</span>
+                <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                <span><strong style={{ color: "rgba(255,255,255,0.8)" }}>5.0</strong> Rating on Google</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs">
                 <Shield className="w-3.5 h-3.5" />
@@ -507,27 +553,36 @@ export default function ClientLanding() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-14 bg-white">
-        <div className="container px-4">
+      {/* ─── Features Grid ─── */}
+      <section className="py-24" style={{ backgroundColor: "#fff" }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 1100 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
           >
             {FEATURES.map((feature, i) => (
               <motion.div
                 key={i}
                 variants={staggerItem}
-                className="p-4 md:p-5 rounded-2xl border border-gray-100 bg-gray-50/50 text-center hover:border-purple-200 hover:bg-purple-50/30 transition-all"
+                className="text-center p-6 rounded-sm transition-all duration-300 hover:shadow-sm"
+                style={{ backgroundColor: C.ivory }}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mx-auto mb-3">
-                  <feature.icon className="w-5 h-5 text-purple-600" />
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ backgroundColor: "rgba(184,150,74,0.1)" }}
+                >
+                  <feature.icon className="w-5 h-5" style={{ color: C.gold }} />
                 </div>
-                <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <h3
+                  className="text-sm mb-2"
+                  style={{ fontFamily: "var(--font-serif)", fontWeight: 500, letterSpacing: "0.05em", color: C.charcoal }}
+                >
+                  {feature.title}
+                </h3>
+                <p className="text-xs leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
                   {feature.description}
                 </p>
               </motion.div>
@@ -536,24 +591,31 @@ export default function ClientLanding() {
         </div>
       </section>
 
-      {/* Our Services — Visual Category Cards */}
-      <section className="py-16 md:py-20 bg-gradient-to-b from-white to-purple-50/30">
-        <div className="container px-4">
+      <GoldDivider />
+
+      {/* ─── Our Services ─── */}
+      <section className="py-24" style={{ backgroundColor: "#fff" }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 1100 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mb-10"
+            className="text-center mb-14"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-medium mb-4">
-              <Sparkles className="w-3 h-3" />
+            <p
+              className="text-xs uppercase mb-3"
+              style={{ letterSpacing: "0.2em", color: C.gold, fontFamily: "var(--font-sans)", fontWeight: 400 }}
+            >
               Comprehensive Care
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+            </p>
+            <h2
+              className="text-3xl md:text-4xl mb-4"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.05em", color: C.charcoal }}
+            >
               Our Services
             </h2>
-            <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
+            <p className="max-w-lg mx-auto text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
               From AI skin analysis to weight loss, peptides, and hormones — everything you need under one roof.
             </p>
           </motion.div>
@@ -563,43 +625,57 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 max-w-6xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {SERVICE_CATEGORIES.map((cat, i) => (
               <motion.div
                 key={i}
                 variants={staggerItem}
-                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer"
+                className="group cursor-pointer overflow-hidden rounded-sm transition-all duration-300 hover:shadow-lg"
+                style={{ backgroundColor: "#fff", border: `1px solid ${C.divider}` }}
                 onClick={() => { if (cat.link) { navigate(cat.link); } else { fbPixel.startAnalysis(); navigate(paths.start); } }}
               >
                 {/* Image */}
-                <div className="relative h-44 md:h-48 overflow-hidden">
+                <div className="relative h-52 overflow-hidden">
                   <img
                     src={cat.image}
                     alt={cat.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"
                   />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${cat.gradient} opacity-40 group-hover:opacity-50 transition-opacity`} />
-                  {/* Tag */}
-                  <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider text-white bg-gradient-to-r ${cat.gradient} shadow-lg`}>
-                    {cat.tag}
-                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                 </div>
                 {/* Content */}
-                <div className="p-4 md:p-5">
-                  <div className="flex items-start justify-between mb-1.5">
-                    <h3 className="font-bold text-base md:text-lg group-hover:text-purple-600 transition-colors">
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3
+                      className="text-base"
+                      style={{ fontFamily: "var(--font-serif)", fontWeight: 500, letterSpacing: "0.03em", color: C.charcoal }}
+                    >
                       {cat.title}
                     </h3>
-                    <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full whitespace-nowrap ml-2 mt-0.5">
+                    <span
+                      className="text-xs whitespace-nowrap ml-2 mt-0.5"
+                      style={{ color: C.gold, fontWeight: 400 }}
+                    >
                       {cat.price}
                     </span>
                   </div>
-                  <p className="text-xs md:text-sm text-gray-500 leading-relaxed">
+                  {cat.label && (
+                    <p
+                      className="text-[11px] mb-2 italic"
+                      style={{ fontFamily: "var(--font-serif)", color: C.goldLight }}
+                    >
+                      {cat.label}
+                    </p>
+                  )}
+                  <p className="text-xs leading-relaxed mb-3" style={{ color: C.charcoalLight, fontWeight: 300 }}>
                     {cat.description}
                   </p>
-                  <div className="mt-3 flex items-center gap-1 text-purple-500 text-xs font-semibold group-hover:gap-2 transition-all">
+                  <div
+                    className="flex items-center gap-1 text-xs group-hover:gap-2 transition-all"
+                    style={{ color: C.gold, fontWeight: 400 }}
+                  >
                     Learn More <ChevronRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -613,37 +689,42 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mt-10"
+            className="text-center mt-14"
           >
-            <Button
+            <LuxuryButton
               size="lg"
-              className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-5 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50"
+              variant="outline"
               onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
-              Start My Free Analysis
+              START MY ANALYSIS
               <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            <p className="mt-3 text-xs text-gray-400">
+            </LuxuryButton>
+            <p className="mt-4 text-xs" style={{ color: C.charcoalLight, fontWeight: 300 }}>
               Our AI will recommend the best services for your unique skin
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-16 md:py-20 bg-gradient-to-b from-white to-pink-50/30">
-        <div className="container px-4">
+      <GoldDivider />
+
+      {/* ─── How It Works ─── */}
+      <section className="py-24" style={{ backgroundColor: C.ivory }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 900 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mb-12"
+            className="text-center mb-14"
           >
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+            <h2
+              className="text-3xl md:text-4xl mb-4"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.05em", color: C.charcoal }}
+            >
               How It Works
             </h2>
-            <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
+            <p className="max-w-lg mx-auto text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
               Four simple steps to understanding your skin and getting a personalized treatment plan.
             </p>
           </motion.div>
@@ -653,34 +734,45 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="max-w-3xl mx-auto"
           >
             {HOW_IT_WORKS.map((step, i) => (
               <motion.div
                 key={i}
                 variants={staggerItem}
-                className="relative flex gap-4 md:gap-6 mb-6 last:mb-0"
+                className="relative flex gap-5 md:gap-6 mb-8 last:mb-0"
               >
                 {/* Connector line */}
                 {i < HOW_IT_WORKS.length - 1 && (
-                  <div className="absolute left-[23px] top-14 bottom-0 w-0.5 bg-gradient-to-b from-gray-200 to-transparent" />
+                  <div
+                    className="absolute left-[22px] top-14 bottom-0 w-px"
+                    style={{ backgroundColor: C.divider }}
+                  />
                 )}
 
                 {/* Step number */}
                 <div
-                  className={`shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg`}
+                  className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: C.gold }}
                 >
-                  <span className="text-lg font-bold text-white">{step.step}</span>
+                  <span className="text-sm font-medium text-white">{step.step}</span>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 pb-6">
-                  <div className="p-4 md:p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex-1 pb-4">
+                  <div
+                    className="p-5 rounded-sm"
+                    style={{ backgroundColor: "#fff", border: `1px solid ${C.divider}` }}
+                  >
                     <div className="flex items-center gap-2 mb-2">
-                      <step.icon className="w-4 h-4 text-gray-400" />
-                      <h3 className="font-bold text-base md:text-lg">{step.title}</h3>
+                      <step.icon className="w-4 h-4" style={{ color: C.goldLight }} />
+                      <h3
+                        className="text-base"
+                        style={{ fontFamily: "var(--font-serif)", fontWeight: 500, letterSpacing: "0.03em", color: C.charcoal }}
+                      >
+                        {step.title}
+                      </h3>
                     </div>
-                    <p className="text-sm text-gray-600 leading-relaxed">
+                    <p className="text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
                       {step.description}
                     </p>
                   </div>
@@ -689,40 +781,44 @@ export default function ClientLanding() {
             ))}
           </motion.div>
 
-          {/* CTA after How It Works */}
+          {/* CTA */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mt-10"
+            className="text-center mt-12"
           >
-            <Button
+            <LuxuryButton
               size="lg"
-              className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-5 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50"
               onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
-              Start My Free Analysis Now
+              START MY ANALYSIS NOW
               <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            </LuxuryButton>
           </motion.div>
         </div>
       </section>
 
-      {/* What You'll Get */}
-      <section className="py-16 md:py-20 bg-white">
-        <div className="container px-4">
+      <GoldDivider />
+
+      {/* ─── What You'll Get ─── */}
+      <section className="py-24" style={{ backgroundColor: "#fff" }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 900 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mb-10"
+            className="text-center mb-12"
           >
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
-              What You'll Get
+            <h2
+              className="text-3xl md:text-4xl mb-4"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.05em", color: C.charcoal }}
+            >
+              What You'll Receive
             </h2>
-            <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
+            <p className="max-w-lg mx-auto text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
               A comprehensive, personalized skin report that's actually useful.
             </p>
           </motion.div>
@@ -732,7 +828,7 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="max-w-3xl mx-auto space-y-2.5"
+            className="space-y-3"
           >
             {[
               "Skin health score with detailed breakdown",
@@ -747,106 +843,123 @@ export default function ClientLanding() {
               <motion.div
                 key={i}
                 variants={staggerItem}
-                className="flex items-center gap-3 p-3.5 md:p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-purple-50/30 hover:border-purple-200 transition-all"
+                className="flex items-center gap-3.5 p-4 rounded-sm transition-all duration-300 hover:shadow-sm"
+                style={{ backgroundColor: C.ivory, border: `1px solid transparent` }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.divider; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
               >
-                <CheckCircle2 className="w-5 h-5 text-purple-500 shrink-0" />
-                <span className="text-sm text-gray-700">{item}</span>
+                <CheckCircle2 className="w-4.5 h-4.5 shrink-0" style={{ color: C.gold }} />
+                <span className="text-sm" style={{ color: C.charcoalLight, fontWeight: 300 }}>{item}</span>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* See Your Future Self CTA */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-purple-500 rounded-full blur-[120px]" />
-          <div className="absolute bottom-10 right-10 w-72 h-72 bg-pink-500 rounded-full blur-[120px]" />
+      <GoldDivider />
+
+      {/* ─── See Your Future Self ─── */}
+      <section className="py-24 relative overflow-hidden" style={{ backgroundColor: C.charcoal }}>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-72 h-72 rounded-full blur-[120px]" style={{ backgroundColor: C.gold }} />
+          <div className="absolute bottom-10 right-10 w-72 h-72 rounded-full blur-[120px]" style={{ backgroundColor: C.goldLight }} />
         </div>
-        <div className="container px-4 relative z-10">
+        <div className="mx-auto px-4 relative z-10" style={{ maxWidth: 900 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="max-w-3xl mx-auto text-center"
+            className="text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-xs font-medium mb-6">
-              <Hourglass className="w-3.5 h-3.5" />
+            <p
+              className="text-xs uppercase mb-6"
+              style={{ letterSpacing: "0.2em", color: C.goldLight, fontFamily: "var(--font-sans)", fontWeight: 300 }}
+            >
               AI-Powered Aging Simulation
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">
+            </p>
+            <h2
+              className="text-3xl md:text-5xl mb-5"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.03em", color: "#fff" }}
+            >
               See Your Future Self
             </h2>
-            <p className="text-lg md:text-xl text-white/70 mb-4 max-w-2xl mx-auto">
-              What will you look like in <span className="text-pink-400 font-semibold">20 years</span>?
+            <p className="text-base md:text-lg mb-4" style={{ color: "rgba(255,255,255,0.6)", fontWeight: 300 }}>
+              What will you look like in <span style={{ color: C.goldLight, fontWeight: 400 }}>20 years</span>?
             </p>
-            <p className="text-sm md:text-base text-white/50 mb-8 max-w-xl mx-auto">
+            <p className="text-sm mb-10 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.4)", fontWeight: 300 }}>
               Our AI generates two futures: one without treatment, and one with consistent skincare.
               The difference is striking — and it starts with a single photo.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-xl mx-auto mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-xl mx-auto mb-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+                className="p-6 rounded-sm"
+                style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
-                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-3">
-                  <Hourglass className="w-6 h-6 text-red-400" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: "rgba(200,80,80,0.15)" }}>
+                  <Hourglass className="w-5 h-5" style={{ color: "#C87070" }} />
                 </div>
-                <h3 className="text-white font-semibold mb-1">Without Treatment</h3>
-                <p className="text-white/50 text-xs">See the natural aging process — sun damage, volume loss, and fine lines compounding over time.</p>
+                <h3 className="text-white font-medium mb-1.5" style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}>Without Treatment</h3>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)", fontWeight: 300 }}>See the natural aging process — sun damage, volume loss, and fine lines compounding over time.</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.4 }}
-                className="p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+                className="p-6 rounded-sm"
+                style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-                  <Sparkles className="w-6 h-6 text-emerald-400" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: "rgba(184,150,74,0.15)" }}>
+                  <Sparkles className="w-5 h-5" style={{ color: C.goldLight }} />
                 </div>
-                <h3 className="text-white font-semibold mb-1">With Treatment</h3>
-                <p className="text-white/50 text-xs">See how consistent treatments preserve your youthful appearance — prevention is the best anti-aging.</p>
+                <h3 className="text-white font-medium mb-1.5" style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}>With Treatment</h3>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)", fontWeight: 300 }}>See how consistent treatments preserve your youthful appearance — prevention is the best anti-aging.</p>
               </motion.div>
             </div>
 
-            <Button
+            <LuxuryButton
               size="lg"
               onClick={() => {
                 fbPixel.trackCustom("FutureSelfCTA");
                 navigate(paths.start);
               }}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-6 text-base rounded-full shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 transition-all"
             >
-              <Camera className="w-5 h-5 mr-2" />
-              See My Future Self — Free
+              <Camera className="w-4 h-4 mr-2.5" />
+              SEE MY FUTURE SELF
               <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            <p className="text-white/40 text-xs mt-4">Takes 60 seconds. No signup required.</p>
+            </LuxuryButton>
+            <p className="text-xs mt-4" style={{ color: "rgba(255,255,255,0.3)", fontWeight: 300 }}>
+              Takes 60 seconds. No signup required.
+            </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 md:py-20 bg-gradient-to-b from-pink-50/30 to-white">
-        <div className="container px-4">
+      <GoldDivider />
+
+      {/* ─── Testimonials ─── */}
+      <section className="py-24" style={{ backgroundColor: C.ivory }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 1100 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mb-10"
+            className="text-center mb-12"
           >
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+            <h2
+              className="text-3xl md:text-4xl mb-4"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.05em", color: C.charcoal }}
+            >
               What Our Clients Say
             </h2>
-            <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
+            <p className="max-w-lg mx-auto text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
               Real results from real people who started their skin journey with us.
             </p>
           </motion.div>
@@ -856,28 +969,32 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {TESTIMONIALS.map((testimonial, i) => (
               <motion.div
                 key={i}
                 variants={staggerItem}
-                className="p-5 md:p-6 rounded-2xl border border-pink-100 bg-white shadow-sm"
+                className="p-6 rounded-sm"
+                style={{ backgroundColor: "#fff", border: `1px solid ${C.divider}` }}
               >
-                <div className="flex items-center gap-0.5 mb-3">
+                <div className="flex items-center gap-0.5 mb-4">
                   {Array.from({ length: testimonial.rating }).map((_, j) => (
-                    <Star
-                      key={j}
-                      className="w-4 h-4 text-amber-400 fill-amber-400"
-                    />
+                    <Star key={j} className="w-3.5 h-3.5" style={{ color: C.gold, fill: C.gold }} />
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 leading-relaxed mb-4 italic">
+                <p
+                  className="text-sm leading-relaxed mb-5"
+                  style={{ color: C.charcoalLight, fontWeight: 300, fontStyle: "italic", fontFamily: "var(--font-serif)" }}
+                >
                   "{testimonial.text}"
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">{testimonial.name}</span>
-                  <span className="text-[10px] text-purple-600 font-medium px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200">
+                  <span className="text-sm" style={{ fontWeight: 500, color: C.charcoal }}>{testimonial.name}</span>
+                  <span
+                    className="text-[10px] px-2.5 py-1 rounded-sm"
+                    style={{ color: C.gold, backgroundColor: "rgba(184,150,74,0.08)", fontWeight: 400 }}
+                  >
                     {testimonial.result}
                   </span>
                 </div>
@@ -887,20 +1004,25 @@ export default function ClientLanding() {
         </div>
       </section>
 
-      {/* Locations Section */}
-      <section className="py-16 md:py-20 bg-white">
-        <div className="container px-4">
+      <GoldDivider />
+
+      {/* ─── Locations ─── */}
+      <section className="py-24" style={{ backgroundColor: "#fff" }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 900 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-center mb-10"
+            className="text-center mb-12"
           >
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+            <h2
+              className="text-3xl md:text-4xl mb-4"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.05em", color: C.charcoal }}
+            >
               Visit Us
             </h2>
-            <p className="mt-3 text-gray-500 max-w-lg mx-auto text-sm md:text-base">
+            <p className="max-w-lg mx-auto text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
               Two convenient locations in the Bay Area. By appointment only.
             </p>
           </motion.div>
@@ -910,30 +1032,39 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
           >
             {LOCATIONS.map((location, i) => (
               <motion.div
                 key={i}
                 variants={staggerItem}
-                className="p-5 md:p-6 rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50/30 shadow-sm hover:shadow-md transition-shadow"
+                className="p-6 rounded-sm"
+                style={{ backgroundColor: C.ivory, border: `1px solid ${C.divider}` }}
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: C.gold }}
+                  >
                     <MapPin className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="font-bold text-lg">{location.name}</h3>
+                  <h3
+                    className="text-lg"
+                    style={{ fontFamily: "var(--font-serif)", fontWeight: 500, color: C.charcoal }}
+                  >
+                    {location.name}
+                  </h3>
                 </div>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <p className="font-medium text-gray-800">{location.address}</p>
-                  <p>{location.city}</p>
-                  <div className="flex items-center gap-1.5 text-xs text-purple-600">
+                <div className="space-y-2 text-sm" style={{ color: C.charcoalLight }}>
+                  <p style={{ fontWeight: 400 }}>{location.address}</p>
+                  <p style={{ fontWeight: 300 }}>{location.city}</p>
+                  <div className="flex items-center gap-1.5 text-xs" style={{ color: C.gold }}>
                     <Clock className="w-3 h-3" />
                     <span>{location.hours}</span>
                   </div>
                 </div>
                 {/* Google Maps Embed */}
-                <div className="mt-3 rounded-xl overflow-hidden border border-pink-100">
+                <div className="mt-4 rounded-sm overflow-hidden" style={{ border: `1px solid ${C.divider}` }}>
                   <iframe
                     src={location.embedUrl}
                     width="100%"
@@ -949,7 +1080,8 @@ export default function ClientLanding() {
                   href={location.mapUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors"
+                  className="inline-flex items-center gap-1 mt-3 text-xs hover:opacity-70 transition-opacity"
+                  style={{ color: C.gold, fontWeight: 400 }}
                 >
                   Get Directions
                   <ChevronRight className="w-3 h-3" />
@@ -964,19 +1096,14 @@ export default function ClientLanding() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mt-8 text-sm text-gray-500"
+            className="flex flex-wrap items-center justify-center gap-6 md:gap-8 mt-10 text-sm"
+            style={{ color: C.charcoalLight }}
           >
-            <a
-              href="tel:4089002674"
-              className="flex items-center gap-2 hover:text-purple-600 transition-colors"
-            >
+            <a href="tel:4089002674" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
               <Phone className="w-4 h-4" />
               (408) 900-2674
             </a>
-            <a
-              href="mailto:radiantilyk@gmail.com"
-              className="flex items-center gap-2 hover:text-purple-600 transition-colors"
-            >
+            <a href="mailto:radiantilyk@gmail.com" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
               <Mail className="w-4 h-4" />
               radiantilyk@gmail.com
             </a>
@@ -984,62 +1111,72 @@ export default function ClientLanding() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-16 md:py-20">
-        <div className="container px-4">
+      <GoldDivider />
+
+      {/* ─── Final CTA ─── */}
+      <section className="py-24" style={{ backgroundColor: C.ivory }}>
+        <div className="mx-auto px-4" style={{ maxWidth: 700 }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="max-w-2xl mx-auto text-center p-8 md:p-10 rounded-3xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-200"
+            className="text-center p-10 md:p-14 rounded-sm"
+            style={{ backgroundColor: "#fff", border: `1px solid ${C.divider}` }}
           >
             <img
               src={LOGO_URL}
               alt="RadiantilyK Aesthetic"
-              className="w-14 h-14 rounded-full object-cover mx-auto mb-4 shadow-md border border-white"
+              className="w-16 h-16 rounded-full object-cover mx-auto mb-6 shadow-md"
+              style={{ border: `2px solid ${C.divider}` }}
             />
-            <h2 className="text-xl md:text-3xl font-bold tracking-tight mb-3">
+            <h2
+              className="text-2xl md:text-3xl mb-4"
+              style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "0.05em", color: C.charcoal }}
+            >
               Ready to See What Your Skin Needs?
             </h2>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm md:text-base">
-              It takes less than 2 minutes and it's completely free. No account required — just your photos and a few quick questions.
+            <p className="mb-8 max-w-md mx-auto text-sm leading-relaxed" style={{ color: C.charcoalLight, fontWeight: 300 }}>
+              It takes less than 2 minutes and it's completely complimentary. No account required — just your photos and a few quick questions.
             </p>
-            <Button
+            <LuxuryButton
               size="lg"
-              className="rounded-full bg-gradient-to-r from-pink-400 to-purple-500 text-white font-semibold text-sm md:text-base px-8 py-6 hover:opacity-90 border-0 shadow-lg shadow-purple-200/50 w-full sm:w-auto"
               onClick={() => { fbPixel.startAnalysis(); navigate(paths.start); }}
             >
-              <Camera className="w-5 h-5 mr-2" />
-              Start My Free Skin Analysis
-            </Button>
+              <Camera className="w-4 h-4 mr-2.5" />
+              START MY SKIN ANALYSIS
+            </LuxuryButton>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-8 bg-gray-50/50">
-        <div className="container px-4">
+      {/* ─── Footer ─── */}
+      <footer style={{ backgroundColor: C.charcoal, borderTop: `1px solid rgba(255,255,255,0.08)` }} className="py-12">
+        <div className="mx-auto px-4" style={{ maxWidth: 1100 }}>
           <div className="flex flex-col items-center gap-6">
             {/* Logo and brand */}
             <div className="flex items-center gap-2.5">
               <img
                 src={LOGO_URL}
                 alt="RadiantilyK Aesthetic"
-                className="w-8 h-8 rounded-full object-cover border border-pink-100"
+                className="w-8 h-8 rounded-full object-cover"
+                style={{ border: "1px solid rgba(255,255,255,0.15)" }}
               />
-              <span className="text-sm font-semibold text-gray-600">
+              <span
+                className="text-sm"
+                style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "rgba(255,255,255,0.7)", letterSpacing: "0.05em" }}
+              >
                 RadiantilyK Aesthetic
               </span>
             </div>
 
             {/* Locations summary */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 text-xs text-gray-400">
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
               <div className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 San Jose: 2100 Curtner Ave, Ste 1B
               </div>
-              <div className="hidden sm:block text-gray-200">|</div>
+              <div className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>|</div>
               <div className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 San Mateo: 1528 S El Camino Real #200
@@ -1047,36 +1184,18 @@ export default function ClientLanding() {
             </div>
 
             {/* Links */}
-            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs text-gray-400">
-              <a
-                href="tel:4089002674"
-                className="hover:text-purple-500 transition-colors flex items-center gap-1"
-              >
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              <a href="tel:4089002674" className="hover:opacity-70 transition-opacity flex items-center gap-1">
                 <Phone className="w-3 h-3" />
                 (408) 900-2674
               </a>
-              <a
-                href={CHECKIN_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-purple-500 transition-colors"
-              >
+              <a href={CHECKIN_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
                 Book Appointment
               </a>
-              <a
-                href="https://rkaskin.co"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-purple-500 transition-colors"
-              >
+              <a href="https://rkaskin.co" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
                 Shop Products
               </a>
-              <a
-                href="https://radiantilykaesthetics.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-purple-500 transition-colors"
-              >
+              <a href="https://radiantilykaesthetics.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">
                 Main Website
               </a>
             </div>
@@ -1087,10 +1206,11 @@ export default function ClientLanding() {
                 href="https://www.facebook.com/profile.php?id=61573509510380"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-purple-100 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
                 aria-label="Facebook"
               >
-                <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" style={{ color: "rgba(255,255,255,0.5)" }} fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
               </a>
@@ -1098,17 +1218,18 @@ export default function ClientLanding() {
                 href="https://www.instagram.com/k_radiantilykaesthetic"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-purple-100 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
                 aria-label="Instagram"
               >
-                <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" style={{ color: "rgba(255,255,255,0.5)" }} fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                 </svg>
               </a>
             </div>
 
             {/* Compliance */}
-            <div className="flex items-center gap-1.5 text-[10px] text-gray-300">
+            <div className="flex items-center gap-1.5 text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
               <Shield className="w-3 h-3" />
               HIPAA Compliant · Led by Certified NP & Board-Certified MD
             </div>
