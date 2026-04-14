@@ -17,10 +17,12 @@ import {
   X,
   Filter,
   CalendarDays,
+  RotateCcw,
+  AlertCircle,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -41,10 +43,42 @@ export default function History() {
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const utils = trpc.useUtils();
   const { data: analyses, isLoading } = trpc.skin.listAnalyses.useQuery(
     undefined,
     { enabled: isAuthenticated }
   );
+
+  // Retry failed analysis mutation
+  const [retryingIds, setRetryingIds] = useState<Set<number>>(new Set());
+  const reanalyzeMutation = trpc.skin.reanalyze.useMutation({
+    onSuccess: (_data, variables) => {
+      // Invalidate the list so it re-fetches and shows "processing" status
+      utils.skin.listAnalyses.invalidate();
+      // Keep the retrying indicator for a moment, then clear
+      setTimeout(() => {
+        setRetryingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(variables.id);
+          return next;
+        });
+      }, 2000);
+    },
+    onError: (_err, variables) => {
+      setRetryingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(variables.id);
+        return next;
+      });
+    },
+  });
+
+  const handleRetry = useCallback((e: React.MouseEvent, analysisId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setRetryingIds((prev) => new Set(prev).add(analysisId));
+    reanalyzeMutation.mutate({ id: analysisId });
+  }, [reanalyzeMutation]);
 
   // Group completed analyses by patient name for easy comparison
   const completedAnalyses = useMemo(
@@ -525,6 +559,29 @@ export default function History() {
 
                       {!compareMode && isCompleted && (
                         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      )}
+
+                      {/* Retry button for failed analyses */}
+                      {isFailed && !compareMode && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/10 hover:text-red-700 hover:border-red-500/50"
+                          disabled={retryingIds.has(analysis.id)}
+                          onClick={(e) => handleRetry(e, analysis.id)}
+                        >
+                          {retryingIds.has(analysis.id) ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              Retrying...
+                            </>
+                          ) : (
+                            <>
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              Retry
+                            </>
+                          )}
+                        </Button>
                       )}
                     </div>
                   </div>

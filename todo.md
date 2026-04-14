@@ -863,3 +863,11 @@
 - [x] Added JSON parse error recovery: even if finish_reason is "stop" but JSON is malformed, attempts recovery before failing
 - [x] 11 unit tests for JSON recovery (truncated strings, nested objects, arrays, escaped quotes, real-world skin analysis)
 - [x] 164 total tests passing
+
+## Retry Failed Button on History Page
+- [x] Reuses existing reanalyze tRPC mutation (already supports re-running any analysis)
+- [x] Added "Retry" button on History page for failed analyses — red outlined button with RotateCcw icon
+- [x] Button shows "Retrying..." spinner while mutation is in flight
+- [x] On success, invalidates listAnalyses query so card updates to "Processing" status
+- [x] Toni B and Jennifer k Toy can now be retried with one click (will use new 16384/32768 token limits)
+- [x] 164 tests passing, 0 TypeScript errors
