@@ -854,3 +854,12 @@
 - [x] Referral banner restyled to match luxury palette
 - [x] Footer redesigned: charcoal background, muted text, gold social icons
 - [x] All 153 tests passing after updating test assertions for new copy
+
+## Bug Fix: Failed Analyses (Toni B & Jennifer k Toy)
+- [x] Root cause: AI response exceeded 12,000 token max_tokens limit, causing truncated JSON ("Unterminated string at position ~50k")
+- [x] Increased maxTokens from 12,000 → 16,384 (first attempt) → 32,768 (retry) in both skinRouter.ts and clientRoutes.ts
+- [x] Added truncation detection: checks finish_reason === "length" and auto-retries with higher token limit
+- [x] Added recoverTruncatedJson() utility (server/jsonRecovery.ts) as last-resort fallback — closes open strings/brackets/braces
+- [x] Added JSON parse error recovery: even if finish_reason is "stop" but JSON is malformed, attempts recovery before failing
+- [x] 11 unit tests for JSON recovery (truncated strings, nested objects, arrays, escaped quotes, real-world skin analysis)
+- [x] 164 total tests passing

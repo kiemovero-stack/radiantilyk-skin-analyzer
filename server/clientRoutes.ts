@@ -27,6 +27,7 @@ import { scheduleFollowUpEmails, send24HourFollowUp, send72HourFollowUp } from "
 import { generateTreatmentSimulations } from "./simulationService";
 import { generateAgingSimulations } from "./agingSimulationService";
 import { sendStaffNotificationEmail } from "./staffNotificationService";
+import { recoverTruncatedJson } from "./jsonRecovery";
 
 // Multer for public uploads
 const upload = multer({
@@ -189,29 +190,70 @@ async function runClientAnalysisInBackground(
     console.log(`[ClientAnalysis] Starting AI analysis for record ${analysisId} with ${imageUrls.length} image(s)`);
     const startTime = Date.now();
 
-    const result = await invokeLLM({
-      messages: [
-        { role: "system", content: buildClientSystemPrompt() },
-        { role: "user", content: imageContents },
-      ],
-      maxTokens: 12000,
-      responseFormat: {
-        type: "json_schema",
-        json_schema: CLIENT_ANALYSIS_OUTPUT_SCHEMA,
-      },
-    });
+    const messages = [
+      { role: "system" as const, content: buildClientSystemPrompt() },
+      { role: "user" as const, content: imageContents },
+    ];
+
+    // Try with 16384 tokens first, retry with 32768 if truncated
+    const TOKEN_LIMITS = [16384, 32768];
+    let report: SkinAnalysisReport | null = null;
+
+    for (const tokenLimit of TOKEN_LIMITS) {
+      const result = await invokeLLM({
+        messages,
+        maxTokens: tokenLimit,
+        responseFormat: {
+          type: "json_schema",
+          json_schema: CLIENT_ANALYSIS_OUTPUT_SCHEMA,
+        },
+      });
+
+      const finishReason = result.choices[0]?.finish_reason;
+      const content = result.choices[0]?.message?.content;
+
+      if (!content) throw new Error("AI analysis returned empty response");
+
+      const text = typeof content === "string"
+        ? content
+        : (content[0] as { type: "text"; text: string }).text;
+
+      // Check if response was truncated
+      if (finishReason === "length") {
+        console.warn(`[ClientAnalysis] Response truncated at ${tokenLimit} tokens for record ${analysisId}. ${tokenLimit < TOKEN_LIMITS[TOKEN_LIMITS.length - 1] ? "Retrying with higher limit..." : "Attempting JSON recovery..."}`);
+
+        if (tokenLimit === TOKEN_LIMITS[TOKEN_LIMITS.length - 1]) {
+          try {
+            report = recoverTruncatedJson(text) as SkinAnalysisReport;
+            console.log(`[ClientAnalysis] Successfully recovered truncated JSON for record ${analysisId}`);
+            break;
+          } catch {
+            throw new Error(`AI response truncated at ${tokenLimit} tokens and JSON recovery failed.`);
+          }
+        }
+        continue;
+      }
+
+      try {
+        report = JSON.parse(text) as SkinAnalysisReport;
+        break;
+      } catch (parseErr: any) {
+        console.warn(`[ClientAnalysis] JSON parse failed for record ${analysisId}: ${parseErr.message}. Attempting recovery...`);
+        try {
+          report = recoverTruncatedJson(text) as SkinAnalysisReport;
+          console.log(`[ClientAnalysis] Successfully recovered malformed JSON for record ${analysisId}`);
+          break;
+        } catch {
+          if (tokenLimit < TOKEN_LIMITS[TOKEN_LIMITS.length - 1]) continue;
+          throw parseErr;
+        }
+      }
+    }
+
+    if (!report) throw new Error("AI analysis failed after all retry attempts");
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`[ClientAnalysis] AI analysis completed in ${elapsed}s for record ${analysisId}`);
-
-    const content = result.choices[0]?.message?.content;
-    if (!content) throw new Error("AI analysis returned empty response");
-
-    let report: SkinAnalysisReport;
-    const text = typeof content === "string"
-      ? content
-      : (content[0] as { type: "text"; text: string }).text;
-    report = JSON.parse(text) as SkinAnalysisReport;
 
     const db = await getDb();
     if (!db) throw new Error("Database not available");
