@@ -530,7 +530,22 @@ export const skinRouter = router({
 
       const record = results[0];
       const imageUrl = record.imageUrl as string;
-      if (!imageUrl) throw new Error("No source image available for re-analysis");
+      if (!imageUrl || imageUrl.trim() === "") throw new Error("No source image available for re-analysis");
+
+      // Validate the primary image is still accessible and is an actual image
+      try {
+        const headResp = await fetch(imageUrl, { method: "HEAD" });
+        if (!headResp.ok) {
+          throw new Error(`Source image is no longer accessible (HTTP ${headResp.status}). Please delete this record and create a new analysis.`);
+        }
+        const contentType = headResp.headers.get("content-type") || "";
+        if (!contentType.startsWith("image/")) {
+          throw new Error(`Source file is not a valid image (type: ${contentType}). Please delete this record and create a new analysis.`);
+        }
+      } catch (fetchErr: any) {
+        if (fetchErr.message.includes("accessible") || fetchErr.message.includes("valid image")) throw fetchErr;
+        throw new Error(`Cannot verify source image: ${fetchErr.message}. Please delete this record and create a new analysis.`);
+      }
 
       // Collect image URLs
       const imageUrls: string[] = [imageUrl];

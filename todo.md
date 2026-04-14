@@ -884,3 +884,10 @@
 - [x] Added Delete button on History page: trash icon appears on hover for all cards, always visible for failed
 - [x] Delete has inline confirmation ("Delete? Yes / No") to prevent accidental deletion
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Delete All Jennifer Toy Records (User Confirmed No Pictures)
+- [x] Deleted remaining Jennifer Toy record (690005) — user confirmed no valid pictures despite imageUrl returning HTTP 200
+- [x] Jennifer Toy has zero records remaining in the database
+- [x] Added image validation to reanalyze mutation (HEAD check + content-type verification before re-running AI)
+- [x] All three entry points now validated: staff analyze, client analyze, and reanalyze
+- [x] 164 tests passing, 0 TypeScript errors
