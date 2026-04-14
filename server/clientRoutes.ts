@@ -512,6 +512,31 @@ export function registerClientRoutes(app: Express) {
         return;
       }
 
+      // STRICT IMAGE VALIDATION: NEVER allow analysis without valid, accessible images
+      for (const img of imageUrls) {
+        const imgUrl = typeof img === "string" ? img : img.url;
+        if (!imgUrl || imgUrl.trim() === "") {
+          res.status(400).json({ error: "Empty image URL provided. All photos must be valid." });
+          return;
+        }
+        try {
+          const headResp = await fetch(imgUrl, { method: "HEAD" });
+          if (!headResp.ok) {
+            res.status(400).json({ error: `Uploaded photo is not accessible (HTTP ${headResp.status}). Please re-upload.` });
+            return;
+          }
+          const contentType = headResp.headers.get("content-type") || "";
+          if (!contentType.startsWith("image/")) {
+            res.status(400).json({ error: `Uploaded file is not a valid image (type: ${contentType}). Please upload a photo.` });
+            return;
+          }
+        } catch (fetchErr: any) {
+          res.status(400).json({ error: `Cannot verify uploaded photo: ${fetchErr.message}. Please re-upload.` });
+          return;
+        }
+      }
+      console.log(`[ClientAnalysis] Image validation passed for ${imageUrls.length} image(s)`);
+
       const db = await getDb();
       if (!db) {
         res.status(500).json({ error: "Database not available" });

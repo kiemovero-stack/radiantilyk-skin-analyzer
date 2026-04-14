@@ -871,3 +871,16 @@
 - [x] On success, invalidates listAnalyses query so card updates to "Processing" status
 - [x] Toni B and Jennifer k Toy can now be retried with one click (will use new 16384/32768 token limits)
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Delete Jennifer Toy Records & Image Validation
+- [x] Investigated: Jennifer Toy DID have images (accessible at S3 URLs). Failures were from JSON truncation, not missing images.
+- [x] Deleted Jennifer Toy's failed duplicate record (690004). Completed record (690005) retained.
+- [x] Added strict server-side image validation to BOTH staff (skinRouter.ts) and client (clientRoutes.ts) analyze endpoints:
+  - Rejects empty/null image URLs
+  - HEAD-checks each URL is accessible (HTTP 200)
+  - Verifies Content-Type starts with "image/"
+  - Blocks analysis BEFORE creating DB record if any check fails
+- [x] Added deleteAnalysis tRPC mutation (staff-only, protectedProcedure)
+- [x] Added Delete button on History page: trash icon appears on hover for all cards, always visible for failed
+- [x] Delete has inline confirmation ("Delete? Yes / No") to prevent accidental deletion
+- [x] 164 tests passing, 0 TypeScript errors

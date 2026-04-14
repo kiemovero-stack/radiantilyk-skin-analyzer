@@ -19,6 +19,7 @@ import {
   CalendarDays,
   RotateCcw,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
@@ -79,6 +80,44 @@ export default function History() {
     setRetryingIds((prev) => new Set(prev).add(analysisId));
     reanalyzeMutation.mutate({ id: analysisId });
   }, [reanalyzeMutation]);
+
+  // Delete analysis mutation
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
+  const deleteMutation = trpc.skin.deleteAnalysis.useMutation({
+    onSuccess: () => {
+      utils.skin.listAnalyses.invalidate();
+      setConfirmDeleteId(null);
+    },
+    onError: () => {
+      setDeletingIds((prev) => {
+        const next = new Set(prev);
+        if (confirmDeleteId) next.delete(confirmDeleteId);
+        return next;
+      });
+    },
+  });
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent, analysisId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfirmDeleteId(analysisId);
+  }, []);
+
+  const handleDeleteConfirm = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirmDeleteId) {
+      setDeletingIds((prev) => new Set(prev).add(confirmDeleteId));
+      deleteMutation.mutate({ id: confirmDeleteId });
+    }
+  }, [confirmDeleteId, deleteMutation]);
+
+  const handleDeleteCancel = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConfirmDeleteId(null);
+  }, []);
 
   // Group completed analyses by patient name for easy comparison
   const completedAnalyses = useMemo(
@@ -561,27 +600,69 @@ export default function History() {
                         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                       )}
 
-                      {/* Retry button for failed analyses */}
+                      {/* Action buttons for failed analyses */}
                       {isFailed && !compareMode && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="shrink-0 gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/10 hover:text-red-700 hover:border-red-500/50"
-                          disabled={retryingIds.has(analysis.id)}
-                          onClick={(e) => handleRetry(e, analysis.id)}
-                        >
-                          {retryingIds.has(analysis.id) ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              Retrying...
-                            </>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/10 hover:text-red-700 hover:border-red-500/50"
+                            disabled={retryingIds.has(analysis.id)}
+                            onClick={(e) => handleRetry(e, analysis.id)}
+                          >
+                            {retryingIds.has(analysis.id) ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                Retrying...
+                              </>
+                            ) : (
+                              <>
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                Retry
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Delete button — visible on hover for all, always visible for failed */}
+                      {!compareMode && (
+                        <div className={`shrink-0 ${isFailed ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                          {confirmDeleteId === analysis.id ? (
+                            <div className="flex items-center gap-1.5 bg-red-50 dark:bg-red-950/30 rounded-lg px-2 py-1 border border-red-200 dark:border-red-800">
+                              <span className="text-xs text-red-600 font-medium whitespace-nowrap">Delete?</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-xs text-red-600 hover:bg-red-100 hover:text-red-700"
+                                disabled={deletingIds.has(analysis.id)}
+                                onClick={handleDeleteConfirm}
+                              >
+                                {deletingIds.has(analysis.id) ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  "Yes"
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-xs text-muted-foreground hover:bg-muted"
+                                onClick={handleDeleteCancel}
+                              >
+                                No
+                              </Button>
+                            </div>
                           ) : (
-                            <>
-                              <RotateCcw className="w-3.5 h-3.5" />
-                              Retry
-                            </>
+                            <button
+                              className="p-1.5 rounded-md text-muted-foreground/50 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                              onClick={(e) => handleDeleteClick(e, analysis.id)}
+                              title="Delete this analysis"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           )}
-                        </Button>
+                        </div>
                       )}
                     </div>
                   </div>

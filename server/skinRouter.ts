@@ -248,6 +248,34 @@ export const skinRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { imageUrls, patientFirstName, patientLastName, patientEmail, patientDob, concerns } = input;
 
+      // STRICT IMAGE VALIDATION: NEVER allow analysis without valid, accessible images
+      if (!imageUrls || imageUrls.length === 0) {
+        throw new Error("At least one photo is required. Cannot run analysis without images.");
+      }
+
+      // Verify each image URL is reachable before proceeding
+      for (const img of imageUrls) {
+        if (!img.url || img.url.trim() === "") {
+          throw new Error(`Empty image URL provided for ${img.angle} angle. All photos must be valid.`);
+        }
+        try {
+          const headResp = await fetch(img.url, { method: "HEAD" });
+          if (!headResp.ok) {
+            throw new Error(`Image for ${img.angle} angle is not accessible (HTTP ${headResp.status}). Please re-upload the photo.`);
+          }
+          // Verify it's actually an image
+          const contentType = headResp.headers.get("content-type") || "";
+          if (!contentType.startsWith("image/")) {
+            throw new Error(`File for ${img.angle} angle is not a valid image (type: ${contentType}). Please upload a photo.`);
+          }
+        } catch (fetchErr: any) {
+          if (fetchErr.message.includes("angle")) throw fetchErr; // re-throw our own errors
+          throw new Error(`Cannot verify image for ${img.angle} angle: ${fetchErr.message}. Please re-upload.`);
+        }
+      }
+
+      console.log(`[SkinAnalysis] Image validation passed for ${imageUrls.length} image(s)`);
+
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 
@@ -575,6 +603,31 @@ export const skinRouter = router({
         .set({ staffNotes: input.notes })
         .where(eq(skinAnalyses.id, input.id));
 
+      return { success: true };
+    }),
+
+  /**
+   * Delete an analysis record.
+   * Staff can delete any record (failed, completed, or processing).
+   */
+  deleteAnalysis: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      // Verify the record exists
+      const results = await db
+        .select({ id: skinAnalyses.id })
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.id, input.id))
+        .limit(1);
+
+      if (results.length === 0) throw new Error("Analysis not found");
+
+      await db.delete(skinAnalyses).where(eq(skinAnalyses.id, input.id));
+
+      console.log(`[SkinAnalysis] Record ${input.id} deleted by staff`);
       return { success: true };
     }),
 
