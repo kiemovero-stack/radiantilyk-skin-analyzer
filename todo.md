@@ -902,3 +902,8 @@
 - [x] Updated skinPrompt.ts SKU examples from RKA-010 to RKA-030
 - [x] Updated test assertions: 76 products total, 18 serums, 20 creams
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Fix: Re-add RKA Vitamin C Serum 30ml
+- [x] Added back RadiantilyK Aesthetic Vitamin C Facial Serum 30ml (RKA-010, $28.00) to Serums category
+- [x] Updated product count to 77, test assertions updated (19 serums)
+- [x] 164 tests passing

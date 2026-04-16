@@ -404,8 +404,8 @@ describe("Product Catalog", () => {
     expect(categories).toContain("Lip Care");
   });
 
-  it("has 76 products total (synced from rkaskin.co)", () => {
-    expect(getProductCount()).toBe(76);
+  it("has 77 products total (synced from rkaskin.co)", () => {
+    expect(getProductCount()).toBe(77);
   });
 
   it("all products have sku, name, price, and description", () => {
@@ -420,10 +420,10 @@ describe("Product Catalog", () => {
     }
   });
 
-  it("serums category has 18 products", () => {
+  it("serums category has 19 products", () => {
     const serums = PRODUCT_CATALOG.find((c) => c.category === "Serums");
     expect(serums).toBeDefined();
-    expect(serums!.products).toHaveLength(18);
+    expect(serums!.products).toHaveLength(19);
   });
 
   it("creams & moisturizers category has 20 products", () => {

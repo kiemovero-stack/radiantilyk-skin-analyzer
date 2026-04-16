@@ -629,6 +629,15 @@ export const PRODUCT_CATALOG: ProductCategory[] = [
         shopUrl: STORE_URL,
       },
       {
+        sku: "RKA-010",
+        name: "RadiantilyK Aesthetic Vitamin C Facial Serum 30ml",
+        price: "$28.00",
+        category: "Serum",
+        description: "Concentrated vitamin C serum to brighten, firm, and protect against environmental damage.",
+        keyBenefits: ["vitamin C", "brightening", "firming", "environmental protection"],
+        shopUrl: STORE_URL,
+      },
+      {
         sku: "RKA-033",
         name: "RadiantilyK Resurfacing Serum",
         price: "$38.00",
@@ -774,7 +783,7 @@ export const PRODUCT_CATALOG: ProductCategory[] = [
  */
 export function buildProductCatalogText(): string {
   let text = "=== SKINCARE PRODUCT CATALOG (RadiantilyK Aesthetic — rkaskin.co) ===\n";
-  text += "76 products available. Recommend 5-7 products per client based on their specific concerns.\n";
+  text += "77 products available. Recommend 5-7 products per client based on their specific concerns.\n";
   text += "ALWAYS include a sunscreen recommendation for every client.\n";
   text += "ALWAYS recommend a post-procedure product when recommending any in-office procedure.\n";
   text += "ALL product links should point to https://rkaskin.co\n\n";
