@@ -891,3 +891,14 @@
 - [x] Added image validation to reanalyze mutation (HEAD check + content-type verification before re-running AI)
 - [x] All three entry points now validated: staff analyze, client analyze, and reanalyze
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Sync Product Catalog with rkaskin.co
+- [x] Removed 5 products not on rkaskin.co: MOV Tina Regence, MOV Hristinka LUME, RKA Vit C Serum 30ml, RKA Bioactive Enzyme, RKA Peptide Complex
+- [x] Fixed naming: "Images" prefix removed from cleanser names to match rkaskin.co display
+- [x] Added 16 missing products: Carvenchy HA9 Cream, Carvenchy PDRN Cream, Carvenchy 4-in-1 Serum, Carvenchy Scar Cream, Glutathione Whitening Cream, Neutralyze Renewal Complex, BIOAQUA Eyelash Growth Essence, Viareline Eye Repair Serum, Gel Inkeratin Peptide Lip Treatment, 4x Peptide Mineral Lip Treatment Gels, S·Remove Rose Gold Sun Shield SPF 45
+- [x] Rewrote bundle deals with 5 new curated bundles matching rkaskin.co inventory
+- [x] Updated all product recommendation guidelines to reference only available products
+- [x] Updated STORE_URL to https://rkaskin.co
+- [x] Updated skinPrompt.ts SKU examples from RKA-010 to RKA-030
+- [x] Updated test assertions: 76 products total, 18 serums, 20 creams
+- [x] 164 tests passing, 0 TypeScript errors

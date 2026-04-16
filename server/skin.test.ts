@@ -288,8 +288,8 @@ describe("PDF Report Generation", () => {
       ],
       skincareProducts: [
         {
-          name: "RadiantilyK Aesthetic Vitamin C Facial Serum 30ml",
-          sku: "RKA-010",
+name: "RadiantilyK Aesthetic Vitamin C Facial Serum 1oz",
+           sku: "RKA-030",
           price: "$28.00",
           type: "Serum",
           purpose: "Brightening and antioxidant protection",
@@ -404,8 +404,8 @@ describe("Product Catalog", () => {
     expect(categories).toContain("Lip Care");
   });
 
-  it("has 67 products total (synced from storefront)", () => {
-    expect(getProductCount()).toBe(67);
+  it("has 76 products total (synced from rkaskin.co)", () => {
+    expect(getProductCount()).toBe(76);
   });
 
   it("all products have sku, name, price, and description", () => {
@@ -420,16 +420,16 @@ describe("Product Catalog", () => {
     }
   });
 
-  it("serums category has 22 products", () => {
+  it("serums category has 18 products", () => {
     const serums = PRODUCT_CATALOG.find((c) => c.category === "Serums");
     expect(serums).toBeDefined();
-    expect(serums!.products).toHaveLength(22);
+    expect(serums!.products).toHaveLength(18);
   });
 
-  it("creams & moisturizers category has 18 products", () => {
+  it("creams & moisturizers category has 20 products", () => {
     const creams = PRODUCT_CATALOG.find((c) => c.category === "Creams & Moisturizers");
     expect(creams).toBeDefined();
-    expect(creams!.products).toHaveLength(18);
+    expect(creams!.products).toHaveLength(20);
   });
 
   it("getProductCatalogText returns formatted text", () => {

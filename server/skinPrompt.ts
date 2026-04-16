@@ -446,8 +446,8 @@ export const SKIN_ANALYSIS_OUTPUT_SCHEMA = {
           required: ["name", "sku", "price", "type", "purpose", "keyIngredients", "targetConditions"],
           additionalProperties: false,
           properties: {
-            name: { type: "string", description: "Exact product name from the catalog (e.g., 'RadiantilyK Aesthetic Vitamin C Facial Serum 30ml')" },
-            sku: { type: "string", description: "Product SKU code from the catalog (e.g., 'RKA-010')" },
+            name: { type: "string", description: "Exact product name from the catalog (e.g., 'RadiantilyK Aesthetic Vitamin C Facial Serum 1oz')" },
+            sku: { type: "string", description: "Product SKU code from the catalog (e.g., 'RKA-030')" },
             price: { type: "string", description: "Exact price from the catalog (e.g., '$49.00')" },
             type: { type: "string", description: "Product category (Serum, Cream, Cleanser, Sunscreen, Post-Procedure, Trial Kit)" },
             purpose: { type: "string" },
