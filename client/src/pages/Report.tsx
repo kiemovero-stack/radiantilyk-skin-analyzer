@@ -45,7 +45,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 import { motion } from "framer-motion";
-import { StickyNote } from "lucide-react";
+import { StickyNote, ExternalLink } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -1538,6 +1538,7 @@ export default function Report() {
                     cp.sku === product.sku
                 );
                 const imageUrl = catalogMatch?.imageUrl;
+                const shopUrl = catalogMatch?.shopUrl || "https://rkaskin.co";
                 return (
                   <div
                     key={i}
@@ -1607,6 +1608,17 @@ export default function Report() {
                               {c}
                             </span>
                           ))}
+                        </div>
+                        <div className="mt-2">
+                          <a
+                            href={shopUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity shadow-sm"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            View on Store
+                          </a>
                         </div>
                       </div>
                     </div>

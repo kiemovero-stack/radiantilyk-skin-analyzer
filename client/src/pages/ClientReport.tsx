@@ -1662,6 +1662,7 @@ export default function ClientReport() {
                     cp.sku === product.sku
                 );
                 const imageUrl = catalogMatch?.imageUrl;
+                const shopUrl = catalogMatch?.shopUrl || SHOP_URL;
                 const categoryIcon: Record<string, string> = {
                   cleanser: "\ud83e\uddf4",
                   cream: "\ud83e\ude75",
@@ -1742,7 +1743,7 @@ export default function ClientReport() {
                         </div>
                         <div className="mt-2">
                           <a
-                            href={withUtm(SHOP_URL, product.name)}
+                            href={withUtm(shopUrl, product.name)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition-colors shadow-sm"

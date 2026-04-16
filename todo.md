@@ -907,3 +907,16 @@
 - [x] Added back RadiantilyK Aesthetic Vitamin C Facial Serum 30ml (RKA-010, $28.00) to Serums category
 - [x] Updated product count to 77, test assertions updated (19 serums)
 - [x] 164 tests passing
+
+## Scrape Product Images from rkaskin.co
+- [x] Scraped all 76 product pages from rkaskin.co using BeautifulSoup (HTML parsing)
+- [x] Matched all 77 catalog entries to scraped data (76 direct + 1 shared page for 30ml Vitamin C serum)
+- [x] Updated all 77 products with CloudFront image URLs from rkaskin.co CDN
+- [x] Updated all 77 products with individual product page URLs (shopUrl: https://rkaskin.co/product/XXX)
+- [x] Removed STORE_URL constant dependency — each product now has its own direct link
+
+## Shop Now Button on Client Report
+- [x] Client report: "Shop Now" button on each product card now links to specific product page (with UTM tracking)
+- [x] Staff report: Added "View on Store" button with ExternalLink icon on each product card
+- [x] Product images clickable — already linked via catalog imageUrl
+- [x] 164 tests passing, 0 TypeScript errors
