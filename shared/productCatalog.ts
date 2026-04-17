@@ -5,7 +5,7 @@
  * skincare products that the clinic actually sells. Each product
  * includes SKU, name, price, category, and description.
  * 
- * Last synced with https://rkaskin.co — April 2026 — 76 products, 5 bundle deals
+ * Last synced with https://rkaskin.co — April 2026 — 78 products, 5 bundle deals
  */
 
 export interface ProductItem {
@@ -289,6 +289,16 @@ export const PRODUCT_CATALOG: ProductCategory[] = [
         keyBenefits: ["copper peptides", "collagen boost", "firming", "anti-aging", "affordable"],
         shopUrl: "https://rkaskin.co/product/11",
         imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663224834738/dRqspyivBm9g9V7BZcsBdg/RKA-025_928751e1.jpg",
+      },
+      {
+        sku: "NCTIFIRM-486",
+        name: "Revision Skincare Nectifirm 1.7 oz",
+        price: "$89.00",
+        category: "Cream",
+        description: "Clinically proven neck firming cream that targets the visible signs of aging on the neck and d\u00E9colletage. Formulated with plant extracts, antioxidants, and peptides to firm, tone, and tighten sagging skin. 1.7 oz / 48g.",
+        keyBenefits: ["neck firming", "d\u00E9colletage", "peptides", "antioxidants", "anti-aging", "plant extracts", "skin elasticity"],
+        shopUrl: "https://rkaskin.co/product/210001",
+        imageUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/gQUNaUN6BpxY2cHrs4Z9XC/revision-nectifirm_1735fd7e.png",
       },
     ],
   },
@@ -860,7 +870,7 @@ export const PRODUCT_CATALOG: ProductCategory[] = [
  */
 export function buildProductCatalogText(): string {
   let text = "=== SKINCARE PRODUCT CATALOG (RadiantilyK Aesthetic — rkaskin.co) ===\n";
-  text += "77 products available. Recommend 5-7 products per client based on their specific concerns.\n";
+  text += "78 products available. Recommend 5-7 products per client based on their specific concerns.\n";
   text += "ALWAYS include a sunscreen recommendation for every client.\n";
   text += "ALWAYS recommend a post-procedure product when recommending any in-office procedure.\n";
   text += "ALL product links should point to https://rkaskin.co\n\n";
@@ -876,7 +886,7 @@ export function buildProductCatalogText(): string {
   text += "- For UNDER-EYE CONCERNS: Sisley Black Rose Eye Contour Fluid, Kiehl's Creamy Eye Treatment with Avocado, Clarins Double Serum Eye, Viareline Advanced Eye Repair Serum\n";
   text += "- For SCARS / MARKS: AIXIN Beauty Scar & Mark Removing Serum, RadiantilyK Resurfacing Serum, AIXIN Beauty EGF Revitalizing Serum, Carvenchy Silicone Scar Cream\n";
   text += "- For LASH ENHANCEMENT: MOV Lash Regenerative Serum, BIOAQUA Eyelash Growth Essence\n";
-  text += "- For FIRMING / COLLAGEN: RadiantilyK GHK-Cu Copper Peptides Face Cream, Waterfully GHK-Cu Copper Peptide Face Cream, Carvenchy PDRN Collagen Jelly Cream\n";
+  text += "- For FIRMING / COLLAGEN: RadiantilyK GHK-Cu Copper Peptides Face Cream, Waterfully GHK-Cu Copper Peptide Face Cream, Carvenchy PDRN Collagen Jelly Cream, Revision Skincare Nectifirm (neck/décolletage)\n";
   text += "- For BRIGHTENING / VITAMIN C: Kiehl's Powerful-Strength Vitamin C Serum, RadiantilyK Vitamin C Facial Serum, RadiantilyK Vitamin C Facial Moisturizer, Dermagarden Vita C Cream, Carvenchy 4-in-1 Facial Serum\n";
   text += "- For LIP CARE: Gel Inkeratin Peptide Lip Treatment, Peptide Mineral Lip Treatment Gel (Passion Fruit, Salted Caramel, Unscented, Watermelon), Summer Fridays Lip Butter Balm (Vanilla, Pink Sugar, Iced Coffee, Brown Sugar, Vanilla Beige, Toasted Marshmallow)\n";
   text += "- For SUN PROTECTION: EltaMD UV Clear SPF 46 (acne/rosacea), EltaMD UV Clear Tinted SPF 46, EltaMD UV AOX Elements SPF 50 (all skin), EltaMD UV Daily Tinted SPF 40, BARUBT Matte SPF 46 (oily), BARUBT Dewy SPF 46 (dry), EELHOE Sun Cream SPF90, S·Remove Rose Gold Sun Shield SPF 45\n";

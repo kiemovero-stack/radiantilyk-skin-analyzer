@@ -920,3 +920,12 @@
 - [x] Staff report: Added "View on Store" button with ExternalLink icon on each product card
 - [x] Product images clickable — already linked via catalog imageUrl
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Scan rkaskin.co for New Products (April 2026)
+- [x] Scraped all 77 products from rkaskin.co via browser JS extraction
+- [x] Compared against current 77-product catalog by shopUrl
+- [x] Found 1 new product: Revision Skincare Nectifirm 1.7 oz ($89.00, neck firming cream)
+- [x] Added Nectifirm to Creams category with SKU NCTIFIRM-486, image, shopUrl, and keyBenefits
+- [x] Added Nectifirm to FIRMING/COLLAGEN recommendation guideline
+- [x] Updated product count to 78, test assertions updated (21 creams, 78 total)
+- [x] 164 tests passing, 0 TypeScript errors
