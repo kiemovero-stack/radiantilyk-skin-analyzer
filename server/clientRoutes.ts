@@ -15,7 +15,7 @@ import type { Express, Request, Response } from "express";
 import multer from "multer";
 import { getDb } from "./db";
 import { skinAnalyses, referralCodes } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
@@ -542,6 +542,36 @@ export function registerClientRoutes(app: Express) {
         res.status(500).json({ error: "Database not available" });
         return;
       }
+
+      // ── RATE LIMIT: 2 analyses per email per calendar month ──────────
+      const normalizedEmail = patientEmail.trim().toLowerCase();
+      const now = new Date();
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const monthlyCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(skinAnalyses)
+        .where(
+          and(
+            sql`LOWER(${skinAnalyses.patientEmail}) = ${normalizedEmail}`,
+            gte(skinAnalyses.createdAt, firstOfMonth)
+          )
+        );
+
+      const analysesThisMonth = Number(monthlyCount[0]?.count ?? 0);
+      if (analysesThisMonth >= 2) {
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const resetDate = nextMonth.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+        console.log(`[ClientAnalysis] Rate limit reached for ${normalizedEmail}: ${analysesThisMonth} analyses this month`);
+        res.status(429).json({
+          error: "rate_limit",
+          message: `You've already used your 2 complimentary skin analyses for this month. Your next analysis will be available on ${resetDate}. For immediate assistance, please contact us directly.`,
+          analysesUsed: analysesThisMonth,
+          resetDate,
+        });
+        return;
+      }
+      console.log(`[ClientAnalysis] Rate check passed for ${normalizedEmail}: ${analysesThisMonth}/2 this month`);
 
       // Use userId = 0 for public client analyses
       const insertResult = await db.insert(skinAnalyses).values({

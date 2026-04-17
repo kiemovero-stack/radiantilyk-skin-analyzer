@@ -534,7 +534,13 @@ export default function ClientAnalyze() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Failed" }));
-        throw new Error(err.error || "Failed to start analysis");
+        if (err.error === "rate_limit") {
+          setIsAnalyzing(false);
+          setAnalysisProgress("");
+          toast.error(err.message || "You've reached your monthly analysis limit. Please try again next month.", { duration: 8000 });
+          return;
+        }
+        throw new Error(err.message || err.error || "Failed to start analysis");
       }
 
       const { id } = await res.json();

@@ -929,3 +929,11 @@
 - [x] Added Nectifirm to FIRMING/COLLAGEN recommendation guideline
 - [x] Updated product count to 78, test assertions updated (21 creams, 78 total)
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Rate Limit: 2 Quizzes Per Month Per Email (Client Portal)
+- [x] Added server-side check in POST /api/client/analyze: counts analyses per email in current calendar month
+- [x] Returns HTTP 429 with error: "rate_limit" and friendly message including reset date (1st of next month)
+- [x] Case-insensitive email matching (LOWER) to prevent bypass with different casing
+- [x] Client UI catches rate_limit error and shows toast with 8-second duration explaining the limit
+- [x] Staff portal (skinRouter.ts) is NOT rate-limited — only client portal
+- [x] 164 tests passing, 0 TypeScript errors
