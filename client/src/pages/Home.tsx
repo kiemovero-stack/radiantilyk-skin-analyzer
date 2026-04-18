@@ -277,7 +277,7 @@ export default function Home() {
             </p>
           </div>
           <div className="text-center mt-6 text-xs text-muted-foreground/60">
-            SkinAI — Advanced AI Skin Diagnostics
+            Radiantilyk Aesthetic — Advanced AI Skin Diagnostics
           </div>
         </div>
       </footer>

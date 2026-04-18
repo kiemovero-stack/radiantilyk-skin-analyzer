@@ -1024,3 +1024,10 @@
 - [x] Update client booking page with location selection step (Location → Provider → Date/Time → Account → Card → Confirm)
 - [x] Each provider has their own weekly availability section
 - [x] 0 TypeScript errors, 196 tests passing
+
+## App Rename to Radiantilyk Aesthetic
+- [x] Update Capacitor config app name (already set to RadiantilyK Aesthetic)
+- [x] Update Android strings.xml app name (already set to RadiantilyK Aesthetic)
+- [x] Update iOS Info.plist display name (already set to RadiantilyK Aesthetic)
+- [x] Update web title and branding (Navbar, Home footer, index.html)
+- [ ] Push to GitHub

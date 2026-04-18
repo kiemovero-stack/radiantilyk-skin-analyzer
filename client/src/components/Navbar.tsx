@@ -32,7 +32,7 @@ export default function Navbar() {
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="text-lg font-semibold tracking-tight text-foreground">
-            SkinAI
+            Radiantilyk
           </span>
         </Link>
 
