@@ -1,22 +1,20 @@
 /**
- * ClientProfile — Client account page.
- * Shows past analyses, rewards summary, financing links, and settings.
+ * ClientProfile — Client account & profile hub.
+ * Shows wallet balance, rewards, past analyses, quick links to all features.
  */
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   User, FileText, Gift, CreditCard, Settings,
   ChevronRight, ExternalLink, LogOut, Star,
-  Camera, History, Shield,
+  Camera, Wallet, MessageCircle, ShoppingBag,
+  CalendarDays, Shield, Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { clientPath } from "@/lib/clientPaths";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663441068939/YXDmLVYUnds4E9JxEbde2D/IMG_2517_3c23507d.PNG";
-const AESTHETIC_RECORD_URL = "https://rkaemr.click/portal";
 const CHERRY_URL = "https://pay.withcherry.com/radiantilyk-aesthetic-llc";
-const SHOP_URL = "https://rkaskin.co";
 
 const C = {
   gold: "#B8964A",
@@ -39,6 +37,7 @@ export default function ClientProfile() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [analyses, setAnalyses] = useState<AnalysisSummary[]>([]);
   const [rewardsPoints, setRewardsPoints] = useState(0);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -53,17 +52,23 @@ export default function ClientProfile() {
   async function loadProfile(memberEmail: string) {
     setIsLoading(true);
     try {
-      // Load analyses
-      const res = await fetch(`/api/client/analyses?email=${encodeURIComponent(memberEmail)}`);
-      if (res.ok) {
-        const data = await res.json();
+      const [analysesRes, rewardsRes, walletRes] = await Promise.allSettled([
+        fetch(`/api/client/analyses?email=${encodeURIComponent(memberEmail)}`),
+        fetch(`/api/rewards/member?email=${encodeURIComponent(memberEmail)}`),
+        fetch(`/api/wallet/balance?userId=${encodeURIComponent(memberEmail)}`),
+      ]);
+
+      if (analysesRes.status === "fulfilled" && analysesRes.value.ok) {
+        const data = await analysesRes.value.json();
         setAnalyses(data.analyses || []);
       }
-      // Load rewards
-      const rewardsRes = await fetch(`/api/rewards/member?email=${encodeURIComponent(memberEmail)}`);
-      if (rewardsRes.ok) {
-        const data = await rewardsRes.json();
+      if (rewardsRes.status === "fulfilled" && rewardsRes.value.ok) {
+        const data = await rewardsRes.value.json();
         setRewardsPoints(data.points || 0);
+      }
+      if (walletRes.status === "fulfilled" && walletRes.value.ok) {
+        const data = await walletRes.value.json();
+        setWalletBalance(data.balance || 0);
       }
     } catch (err) {
       console.error("Failed to load profile:", err);
@@ -87,10 +92,49 @@ export default function ClientProfile() {
     setEmail("");
     setAnalyses([]);
     setRewardsPoints(0);
+    setWalletBalance(0);
     localStorage.removeItem("rka_rewards_email");
   }
 
+  const quickActions = [
+    {
+      icon: CalendarDays,
+      label: "Book",
+      action: () => setLocation(clientPath("/book")),
+    },
+    {
+      icon: MessageCircle,
+      label: "AI Chat",
+      action: () => setLocation(clientPath("/chat")),
+    },
+    {
+      icon: ShoppingBag,
+      label: "Shop",
+      action: () => setLocation(clientPath("/shop")),
+    },
+    {
+      icon: Camera,
+      label: "Analyze",
+      action: () => setLocation(clientPath("/start")),
+    },
+  ];
+
   const menuItems = [
+    {
+      icon: Wallet,
+      label: "My Wallet",
+      description: `$${walletBalance.toFixed(2)} balance`,
+      badge: walletBalance > 0 ? `$${walletBalance.toFixed(0)}` : undefined,
+      action: () => {
+        // Could navigate to wallet detail page
+      },
+    },
+    {
+      icon: Gift,
+      label: "Rewards Program",
+      description: `${rewardsPoints.toLocaleString()} points`,
+      action: () => setLocation(clientPath("/rewards")),
+    },
     {
       icon: FileText,
       label: "My Skin Reports",
@@ -102,34 +146,15 @@ export default function ClientProfile() {
       },
     },
     {
-      icon: Gift,
-      label: "Rewards Program",
-      description: `${rewardsPoints.toLocaleString()} points`,
-      action: () => setLocation(clientPath("/rewards")),
-    },
-    {
-      icon: Camera,
-      label: "New Skin Analysis",
-      description: "Get your AI skin assessment",
-      action: () => setLocation(clientPath("/start")),
-    },
-    {
       icon: CreditCard,
       label: "Cherry Financing",
       description: "Apply for 0% APR financing",
       href: CHERRY_URL,
     },
     {
-      icon: History,
-      label: "Patient Portal",
-      description: "Aesthetic Record",
-      href: AESTHETIC_RECORD_URL,
-    },
-    {
-      icon: Star,
-      label: "Shop Products",
-      description: "Browse skincare at rkaskin.co",
-      href: SHOP_URL,
+      icon: Shield,
+      label: "Privacy & Security",
+      description: "HIPAA compliant • PCI secure",
     },
   ];
 
@@ -168,7 +193,7 @@ export default function ClientProfile() {
                 Your Account
               </h1>
               <p className="text-white/60 text-sm mb-5">
-                Sign in to view your reports and rewards
+                Sign in to view your wallet, reports, and rewards
               </p>
               <form onSubmit={handleLogin} className="flex gap-2 max-w-sm mx-auto">
                 <input
@@ -203,70 +228,139 @@ export default function ClientProfile() {
         </div>
       </div>
 
-      {/* Menu Items */}
-      <div className="px-5 py-6 max-w-lg mx-auto space-y-3">
-        {isLoggedIn && (
-          <>
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-3 gap-3 mb-6"
+      {isLoggedIn && (
+        <div className="px-5 py-6 max-w-lg mx-auto space-y-5">
+          {/* Quick Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-3 gap-3"
+          >
+            <div
+              className="text-center p-3 rounded-xl bg-white border"
+              style={{ borderColor: C.gold + "15" }}
             >
-              <div
-                className="text-center p-3 rounded-xl bg-white border"
-                style={{ borderColor: C.gold + "15" }}
+              <p
+                className="text-2xl font-light"
+                style={{ fontFamily: "'Cormorant Garamond', serif", color: C.gold }}
               >
-                <p
-                  className="text-2xl font-light"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", color: C.gold }}
-                >
-                  {analyses.length}
-                </p>
-                <p className="text-[10px] tracking-wider uppercase" style={{ color: C.charcoalLight + "70" }}>
-                  Analyses
-                </p>
-              </div>
-              <div
-                className="text-center p-3 rounded-xl bg-white border"
-                style={{ borderColor: C.gold + "15" }}
+                ${walletBalance.toFixed(0)}
+              </p>
+              <p className="text-[10px] tracking-wider uppercase" style={{ color: C.charcoalLight + "70" }}>
+                Wallet
+              </p>
+            </div>
+            <div
+              className="text-center p-3 rounded-xl bg-white border"
+              style={{ borderColor: C.gold + "15" }}
+            >
+              <p
+                className="text-2xl font-light"
+                style={{ fontFamily: "'Cormorant Garamond', serif", color: C.gold }}
               >
-                <p
-                  className="text-2xl font-light"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", color: C.gold }}
-                >
-                  {rewardsPoints.toLocaleString()}
-                </p>
-                <p className="text-[10px] tracking-wider uppercase" style={{ color: C.charcoalLight + "70" }}>
-                  Points
-                </p>
-              </div>
-              <div
-                className="text-center p-3 rounded-xl bg-white border"
-                style={{ borderColor: C.gold + "15" }}
+                {rewardsPoints.toLocaleString()}
+              </p>
+              <p className="text-[10px] tracking-wider uppercase" style={{ color: C.charcoalLight + "70" }}>
+                Points
+              </p>
+            </div>
+            <div
+              className="text-center p-3 rounded-xl bg-white border"
+              style={{ borderColor: C.gold + "15" }}
+            >
+              <p
+                className="text-2xl font-light"
+                style={{ fontFamily: "'Cormorant Garamond', serif", color: C.gold }}
               >
-                <p
-                  className="text-2xl font-light"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", color: C.gold }}
-                >
-                  {analyses.length > 0
-                    ? analyses[0].skinHealthScore || "—"
-                    : "—"}
-                </p>
-                <p className="text-[10px] tracking-wider uppercase" style={{ color: C.charcoalLight + "70" }}>
-                  Skin Score
-                </p>
-              </div>
-            </motion.div>
+                {analyses.length > 0 ? analyses[0].skinHealthScore || "—" : "—"}
+              </p>
+              <p className="text-[10px] tracking-wider uppercase" style={{ color: C.charcoalLight + "70" }}>
+                Skin Score
+              </p>
+            </div>
+          </motion.div>
 
-            {/* Menu */}
+          {/* Wallet Top-Up Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="p-4 rounded-xl border"
+            style={{
+              background: `linear-gradient(135deg, ${C.gold}08 0%, ${C.gold}15 100%)`,
+              borderColor: C.gold + "25",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: C.charcoal }}>
+                  Add funds, get bonus
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: C.charcoalLight + "80" }}>
+                  Add $1,000 → Get $1,100 in credits
+                </p>
+              </div>
+              <Button
+                size="sm"
+                className="rounded-full px-4 text-xs"
+                style={{ background: C.gold, color: "white" }}
+                onClick={() => {
+                  // Trigger wallet add funds
+                  fetch("/api/wallet/add-funds", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount: 500, userId: email }),
+                  })
+                    .then((r) => r.json())
+                    .then((data) => {
+                      if (data.checkoutUrl) {
+                        window.open(data.checkoutUrl, "_blank");
+                      }
+                    })
+                    .catch(console.error);
+                }}
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Funds
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="grid grid-cols-4 gap-3"
+          >
+            {quickActions.map((action) => (
+              <button
+                key={action.label}
+                onClick={action.action}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white border hover:border-[#B8964A30] transition-colors"
+                style={{ borderColor: C.gold + "12" }}
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ background: C.gold + "12" }}
+                >
+                  <action.icon className="w-5 h-5" style={{ color: C.gold }} />
+                </div>
+                <span className="text-[10px] font-medium tracking-wider" style={{ color: C.charcoal }}>
+                  {action.label}
+                </span>
+              </button>
+            ))}
+          </motion.div>
+
+          {/* Menu Items */}
+          <div className="space-y-2">
             {menuItems.map((item, i) => {
               const content = (
                 <motion.div
                   key={item.label}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ delay: 0.2 + i * 0.05 }}
                   className="flex items-center gap-4 p-4 rounded-xl bg-white border cursor-pointer hover:border-[#B8964A30] transition-colors"
                   style={{ borderColor: C.gold + "12" }}
                 >
@@ -305,70 +399,36 @@ export default function ClientProfile() {
                 </div>
               );
             })}
+          </div>
 
-            {/* Recent Analyses */}
-            {analyses.length > 0 && (
-              <div className="mt-6">
-                <h3
-                  className="text-lg mb-3"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", color: C.charcoal, fontWeight: 500 }}
-                >
-                  Recent Analyses
-                </h3>
-                <div className="space-y-2">
-                  {analyses.slice(0, 3).map((analysis) => (
-                    <div
-                      key={analysis.id}
-                      onClick={() => setLocation(clientPath(`/report/${analysis.id}`))}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-white border cursor-pointer hover:border-[#B8964A30] transition-colors"
-                      style={{ borderColor: C.gold + "10" }}
-                    >
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium"
-                        style={{ background: C.gold + "15", color: C.gold }}
-                      >
-                        {analysis.skinHealthScore || "—"}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-medium" style={{ color: C.charcoal }}>
-                          Skin Analysis #{analysis.id}
-                        </p>
-                        <p className="text-[10px]" style={{ color: C.charcoalLight + "60" }}>
-                          {new Date(analysis.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-4 h-4" style={{ color: C.gold + "40" }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sign Out */}
+          {/* Sign Out */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="pt-4"
+          >
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full p-4 mt-4 rounded-xl border hover:bg-red-50/50 transition-colors"
-              style={{ borderColor: "#fee2e2" }}
+              className="flex items-center gap-2 mx-auto text-sm"
+              style={{ color: C.charcoalLight + "60" }}
             >
-              <LogOut className="w-4 h-4 text-red-400" />
-              <span className="text-sm text-red-400">Sign Out</span>
+              <LogOut className="w-4 h-4" />
+              Sign Out
             </button>
-          </>
-        )}
+          </motion.div>
 
-        {/* Privacy note */}
-        <div className="flex items-start gap-2 mt-6 px-2">
-          <Shield className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: C.charcoalLight + "40" }} />
-          <p className="text-[10px]" style={{ color: C.charcoalLight + "50" }}>
-            Your data is protected and never shared with third parties.
-            We comply with HIPAA privacy standards.
-          </p>
+          {/* Compliance Footer */}
+          <div className="text-center pt-2 pb-4">
+            <p className="text-[10px]" style={{ color: C.charcoalLight + "40" }}>
+              HIPAA Compliant • PCI DSS Secure • 256-bit Encryption
+            </p>
+            <p className="text-[10px] mt-1" style={{ color: C.charcoalLight + "30" }}>
+              RadiantilyK Aesthetic © 2025
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

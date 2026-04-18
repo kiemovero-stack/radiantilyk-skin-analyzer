@@ -23,6 +23,9 @@ import StaffAppointments from "./pages/StaffAppointments";
 import ClientRewards from "./pages/ClientRewards";
 import ClientBook from "./pages/ClientBook";
 import ClientProfile from "./pages/ClientProfile";
+import ClientHome from "./pages/ClientHome";
+import ClientChat from "./pages/ClientChat";
+import ClientShop from "./pages/ClientShop";
 import MobileTabBar from "./components/MobileTabBar";
 
 function Router() {
@@ -34,16 +37,24 @@ function Router() {
       <Route path="/history" component={History} />
       <Route path="/compare" component={Compare} />
       {/* Public client-facing routes (no login required) */}
-      <Route path="/client" component={ClientLanding} />
+      <Route path="/client" component={ClientHome} />
+      <Route path="/client/landing" component={ClientLanding} />
       <Route path="/client/start" component={ClientAnalyze} />
       <Route path="/client/report/:id" component={ClientReport} />
       <Route path="/client/rewards" component={ClientRewards} />
       <Route path="/client/book" component={ClientBook} />
       <Route path="/client/profile" component={ClientProfile} />
+      <Route path="/client/chat" component={ClientChat} />
+      <Route path="/client/shop" component={ClientShop} />
+      <Route path="/client/home" component={ClientHome} />
       {/* Client app routes (standalone domain) */}
+      <Route path="/home" component={ClientHome} />
       <Route path="/rewards" component={ClientRewards} />
       <Route path="/book" component={ClientBook} />
       <Route path="/profile" component={ClientProfile} />
+      <Route path="/chat" component={ClientChat} />
+      <Route path="/shop" component={ClientShop} />
+      <Route path="/start" component={ClientAnalyze} />
       <Route path="/scar-consultation" component={ScarConsultation} />
       <Route path="/scar-treatment" component={ScarTreatment} />
       {/* Staff-facing dashboard (no auth gate for now) */}

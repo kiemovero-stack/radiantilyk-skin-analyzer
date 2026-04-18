@@ -218,3 +218,124 @@ export const bookingAppointments = mysqlTable("bookingAppointments", {
 
 export type BookingAppointment = typeof bookingAppointments.$inferSelect;
 export type InsertBookingAppointment = typeof bookingAppointments.$inferInsert;
+
+/**
+ * Wallet — prepaid credit balance per booking client.
+ */
+export const wallets = mysqlTable("wallets", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull().unique(),
+  balance: int("balance").notNull().default(0), // stored in cents
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = typeof wallets.$inferInsert;
+
+/**
+ * Wallet transactions — every deposit, bonus, and spend.
+ */
+export const walletTransactions = mysqlTable("walletTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  walletId: int("walletId").notNull(),
+  type: mysqlEnum("type", ["deposit", "bonus", "spend", "refund"]).notNull(),
+  amount: int("amount").notNull(), // in cents
+  description: text("description"),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = typeof walletTransactions.$inferInsert;
+
+/**
+ * Products — skincare items and bundles for the in-app store.
+ */
+export const products = mysqlTable("products", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 256 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 128 }),
+  price: int("price").notNull(), // in cents
+  imageUrl: text("imageUrl"),
+  externalUrl: text("externalUrl"),
+  isBundle: int("isBundle").notNull().default(0),
+  isSubscription: int("isSubscription").notNull().default(0),
+  isActive: int("isActive").notNull().default(1),
+  stripePriceId: varchar("stripePriceId", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;
+
+/**
+ * Orders — product purchases from the in-app store.
+ */
+export const orders = mysqlTable("orders", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(),
+  status: mysqlEnum("status", ["pending", "paid", "shipped", "delivered", "cancelled"]).default("pending").notNull(),
+  totalAmount: int("totalAmount").notNull(), // in cents
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 128 }),
+  shippingAddress: text("shippingAddress"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = typeof orders.$inferInsert;
+
+/**
+ * Order items — individual products in an order.
+ */
+export const orderItems = mysqlTable("orderItems", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  productId: int("productId").notNull(),
+  quantity: int("quantity").notNull().default(1),
+  priceAtPurchase: int("priceAtPurchase").notNull(), // in cents
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OrderItem = typeof orderItems.$inferSelect;
+export type InsertOrderItem = typeof orderItems.$inferInsert;
+
+/**
+ * AI Chat — conversation history for the concierge.
+ */
+export const chatMessages = mysqlTable("chatMessages", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId"),
+  sessionId: varchar("sessionId", { length: 128 }).notNull(),
+  role: mysqlEnum("role", ["user", "assistant"]).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = typeof chatMessages.$inferInsert;
+
+/**
+ * Flash deals — time-limited offers shown on the home screen.
+ */
+export const flashDeals = mysqlTable("flashDeals", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 256 }).notNull(),
+  description: text("description"),
+  discountPercent: int("discountPercent"),
+  discountAmount: int("discountAmount"), // in cents
+  originalPrice: int("originalPrice"), // in cents
+  imageUrl: text("imageUrl"),
+  startsAt: timestamp("startsAt").notNull(),
+  endsAt: timestamp("endsAt").notNull(),
+  isActive: int("isActive").notNull().default(1),
+  maxRedemptions: int("maxRedemptions"),
+  currentRedemptions: int("currentRedemptions").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FlashDeal = typeof flashDeals.$inferSelect;
+export type InsertFlashDeal = typeof flashDeals.$inferInsert;

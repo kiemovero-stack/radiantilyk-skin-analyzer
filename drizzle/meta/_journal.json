@@ -57,6 +57,13 @@
       "when": 1776488013143,
       "tag": "0007_lean_polaris",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1776495882878,
+      "tag": "0008_green_meteorite",
+      "breakpoints": true
     }
   ]
 }

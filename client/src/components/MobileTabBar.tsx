@@ -2,14 +2,14 @@
  * MobileTabBar — Bottom tab navigation for the RadiantilyK app.
  *
  * Two modes:
- * 1. Client mode (standalone client domain): Home, Analyze, Rewards, Book, Profile
+ * 1. Client mode (standalone client domain): Home, Book, Rewards, Analyze, Shop, Profile
  * 2. Staff mode (staff domain): Dashboard, History, Rewards Mgmt, Appointments, Leads
  *
  * Hidden entirely on report pages and non-mobile viewports.
  */
 import { useLocation } from "wouter";
 import {
-  Home, Camera, Gift, CalendarDays, User,
+  Home, Camera, Gift, CalendarDays, User, ShoppingBag,
   LayoutDashboard, Clock, Award, Users,
 } from "lucide-react";
 import { clientPath, isStandaloneClient } from "@/lib/clientPaths";
@@ -29,10 +29,11 @@ interface TabItem {
 }
 
 const clientTabs: TabItem[] = [
-  { label: "Home", icon: Home, path: "/" },
-  { label: "Analyze", icon: Camera, path: "/start" },
-  { label: "Rewards", icon: Gift, path: "/rewards" },
+  { label: "Home", icon: Home, path: "/home" },
   { label: "Book", icon: CalendarDays, path: "/book" },
+  { label: "Rewards", icon: Gift, path: "/rewards" },
+  { label: "Analyze", icon: Camera, path: "/start" },
+  { label: "Shop", icon: ShoppingBag, path: "/shop" },
   { label: "Profile", icon: User, path: "/profile" },
 ];
 
@@ -58,7 +59,6 @@ const STAFF_ROUTE_PREFIXES = [
 ];
 
 function isStaffRoute(location: string): boolean {
-  // Root "/" is the staff dashboard on the staff domain
   if (location === "/") return true;
   return STAFF_ROUTE_PREFIXES.some((prefix) => location.startsWith(prefix));
 }
@@ -77,8 +77,8 @@ export default function MobileTabBar() {
         {clientTabs.map((tab) => {
           const fullPath = clientPath(tab.path);
           const isActive =
-            tab.path === "/"
-              ? location === fullPath || location === clientPath("")
+            tab.path === "/home"
+              ? location === fullPath || location === clientPath("") || location === clientPath("/")
               : location.startsWith(fullPath);
           return (
             <TabButton
@@ -164,8 +164,8 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-0.5 py-2 px-3 transition-colors duration-200"
-      style={{ minWidth: 56 }}
+      className="flex flex-col items-center gap-0.5 py-2 px-2 transition-colors duration-200"
+      style={{ minWidth: 48 }}
     >
       <tab.icon
         className="w-5 h-5 transition-colors duration-200"
@@ -173,7 +173,7 @@ function TabButton({
         strokeWidth={isActive ? 2.2 : 1.8}
       />
       <span
-        className="text-[10px] font-medium tracking-wide transition-colors duration-200"
+        className="text-[9px] font-medium tracking-wide transition-colors duration-200"
         style={{
           color: isActive ? accent : C.muted,
           fontFamily: "'Inter', sans-serif",

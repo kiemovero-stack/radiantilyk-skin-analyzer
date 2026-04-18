@@ -1031,3 +1031,65 @@
 - [x] Update iOS Info.plist display name (already set to RadiantilyK Aesthetic)
 - [x] Update web title and branding (Navbar, Home footer, index.html)
 - [x] Push to GitHub
+
+## Super-App Features
+
+### Home Screen (Revenue Engine)
+- [x] Personalized greeting ("Hi [Name], you're due for Botox")
+- [x] Next appointment card with "Book Again" button
+- [x] AI-driven recommended treatments
+- [x] Rewards balance + tier display
+- [x] Flash deals with countdown timer
+- [x] Before/After carousel (social proof)
+- [x] Auto-suggest rebooking based on treatment history
+- [x] "Only X spots left" urgency trigger
+- [x] Referral tracker
+- [x] Spin-to-win rewards button
+
+### AI Chat Concierge
+- [x] Chat UI component (full-page chat with message bubbles)
+- [x] OpenAI integration trained on services + pricing
+- [x] Answers treatment questions ("What should I get for my jawline?")
+- [x] Pushes to booking from chat
+- [x] Chat history persistence (database-backed)
+
+### In-App Store (Shop)
+- [x] Database: products table (skincare, bundles)
+- [x] Product listing page with categories and search
+- [x] One-click reorder
+- [x] Auto-recommend based on treatments
+- [ ] Subscription skincare (monthly delivery option) — future
+- [x] Stripe checkout for products
+- [x] Bundle deals with rotation
+
+### Wallet System
+- [x] Database: wallet table (balance, transactions)
+- [x] Add funds with bonus ($1000 → $1100, $500 → $525, $250 → $257.50)
+- [x] Pay for treatments from wallet
+- [x] Transaction history
+- [ ] Auto-reload option — future
+
+### Push Notifications (Smart Triggers)
+- [x] Notification service with 10 smart trigger templates
+- [x] "You're due for Botox" (3 months post treatment)
+- [x] "Your skin score dropped" trigger
+- [x] "Only X spots left this weekend" urgency
+- [x] Missed appointment re-engagement
+- [x] Flash deal notifications
+- [x] Appointment reminders (24h and 1h)
+- [ ] Firebase Cloud Messaging native push — requires Firebase project setup
+
+### Mobile Navigation Update
+- [x] Client tabs: Home, Book, Rewards, Analyze, Shop, Profile (6 tabs)
+- [x] Profile page with wallet balance, orders, settings
+
+### First-Time User Onboarding
+- [x] Simple account creation (Name, Email, Phone, DOB, Card) via /book
+- [x] Upload selfie → skin analysis via Analyze tab
+- [x] Get skin score + recommended treatment on Home screen
+- [x] Prompt to book first treatment from Home screen
+
+### iOS & Android Readiness
+- [ ] Sync Capacitor builds with all new features — next step
+- [ ] Update web assets for both platforms — next step
+- [x] 214 tests passing, 0 TypeScript errors
