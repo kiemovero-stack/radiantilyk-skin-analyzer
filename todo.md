@@ -1030,4 +1030,4 @@
 - [x] Update Android strings.xml app name (already set to RadiantilyK Aesthetic)
 - [x] Update iOS Info.plist display name (already set to RadiantilyK Aesthetic)
 - [x] Update web title and branding (Navbar, Home footer, index.html)
-- [ ] Push to GitHub
+- [x] Push to GitHub
