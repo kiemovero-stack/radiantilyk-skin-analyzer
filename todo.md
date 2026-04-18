@@ -937,3 +937,54 @@
 - [x] Client UI catches rate_limit error and shows toast with 8-second duration explaining the limit
 - [x] Staff portal (skinRouter.ts) is NOT rate-limited — only client portal
 - [x] 164 tests passing, 0 TypeScript errors
+
+## RadiantilyK Aesthetic iOS App Build
+### Mobile App Shell
+- [x] Bottom tab navigation: Home, Analyze, Rewards, Book, Profile (MobileTabBar component)
+- [x] Mobile-optimized layouts with framer-motion transitions
+- [x] Splash screen configured (ivory background, 2s duration)
+- [x] App icon generated from RKA rose gold seal logo (1024x1024 + all required sizes)
+
+### RepeatMD-Style Rewards Program
+- [x] Points earning: 1pt/$1 treatments, 500pts referral, 100pts check-in, 50pts social share, 1pt/$1 products
+- [x] Tiered levels: Bronze (0-499), Silver (500-1499), Gold (1500-2999), Platinum (3000+)
+- [x] Tier perks: 5-20% discounts, priority booking, birthday bonuses, exclusive access
+- [x] Points redemption: 100pts = $1 off, minimum 500pts to redeem
+- [x] Rewards dashboard: points balance, tier progress bar, earning actions, transaction history
+- [x] Database tables: rewardsMembers, rewardsTransactions (created via migration)
+- [x] API endpoints: GET /api/rewards/member, POST /api/rewards/enroll, POST /api/rewards/earn, POST /api/rewards/redeem
+
+### Appointment Booking
+- [x] ClientBook page with Aesthetic Record integration (https://rkaemr.click/portal)
+- [x] Service categories: Injectables, Laser, Facials, Body, Skin Analysis
+- [x] Direct booking link + call-to-action buttons
+
+### Financing
+- [x] Cherry financing: direct link to https://pay.withcherry.com/radiantilyk-aesthetic-llc
+- [x] Affirm: integrated via Stripe (already connected) — "Check Your Rate" button
+- [x] Both displayed on ClientBook page with benefit descriptions
+
+### Client Profile
+- [x] ClientProfile page: email-based login, past analyses list, rewards summary
+- [x] GET /api/client/analyses endpoint for fetching client's analysis history
+- [x] Menu links to: Skin Reports, Rewards, New Analysis, Cherry, Patient Portal, Shop
+
+### Native iOS Build
+- [x] Capacitor 8.3.1 installed and configured (capacitor.config.ts)
+- [x] iOS platform added with Xcode project at ios/App/App.xcodeproj
+- [x] App points to live server (https://rkaskinai.com)
+- [x] App icon assets generated (1024px + all required sizes) in AppIcon.appiconset
+- [x] Info.plist: camera/photo permissions, portrait-only on iPhone, ATS configured
+- [x] Plugins: SplashScreen, StatusBar, Browser
+- [x] APP_STORE_GUIDE.md: step-by-step instructions for Xcode signing, build, and App Store submission
+- [x] 164 tests passing, 0 TypeScript errors
+
+## Staff-Facing Area in Mobile App
+- [x] Build staff rewards management page (view all members, award/adjust points, search clients)
+- [x] Build staff appointment management page (view/manage upcoming bookings, Aesthetic Record integration)
+- [x] Add staff-specific bottom tab bar (Dashboard, History, Rewards Mgmt, Appointments, Leads)
+- [x] Ensure staff portal pages are mobile-optimized for app-like experience
+- [x] Add staff rewards API endpoints (list all members, award points, adjust points)
+- [x] MobileTabBar detects staff vs client routes and shows appropriate tabs
+- [x] Staff tab bar hidden on desktop (md:hidden), visible only on mobile
+- [x] 164 tests passing, 0 TypeScript errors

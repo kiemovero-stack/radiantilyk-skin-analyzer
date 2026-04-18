@@ -11,6 +11,7 @@ import { registerReferralRoutes } from "../referralRoutes";
 import { registerLeadScoringRoutes } from "../leadScoringRoutes";
 import { registerStaffRoutes } from "../staffRoutes";
 import { registerQuestionnaireRoutes } from "../questionnaireRoutes";
+import { registerRewardsRoutes } from "../rewardsRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -94,6 +95,8 @@ async function startServer() {
   registerStaffRoutes(app);
   // Questionnaire & consent form PDF routes
   registerQuestionnaireRoutes(app);
+  // Rewards program routes
+  registerRewardsRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

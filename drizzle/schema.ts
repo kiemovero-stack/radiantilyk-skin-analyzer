@@ -95,3 +95,39 @@ export const referralRedemptions = mysqlTable("referralRedemptions", {
 
 export type ReferralRedemption = typeof referralRedemptions.$inferSelect;
 export type InsertReferralRedemption = typeof referralRedemptions.$inferInsert;
+
+/**
+ * Rewards program members.
+ * Tracks loyalty points, tier, and lifetime earnings.
+ */
+export const rewardsMembers = mysqlTable("rewardsMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  name: varchar("name", { length: 256 }),
+  points: int("points").notNull().default(0),
+  lifetimePoints: int("lifetimePoints").notNull().default(0),
+  tier: mysqlEnum("tier", ["Glow", "Radiant", "Luminous", "Icon"]).default("Glow").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RewardsMember = typeof rewardsMembers.$inferSelect;
+export type InsertRewardsMember = typeof rewardsMembers.$inferInsert;
+
+/**
+ * Rewards transaction history — every earn and redeem event.
+ */
+export const rewardsTransactions = mysqlTable("rewardsTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  memberId: int("memberId").notNull(),
+  type: mysqlEnum("type", ["earn", "redeem"]).notNull(),
+  points: int("points").notNull(),
+  action: varchar("action", { length: 128 }).notNull(),
+  description: text("description"),
+  /** Reference ID (e.g., analysis ID, referral code ID) */
+  referenceId: varchar("referenceId", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RewardsTransaction = typeof rewardsTransactions.$inferSelect;
+export type InsertRewardsTransaction = typeof rewardsTransactions.$inferInsert;

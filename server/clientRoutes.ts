@@ -1098,4 +1098,44 @@ export function registerClientRoutes(app: Express) {
       res.status(500).json({ error: "Failed to submit consultation request" });
     }
   });
+
+  // ── Get Client Analyses by Email ─────────────────────────────────
+  // Returns a list of the client's past analyses for the Profile page
+  app.get("/api/client/analyses", async (req: Request, res: Response) => {
+    const email = (req.query.email as string || "").toLowerCase().trim();
+    if (!email) {
+      return res.status(400).json({ error: "Email required" });
+    }
+
+    try {
+      const db = await getDb();
+      if (!db) {
+        return res.status(500).json({ error: "Database not available" });
+      }
+
+      const results = await db
+        .select({
+          id: skinAnalyses.id,
+          skinHealthScore: skinAnalyses.skinHealthScore,
+          createdAt: skinAnalyses.createdAt,
+          status: skinAnalyses.status,
+        })
+        .from(skinAnalyses)
+        .where(eq(skinAnalyses.patientEmail, email))
+        .orderBy(sql`${skinAnalyses.createdAt} DESC`)
+        .limit(20);
+
+      return res.json({
+        analyses: results.map((r) => ({
+          id: r.id,
+          skinHealthScore: r.skinHealthScore,
+          createdAt: r.createdAt,
+          status: r.status,
+        })),
+      });
+    } catch (error: any) {
+      console.error("[ClientAnalyses] Error:", error?.message);
+      return res.status(500).json({ error: "Failed to fetch analyses" });
+    }
+  });
 }

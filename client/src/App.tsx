@@ -18,6 +18,12 @@ import ScarTreatment from "./pages/ScarTreatment";
 import LeadDashboard from "./pages/LeadDashboard";
 import StaffManagement from "./pages/StaffManagement";
 import StaffGuide from "./pages/StaffGuide";
+import StaffRewards from "./pages/StaffRewards";
+import StaffAppointments from "./pages/StaffAppointments";
+import ClientRewards from "./pages/ClientRewards";
+import ClientBook from "./pages/ClientBook";
+import ClientProfile from "./pages/ClientProfile";
+import MobileTabBar from "./components/MobileTabBar";
 
 function Router() {
   return (
@@ -31,6 +37,13 @@ function Router() {
       <Route path="/client" component={ClientLanding} />
       <Route path="/client/start" component={ClientAnalyze} />
       <Route path="/client/report/:id" component={ClientReport} />
+      <Route path="/client/rewards" component={ClientRewards} />
+      <Route path="/client/book" component={ClientBook} />
+      <Route path="/client/profile" component={ClientProfile} />
+      {/* Client app routes (standalone domain) */}
+      <Route path="/rewards" component={ClientRewards} />
+      <Route path="/book" component={ClientBook} />
+      <Route path="/profile" component={ClientProfile} />
       <Route path="/scar-consultation" component={ScarConsultation} />
       <Route path="/scar-treatment" component={ScarTreatment} />
       {/* Staff-facing dashboard (no auth gate for now) */}
@@ -39,6 +52,9 @@ function Router() {
       <Route path="/staff" component={StaffManagement} />
       {/* Staff consultation guide */}
       <Route path="/guide" component={StaffGuide} />
+      {/* Staff rewards & appointments management */}
+      <Route path="/rewards-admin" component={StaffRewards} />
+      <Route path="/appointments" component={StaffAppointments} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -53,6 +69,7 @@ function App() {
           <CopyProtection />
           <Toaster />
           <Router />
+          <MobileTabBar />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
