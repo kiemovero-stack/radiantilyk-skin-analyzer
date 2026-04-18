@@ -141,6 +141,7 @@ export const bookingStaff = mysqlTable("bookingStaff", {
   name: varchar("name", { length: 256 }).notNull(),
   email: varchar("email", { length: 320 }).notNull().unique(),
   title: varchar("title", { length: 128 }),
+  location: varchar("location", { length: 256 }),
   googleCalendarId: varchar("googleCalendarId", { length: 320 }),
   isActive: int("isActive").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

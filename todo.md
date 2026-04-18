@@ -1016,3 +1016,11 @@
 - [x] Generate Android app icons from iOS source (all densities)
 - [x] Create ANDROID_BUILD_GUIDE.md with step-by-step instructions for building on Windows
 - [x] Push code to GitHub for easy access from Windows PC
+
+## Provider Setup & Location Support
+- [x] Add location column to bookingStaff table
+- [x] Seed 4 providers: Kamaren Manzano RN (San Jose), Kiem Vukadinovic NP (San Jose), Donnie Nelson RN (San Mateo), Arpana Purani LE (San Mateo)
+- [x] Update staff management UI to group providers by location
+- [x] Update client booking page with location selection step (Location → Provider → Date/Time → Account → Card → Confirm)
+- [x] Each provider has their own weekly availability section
+- [x] 0 TypeScript errors, 196 tests passing

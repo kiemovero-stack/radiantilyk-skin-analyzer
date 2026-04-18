@@ -1,0 +1,1 @@
+ALTER TABLE `bookingStaff` ADD `location` varchar(256);

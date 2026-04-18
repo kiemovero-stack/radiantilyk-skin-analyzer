@@ -50,6 +50,13 @@
       "when": 1776486943274,
       "tag": "0006_useful_harrier",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1776488013143,
+      "tag": "0007_lean_polaris",
+      "breakpoints": true
     }
   ]
 }

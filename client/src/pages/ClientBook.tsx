@@ -1,6 +1,6 @@
 /**
  * ClientBook — Standalone booking page.
- * Multi-step flow: Select Staff → Select Date/Time → Create Account/Login → Add Card → Confirm
+ * Multi-step flow: Location → Provider → Date/Time → Account → Card → Confirm
  * No EMR integration. Simple, clean, mobile-first.
  */
 import { useState, useEffect, useCallback } from "react";
@@ -9,7 +9,7 @@ import {
   CalendarDays, Clock, MapPin, Phone, User, Mail,
   CreditCard, ChevronLeft, ChevronRight, Check,
   Loader2, Eye, EyeOff, Lock, AlertCircle, Calendar,
-  ArrowRight, Shield, X,
+  ArrowRight, Shield, X, Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { loadStripe } from "@stripe/stripe-js";
@@ -37,12 +37,18 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-type Step = "provider" | "datetime" | "account" | "card" | "confirm" | "success";
+const LOCATIONS: Record<string, { address: string; phone: string }> = {
+  "San Jose": { address: "San Jose, CA", phone: "(510) 990-1444" },
+  "San Mateo": { address: "San Mateo, CA", phone: "(510) 990-1444" },
+};
+
+type Step = "location" | "provider" | "datetime" | "account" | "card" | "confirm" | "success";
 
 interface StaffMember {
   id: number;
   name: string;
   title: string | null;
+  location: string | null;
 }
 
 interface BookingClient {
@@ -88,7 +94,6 @@ function CardForm({
     setError("");
 
     try {
-      // Get SetupIntent client secret from server
       const res = await fetch(`${API_BASE}/api/booking/setup-card`, {
         method: "POST",
         headers: {
@@ -108,7 +113,6 @@ function CardForm({
 
       if (stripeError) throw new Error(stripeError.message);
 
-      // Confirm card on file in our system
       await fetch(`${API_BASE}/api/booking/confirm-card`, {
         method: "POST",
         headers: {
@@ -198,8 +202,9 @@ function CardForm({
 }
 
 export default function ClientBook() {
-  const [step, setStep] = useState<Step>("provider");
-  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [step, setStep] = useState<Step>("location");
+  const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -230,12 +235,18 @@ export default function ClientBook() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState("");
 
+  // Filtered staff by location
+  const locationStaff = allStaff.filter((s) => s.location === selectedLocation);
+
+  // Unique locations from staff data
+  const locations = Array.from(new Set(allStaff.map((s) => s.location).filter(Boolean))) as string[];
+
   // Load staff on mount
   useEffect(() => {
     fetch(`${API_BASE}/api/booking/staff`)
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data)) setStaff(data);
+        if (Array.isArray(data)) setAllStaff(data);
       })
       .catch(console.error);
   }, []);
@@ -299,7 +310,6 @@ export default function ClientBook() {
       localStorage.setItem("booking_token", data.token);
       setClient(data.client);
 
-      // Skip card step if already has card on file
       if (data.client.hasCardOnFile) {
         setStep("confirm");
       } else {
@@ -395,6 +405,7 @@ export default function ClientBook() {
 
   /* ── Step indicator ── */
   const steps: { key: Step; label: string }[] = [
+    { key: "location", label: "Location" },
     { key: "provider", label: "Provider" },
     { key: "datetime", label: "Date & Time" },
     { key: "account", label: "Account" },
@@ -403,6 +414,8 @@ export default function ClientBook() {
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.key === step);
+
+  const locInfo = selectedLocation ? LOCATIONS[selectedLocation] : null;
 
   return (
     <div className="min-h-screen pb-24" style={{ background: C.ivory }}>
@@ -443,20 +456,20 @@ export default function ClientBook() {
               <div key={s.key} className="flex items-center">
                 <div className="flex flex-col items-center">
                   <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors"
+                    className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-medium transition-colors"
                     style={{
                       background: i <= currentStepIndex ? C.gold : C.gold + "15",
                       color: i <= currentStepIndex ? "white" : C.gold,
                     }}
                   >
                     {i < currentStepIndex ? (
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     ) : (
                       i + 1
                     )}
                   </div>
                   <span
-                    className="text-[10px] mt-1 hidden sm:block"
+                    className="text-[9px] sm:text-[10px] mt-1 hidden sm:block"
                     style={{ color: i <= currentStepIndex ? C.charcoal : C.charcoalLight + "60" }}
                   >
                     {s.label}
@@ -464,7 +477,7 @@ export default function ClientBook() {
                 </div>
                 {i < steps.length - 1 && (
                   <div
-                    className="w-6 sm:w-10 h-0.5 mx-1"
+                    className="w-4 sm:w-8 h-0.5 mx-0.5 sm:mx-1"
                     style={{ background: i < currentStepIndex ? C.gold : C.gold + "20" }}
                   />
                 )}
@@ -476,10 +489,10 @@ export default function ClientBook() {
 
       <div className="px-5 py-4 max-w-lg mx-auto">
         <AnimatePresence mode="wait">
-          {/* ═══ STEP 1: Select Provider ═══ */}
-          {step === "provider" && (
+          {/* ═══ STEP 0: Select Location ═══ */}
+          {step === "location" && (
             <motion.div
-              key="provider"
+              key="location"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -489,14 +502,17 @@ export default function ClientBook() {
                 className="text-lg"
                 style={{ fontFamily: "'Cormorant Garamond', serif", color: C.charcoal, fontWeight: 500 }}
               >
-                Select Your Provider
+                Select Location
               </h2>
+              <p className="text-xs" style={{ color: C.charcoalLight + "80" }}>
+                Choose the location most convenient for you.
+              </p>
 
-              {staff.length === 0 ? (
+              {locations.length === 0 ? (
                 <div className="text-center py-12">
-                  <CalendarDays className="w-10 h-10 mx-auto mb-3 opacity-30" style={{ color: C.gold }} />
+                  <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" style={{ color: C.gold }} />
                   <p className="text-sm" style={{ color: C.charcoalLight + "80" }}>
-                    No providers available at this time.
+                    No locations available at this time.
                   </p>
                   <p className="text-xs mt-1" style={{ color: C.charcoalLight + "60" }}>
                     Please call us at (510) 990-1444 to schedule.
@@ -504,7 +520,84 @@ export default function ClientBook() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {staff.map((s) => (
+                  {locations.map((loc) => {
+                    const info = LOCATIONS[loc];
+                    const providerCount = allStaff.filter((s) => s.location === loc).length;
+                    return (
+                      <button
+                        key={loc}
+                        onClick={() => {
+                          setSelectedLocation(loc);
+                          setSelectedStaff(null);
+                          setStep("provider");
+                        }}
+                        className="w-full flex items-center gap-4 p-5 rounded-xl bg-white border transition-all hover:shadow-md"
+                        style={{ borderColor: C.gold + "15" }}
+                      >
+                        <div
+                          className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: C.gold + "12" }}
+                        >
+                          <MapPin className="w-7 h-7" style={{ color: C.gold }} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-base font-medium" style={{ color: C.charcoal }}>
+                            {loc}
+                          </p>
+                          {info && (
+                            <p className="text-xs mt-0.5" style={{ color: C.charcoalLight + "70" }}>
+                              {info.address}
+                            </p>
+                          )}
+                          <p className="text-xs mt-1" style={{ color: C.gold }}>
+                            {providerCount} provider{providerCount !== 1 ? "s" : ""} available
+                          </p>
+                        </div>
+                        <ChevronRight className="w-5 h-5" style={{ color: C.gold }} />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ═══ STEP 1: Select Provider ═══ */}
+          {step === "provider" && (
+            <motion.div
+              key="provider"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <button onClick={() => setStep("location")}>
+                  <ChevronLeft className="w-5 h-5" style={{ color: C.charcoal }} />
+                </button>
+                <h2
+                  className="text-lg"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", color: C.charcoal, fontWeight: 500 }}
+                >
+                  Select Your Provider
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs" style={{ color: C.charcoalLight + "80" }}>
+                <MapPin className="w-3.5 h-3.5" style={{ color: C.gold }} />
+                <span>{selectedLocation}</span>
+              </div>
+
+              {locationStaff.length === 0 ? (
+                <div className="text-center py-12">
+                  <CalendarDays className="w-10 h-10 mx-auto mb-3 opacity-30" style={{ color: C.gold }} />
+                  <p className="text-sm" style={{ color: C.charcoalLight + "80" }}>
+                    No providers available at this location.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {locationStaff.map((s) => (
                     <button
                       key={s.id}
                       onClick={() => {
@@ -512,10 +605,7 @@ export default function ClientBook() {
                         setStep("datetime");
                       }}
                       className="w-full flex items-center gap-4 p-4 rounded-xl bg-white border transition-all hover:shadow-sm"
-                      style={{
-                        borderColor: selectedStaff?.id === s.id ? C.gold : C.gold + "15",
-                        boxShadow: selectedStaff?.id === s.id ? `0 0 0 2px ${C.gold}30` : undefined,
-                      }}
+                      style={{ borderColor: C.gold + "15" }}
                     >
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
@@ -537,11 +627,10 @@ export default function ClientBook() {
                     </button>
                   ))}
 
-                  {/* Any Provider option */}
-                  {staff.length > 1 && (
+                  {locationStaff.length > 1 && (
                     <button
                       onClick={() => {
-                        setSelectedStaff(staff[0]); // default to first
+                        setSelectedStaff(locationStaff[0]);
                         setStep("datetime");
                       }}
                       className="w-full flex items-center gap-4 p-4 rounded-xl border transition-all hover:shadow-sm"
@@ -558,7 +647,7 @@ export default function ClientBook() {
                           First Available
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: C.charcoalLight + "70" }}>
-                          See the earliest open time
+                          See the earliest open time at {selectedLocation}
                         </p>
                       </div>
                       <ChevronRight className="w-4 h-4" style={{ color: C.gold }} />
@@ -590,12 +679,18 @@ export default function ClientBook() {
                 </h2>
               </div>
 
-              {selectedStaff && (
-                <div className="flex items-center gap-2 text-xs" style={{ color: C.charcoalLight + "80" }}>
-                  <User className="w-3.5 h-3.5" style={{ color: C.gold }} />
-                  <span>with {selectedStaff.name}</span>
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" style={{ color: C.charcoalLight + "80" }}>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" style={{ color: C.gold }} />
+                  {selectedLocation}
+                </span>
+                {selectedStaff && (
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5" style={{ color: C.gold }} />
+                    {selectedStaff.name}{selectedStaff.title ? `, ${selectedStaff.title}` : ""}
+                  </span>
+                )}
+              </div>
 
               {/* Service (optional) */}
               <div>
@@ -611,8 +706,6 @@ export default function ClientBook() {
                   style={{
                     borderColor: C.gold + "20",
                     color: C.charcoal,
-                    // @ts-ignore
-                    "--tw-ring-color": C.gold + "40",
                   }}
                 />
               </div>
@@ -986,11 +1079,21 @@ export default function ClientBook() {
 
               <div className="bg-white rounded-xl border p-5 space-y-4" style={{ borderColor: C.gold + "15" }}>
                 <div className="flex items-center gap-3">
+                  <MapPin className="w-4 h-4" style={{ color: C.gold }} />
+                  <div>
+                    <p className="text-xs" style={{ color: C.charcoalLight + "60" }}>Location</p>
+                    <p className="text-sm font-medium" style={{ color: C.charcoal }}>
+                      {selectedLocation}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
                   <User className="w-4 h-4" style={{ color: C.gold }} />
                   <div>
                     <p className="text-xs" style={{ color: C.charcoalLight + "60" }}>Provider</p>
                     <p className="text-sm font-medium" style={{ color: C.charcoal }}>
-                      {selectedStaff?.name}
+                      {selectedStaff?.name}{selectedStaff?.title ? `, ${selectedStaff.title}` : ""}
                     </p>
                   </div>
                 </div>
@@ -1123,9 +1226,15 @@ export default function ClientBook() {
 
               <div className="bg-white rounded-xl border p-5 text-left space-y-3" style={{ borderColor: C.gold + "15" }}>
                 <div className="flex items-center gap-3">
+                  <MapPin className="w-4 h-4" style={{ color: C.gold }} />
+                  <span className="text-sm" style={{ color: C.charcoal }}>
+                    {selectedLocation}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
                   <User className="w-4 h-4" style={{ color: C.gold }} />
                   <span className="text-sm" style={{ color: C.charcoal }}>
-                    {selectedStaff?.name}
+                    {selectedStaff?.name}{selectedStaff?.title ? `, ${selectedStaff.title}` : ""}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1149,7 +1258,7 @@ export default function ClientBook() {
                     setSelectedTime("");
                     setService("");
                     setBookingError("");
-                    setStep("provider");
+                    setStep("location");
                   }}
                   className="w-full py-3 rounded-lg text-sm font-medium text-white"
                   style={{ background: C.gold }}
@@ -1161,10 +1270,6 @@ export default function ClientBook() {
                   <div className="flex items-center justify-center gap-2">
                     <Phone className="w-3.5 h-3.5" style={{ color: C.gold }} />
                     <a href="tel:+15109901444" className="underline">(510) 990-1444</a>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <MapPin className="w-3.5 h-3.5" style={{ color: C.gold }} />
-                    <span>39180 Farwell Dr, Ste 110, Fremont, CA</span>
                   </div>
                 </div>
               </div>

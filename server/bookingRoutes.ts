@@ -265,6 +265,7 @@ export function registerBookingRoutes(app: Express) {
           id: bookingStaff.id,
           name: bookingStaff.name,
           title: bookingStaff.title,
+          location: bookingStaff.location,
         })
         .from(bookingStaff)
         .where(eq(bookingStaff.isActive, 1));
@@ -566,7 +567,7 @@ export function registerBookingRoutes(app: Express) {
 
   /* ── POST /api/booking/admin/staff ── */
   app.post("/api/booking/admin/staff", staffAuth, async (req: Request, res: Response) => {
-    const { name, email, title } = req.body;
+    const { name, email, title, location } = req.body;
     if (!name || !email) return res.status(400).json({ error: "Name and email required" });
 
     try {
@@ -577,6 +578,7 @@ export function registerBookingRoutes(app: Express) {
         name: name.trim(),
         email: email.toLowerCase().trim(),
         title: title?.trim() || null,
+        location: location?.trim() || null,
       });
 
       return res.json({ success: true });
@@ -591,7 +593,7 @@ export function registerBookingRoutes(app: Express) {
   /* ── PUT /api/booking/admin/staff/:id ── */
   app.put("/api/booking/admin/staff/:id", staffAuth, async (req: Request, res: Response) => {
     const staffId = Number(req.params.id);
-    const { name, email, title, isActive } = req.body;
+    const { name, email, title, location, isActive } = req.body;
 
     try {
       const db = await getDb();
@@ -601,6 +603,7 @@ export function registerBookingRoutes(app: Express) {
       if (name !== undefined) updateData.name = name.trim();
       if (email !== undefined) updateData.email = email.toLowerCase().trim();
       if (title !== undefined) updateData.title = title?.trim() || null;
+      if (location !== undefined) updateData.location = location?.trim() || null;
       if (isActive !== undefined) updateData.isActive = isActive ? 1 : 0;
 
       await db.update(bookingStaff).set(updateData).where(eq(bookingStaff.id, staffId));
