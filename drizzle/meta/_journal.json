@@ -43,6 +43,13 @@
       "when": 1775861540835,
       "tag": "0005_foamy_havok",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1776486943274,
+      "tag": "0006_useful_harrier",
+      "breakpoints": true
     }
   ]
 }

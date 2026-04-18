@@ -988,3 +988,31 @@
 - [x] MobileTabBar detects staff vs client routes and shows appropriate tabs
 - [x] Staff tab bar hidden on desktop (md:hidden), visible only on mobile
 - [x] 164 tests passing, 0 TypeScript errors
+
+## Standalone Booking System (No EMR)
+- [x] Database: bookingStaff table (staff members with name, email, Google Calendar ID)
+- [x] Database: bookingAvailability table (weekly recurring slots per staff, day of week, start/end time, 30-min increments)
+- [x] Database: bookingAppointments table (client, staff, datetime, status, stripe payment method ID)
+- [x] Database: bookingClients table (full name, email, phone, DOB, stripe customer ID)
+- [x] API: Staff availability CRUD (add/edit/delete weekly availability)
+- [x] API: Get available slots for a given date (respects staff availability, prevents double-booking)
+- [x] API: Client registration (full name, email, phone, DOB) — simple account creation
+- [x] API: Add card on file via Stripe Setup Intent (no charge)
+- [x] API: Book appointment (requires account + card on file)
+- [x] API: Cancel/reschedule appointment
+- [ ] API: Google Calendar sync (create calendar event when appointment booked) — requires Google API credentials
+- [x] Client page: /book — clean booking flow (select date → select time → select staff → create account or login → add card → confirm)
+- [x] Client page: No-show policy language displayed before confirmation
+- [x] Client page: Mobile-friendly, minimal clicks
+- [x] Staff page: /appointments — manage weekly availability, view upcoming appointments
+- [x] Staff page: Mark no-show and charge card
+- [x] Remove all Aesthetic Record references from appointments page
+- [x] Shareable direct booking link (rkaskinai.com/book)
+- [x] Write vitest tests for booking API endpoints (32 tests passing)
+
+## Android App Build
+- [x] Add Capacitor Android platform
+- [x] Configure Android app settings (package name, app name, icon)
+- [x] Generate Android app icons from iOS source (all densities)
+- [x] Create ANDROID_BUILD_GUIDE.md with step-by-step instructions for building on Windows
+- [x] Push code to GitHub for easy access from Windows PC

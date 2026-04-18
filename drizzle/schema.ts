@@ -131,3 +131,89 @@ export const rewardsTransactions = mysqlTable("rewardsTransactions", {
 
 export type RewardsTransaction = typeof rewardsTransactions.$inferSelect;
 export type InsertRewardsTransaction = typeof rewardsTransactions.$inferInsert;
+
+/**
+ * Booking system — staff providers who can receive appointments.
+ */
+export const bookingStaff = mysqlTable("bookingStaff", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  name: varchar("name", { length: 256 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  title: varchar("title", { length: 128 }),
+  googleCalendarId: varchar("googleCalendarId", { length: 320 }),
+  isActive: int("isActive").notNull().default(1),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BookingStaff = typeof bookingStaff.$inferSelect;
+export type InsertBookingStaff = typeof bookingStaff.$inferInsert;
+
+/**
+ * Booking system — recurring weekly availability per staff member.
+ * Each row = one time block on a given day of the week.
+ */
+export const bookingAvailability = mysqlTable("bookingAvailability", {
+  id: int("id").autoincrement().primaryKey(),
+  staffId: int("staffId").notNull(),
+  /** 0 = Sunday, 1 = Monday, ... 6 = Saturday */
+  dayOfWeek: int("dayOfWeek").notNull(),
+  /** HH:MM format, e.g. "09:00" */
+  startTime: varchar("startTime", { length: 5 }).notNull(),
+  /** HH:MM format, e.g. "17:00" */
+  endTime: varchar("endTime", { length: 5 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BookingAvailability = typeof bookingAvailability.$inferSelect;
+export type InsertBookingAvailability = typeof bookingAvailability.$inferInsert;
+
+/**
+ * Booking system — client profiles for booking (separate from OAuth users).
+ * Simple account: name, email, phone, DOB, Stripe customer ID.
+ */
+export const bookingClients = mysqlTable("bookingClients", {
+  id: int("id").autoincrement().primaryKey(),
+  fullName: varchar("fullName", { length: 256 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  phone: varchar("phone", { length: 32 }).notNull(),
+  dateOfBirth: varchar("dateOfBirth", { length: 16 }).notNull(),
+  passwordHash: varchar("passwordHash", { length: 256 }).notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 128 }),
+  hasCardOnFile: int("hasCardOnFile").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BookingClient = typeof bookingClients.$inferSelect;
+export type InsertBookingClient = typeof bookingClients.$inferInsert;
+
+/**
+ * Booking system — appointments.
+ */
+export const bookingAppointments = mysqlTable("bookingAppointments", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(),
+  staffId: int("staffId").notNull(),
+  /** Appointment date in YYYY-MM-DD format */
+  appointmentDate: varchar("appointmentDate", { length: 10 }).notNull(),
+  /** Start time in HH:MM format */
+  startTime: varchar("startTime", { length: 5 }).notNull(),
+  /** End time in HH:MM format (startTime + 30 min) */
+  endTime: varchar("endTime", { length: 5 }).notNull(),
+  /** Service/reason for visit */
+  service: varchar("service", { length: 256 }),
+  notes: text("notes"),
+  status: mysqlEnum("status", ["confirmed", "cancelled", "completed", "no_show"]).default("confirmed").notNull(),
+  /** Stripe PaymentMethod ID for card on file */
+  stripePaymentMethodId: varchar("stripePaymentMethodId", { length: 128 }),
+  /** Amount charged for no-show (null = not charged) */
+  noShowChargeAmount: int("noShowChargeAmount"),
+  /** Google Calendar event ID for sync */
+  googleCalendarEventId: varchar("googleCalendarEventId", { length: 256 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BookingAppointment = typeof bookingAppointments.$inferSelect;
+export type InsertBookingAppointment = typeof bookingAppointments.$inferInsert;

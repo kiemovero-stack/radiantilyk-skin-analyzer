@@ -12,6 +12,7 @@ import { registerLeadScoringRoutes } from "../leadScoringRoutes";
 import { registerStaffRoutes } from "../staffRoutes";
 import { registerQuestionnaireRoutes } from "../questionnaireRoutes";
 import { registerRewardsRoutes } from "../rewardsRoutes";
+import { registerBookingRoutes } from "../bookingRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -97,6 +98,8 @@ async function startServer() {
   registerQuestionnaireRoutes(app);
   // Rewards program routes
   registerRewardsRoutes(app);
+  // Standalone booking system routes
+  registerBookingRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",
